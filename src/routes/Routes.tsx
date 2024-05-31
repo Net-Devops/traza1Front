@@ -7,7 +7,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import Empresa from '../components/pages/empresa/Empresa';
 import Sucursal from '../components/pages/sucursal/Sucursal';
-
+import Productos from '../components/pages/productos/Productos';
 
 const Rutas: React.FC = () => {
     return (
@@ -19,7 +19,7 @@ const Rutas: React.FC = () => {
               
               <Route path="/sucursal/:id" element={<Sucursal/>} />
               
-              
+              <Route path='/productos' element={<Productos/>}/>
             </Routes>
        
       
