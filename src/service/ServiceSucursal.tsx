@@ -1,5 +1,6 @@
 export interface Sucursal {
     id?: number;
+    eliminado?: boolean;
     nombre?: string;
     horaApertura?: string;
     horaCierre?: string; // Cambiado a string para que coincida con el formato de la API
@@ -66,4 +67,20 @@ export async function crearSucursal(formData: Sucursal) {
     } catch (error) {
         console.log("Error: ", error);
     }
+}
+export async function eliminarSucursal(id: string) {
+        const urlServer = "http://localhost:8080/api/sucursal/" + id;
+    await fetch(urlServer, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      mode: "cors",
+    });
+
+
+
+
+
 }
