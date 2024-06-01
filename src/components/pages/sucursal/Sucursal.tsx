@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Card, Switch } from "antd";
+import { EditOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Card, Switch, Modal, Row, Col, Carousel } from "antd"; // Importa Carousel de Ant Design
 import { useNavigate, useParams } from "react-router-dom";
 import TarjetaAgregar from "../../element/tarjeta/TarjetaAgregar";
 import {
@@ -8,10 +8,11 @@ import {
   getSucursalId,
   Sucursal as sucursalInterface,
 } from "../../../service/ServiceSucursal";
-import imagenSucrusal from "../../../util/empresa.jpeg";
+import imagenSucursal from "../../../util/empresa.jpeg";
 import { useSelector, useDispatch } from "react-redux";
 import { EmpresaSlice } from "../../../redux/slice/empresa/EmpresaRedux";
 const { Meta } = Card;
+const { info } = Modal;
 
 const Sucursal = () => {
   const empresa = useSelector((state) => state);
@@ -23,13 +24,10 @@ const Sucursal = () => {
   const { id } = useParams<{ id: string }>();
 
   const handleSwitchChange = async (checked, sucursalId, event) => {
-    event.stopPropagation(); // Detener la propagación del clic
-    // Aquí puedes llamar a una función para actualizar el estado eliminado en el backend
+    event.stopPropagation();
     if (checked) {
       await eliminarSucursal(sucursalId);
     }
-
-    // Actualiza el estado local de la sucursal
     setSucursales((prevSucursales) =>
       prevSucursales.map((sucursal) =>
         sucursal.id === sucursalId ? { ...sucursal, eliminado: checked } : sucursal
@@ -40,18 +38,27 @@ const Sucursal = () => {
   useEffect(() => {
     getSucursalId(Number(id))
       .then((response) => {
-        console.log(response); // Verifica la respuesta
+        console.log(response);
         setSucursales(response);
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
-        setSucursales([]); // Asegúrate de que el estado se establece en un array vacío en caso de error
+        setSucursales([]);
       });
   }, [id]);
 
-  const handleCardClick = (sucursal) => {
+  const showInfo = () => {
+    info({
+      title: 'Sucursal deshabilitada',
+      content: 'Para ingresar a la sucursal, primero debes habilitarla.',
+      okText: 'Aceptar',
+      onOk() {},
+    });
+  };
+
+  const handleCardClick = (sucursal: sucursalInterface) => {
     if (sucursal.eliminado) {
-      alert("Para ingresar a la sucursal, primero debes habilitarla.");
+      showInfo();
     } else {
       dispatch(EmpresaSlice.actions.setIdSucursal(sucursal.id || null));
       navigate("/productos");
@@ -61,39 +68,51 @@ const Sucursal = () => {
   return (
     <div>
       <h1>Sucursales</h1>
-
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+      <Carousel 
+        style={{ width: "100%" }} 
+        autoplay 
+        prevArrow={<LeftOutlined style={{ fontSize: '24px', color: '#08c', cursor: 'pointer' }} />}
+        nextArrow={<RightOutlined style={{ fontSize: '24px', color: '#08c', cursor: 'pointer' }} />}
+      >
         {Array.isArray(sucursales) &&
-          sucursales.map((sucursal) => (
-            <Card
-              key={sucursal.id}
-              style={{ width: 300, margin: "10px", backgroundColor: sucursal.eliminado ? 'red' : 'white' }}
-              onClick={() => handleCardClick(sucursal)}
-              cover={<img alt={sucursal.nombre} src={imagenSucrusal} />}
-              actions={[
-                <Switch 
-                  checked={sucursal.eliminado}
-                  onChange={(checked, event) => handleSwitchChange(checked, sucursal.id, event)}
-                  onClick={(e) => e.stopPropagation()} // Detener la propagación del clic
-                />,
-                <EditOutlined 
-                  key="edit" 
-                  disabled={sucursal.eliminado} 
-                  onClick={(e) => {
-                    e.stopPropagation(); // Detener la propagación del clic
-                    // Agregar aquí el código para manejar la acción de edición
-                  }}
-                />,
-              ]}
-            >
-              <Meta
-                title={sucursal.nombre}
-                description={sucursal.horaApertura}
-              />
-            </Card>
+          sucursales.map((sucursal, index) => (
+            index % 3 === 0 ? (
+              <div key={sucursal.id}>
+                <Row gutter={16}>
+                  {sucursales.slice(index, index + 4).map((sucursal) => (
+                    <Col key={sucursal.id} span={5}>
+                      <Card
+                        style={{ marginBottom: 10, backgroundColor: sucursal.eliminado ? 'red' : 'white' }}
+                        onClick={() => handleCardClick(sucursal)}
+                        cover={<img alt={sucursal.nombre} src={imagenSucursal} />}
+                        actions={[
+                          <Switch 
+                            checked={sucursal.eliminado}
+                            onChange={(checked, event) => handleSwitchChange(checked, sucursal.id, event)}
+                            onClick={(e) => e.stopPropagation()}
+                          />,
+                          <EditOutlined 
+                            key="edit" 
+                            disabled={sucursal.eliminado} 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          />,
+                        ]}
+                      >
+                        <Meta
+                          title={sucursal.nombre}
+                          description={sucursal.horaApertura}
+                        />
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </div>
+            ) : null
           ))}
-        <TarjetaAgregar />
-      </div>
+      </Carousel>
+      <TarjetaAgregar />
     </div>
   );
 };

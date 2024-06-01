@@ -1,10 +1,21 @@
 export interface Sucursal {
     id?: number;
     eliminado?: boolean;
-    nombre?: string;
-    horaApertura?: string;
-    horaCierre?: string; // Cambiado a string para que coincida con el formato de la API
+    nombre: string;
+    horaApertura: string;
+    horaCierre: string;
+    calle?: string;
+    codigoPostal?:number;
+    numero?: number;
+    piso?:string;
+    nroDepto?:number;
+    localidad?:string;
+    provincia?:string;
+    pais?:string;
+    imagen?:string;
+    // Cambiado a string para que coincida con el formato de la API
     empresa?: Empresa;
+    file?: File; // Añadido para manejar el archivo
 }
 
 export interface Empresa {
@@ -33,7 +44,6 @@ export const getSucursalId = async (id: number): Promise<Sucursal[]> => {
     return sucursales;
 };
 
-
 export async function crearSucursal(formData: Sucursal) {
     console.log("estoy en el crearEmpresa");
     
@@ -43,21 +53,24 @@ export async function crearSucursal(formData: Sucursal) {
         console.log(formData);
 
         const urlServer = "http://localhost:8080/api/sucursal/";
+
+        // Crear un objeto FormData
+        const data = new FormData();
+        data.append('nombre', formData.nombre || ''); // Provide a default value of an empty string
+        data.append('horaApertura', formData.horaApertura);
+        data.append('horaCierre', formData.horaCierre);
+        data.append('empresa', JSON.stringify({ id: formData.empresa?.id }));
+        if (formData.file) {
+            data.append('file', formData.file);
+        }
+
         const response = await fetch(urlServer, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
             },
             mode: "cors",
-            body: JSON.stringify({
-                nombre: formData.nombre,
-                horaApertura: formData.horaApertura,
-                horaCierre: formData.horaCierre,
-                empresa: {
-                    id: formData.empresa?.id,
-                },
-            }),
+            body: data, // Enviar el objeto FormData en lugar de un objeto JSON
         });
 
         if (!response.ok) {
@@ -68,8 +81,9 @@ export async function crearSucursal(formData: Sucursal) {
         console.log("Error: ", error);
     }
 }
+
 export async function eliminarSucursal(id: string) {
-        const urlServer = "http://localhost:8080/api/sucursal/" + id;
+    const urlServer = "http://localhost:8080/api/sucursal/" + id;
     await fetch(urlServer, {
       method: "DELETE",
       headers: {
@@ -78,9 +92,4 @@ export async function eliminarSucursal(id: string) {
       },
       mode: "cors",
     });
-
-
-
-
-
 }
