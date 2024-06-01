@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 import {
     Button,
@@ -10,10 +10,14 @@ import {
     TimePicker,
     Upload,
     notification,
+    Select,
 } from 'antd';
 import { useParams } from 'react-router-dom';
 import { Sucursal, crearSucursal } from '../../../service/ServiceSucursal';
+import { getLocalidad, getPais, getProvincia } from '../../../service/ServiceUbicacion';
 
+import { Pais, Provincia, Localidad } from '../../../service/ServiceUbicacion';
+const { Option } = Select;
 const normFile = (e: any) => {
     if (Array.isArray(e)) {
         return e;
@@ -31,6 +35,16 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({ on
     const { id } = useParams<{ id: string }>();
     const [form] = Form.useForm(); // Usar el hook useForm
 
+    const [paises, setPaises] = useState<Pais[]>([]);
+    const [provincias, setProvincias] = useState<Provincia[]>([]);
+    const [localidades, setLocalidades] = useState<Localidad[]>([]);
+
+    useEffect(() => {
+        getPais().then((data: Pais[]) => setPaises(data));
+        getProvincia().then((data: Provincia[]) => setProvincias(data));
+        getLocalidad().then((data: Localidad[]) => setLocalidades(data));
+    }, []);
+
     const handleOk = () => {
         setIsModalVisible(false);
         onClose();
@@ -42,17 +56,19 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({ on
     };
 
     const handleSubmit = async (values: any) => {
+        console.log("Form submitted with values:", values); // Add log to check form values
         try {
             const { horaApertura, horaCierre, ...rest } = values;
-            const sucursal: Sucursal = { 
-                ...rest, 
+            const sucursal: Sucursal = {
+                ...rest,
                 empresa: { id },
-                
                 horaApertura: horaApertura.format('HH:mm'), // Formatear la hora de apertura
                 horaCierre: horaCierre.format('HH:mm'), // Formatear la hora de cierre
-                
+                idEmpresa: id, // Ensure idEmpresa is set correctly
+                file: values.fileList?.[0]?.originFileObj || null, // Handle the file input
+            };
+            console.log("Sucursal to create:", sucursal); // Log the sucursal object
 
-            }; 
             await crearSucursal(sucursal); // Llamar a la función crearSucursal
             notification.success({
                 message: 'Sucursal agregada',
@@ -61,6 +77,7 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({ on
             handleOk();
             window.location.reload();
         } catch (error) {
+            console.error("Error creating sucursal:", error); // Log the error
             notification.error({
                 message: 'Error',
                 description: 'La sucursal no fue agregada, revise los datos',
@@ -108,19 +125,46 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({ on
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="País" name="pais" rules={[{ required: true, message: 'Por favor ingrese el país' }]}>
-                            <Input />
+                            <Select
+                                showSearch
+                                filterOption={(input, option:any) =>
+                                    option.children.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                }
+                            >
+                                {paises.map((pais) => (
+                                    <Option key={pais.id} value={String(pais.id)}>{pais.nombre}</Option>
+                                ))}
+                            </Select>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="Provincia" name="provincia" rules={[{ required: true, message: 'Por favor ingrese la provincia' }]}>
-                            <Input />
+                            <Select
+                                showSearch
+                                filterOption={(input, option:any) =>
+                                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                }
+                            >
+                                {provincias.map((provincia) => (
+                                    <Option key={provincia.id} value={String(provincia.id)}>{provincia.nombre}</Option>
+                                ))}
+                            </Select>
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="Localidad" name="localidad" rules={[{ required: true, message: 'Por favor ingrese la localidad' }]}>
-                            <Input />
+                            <Select
+                                showSearch
+                                filterOption={(input, option:any) =>
+                                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                }
+                            >
+                                {localidades.map((localidad) => (
+                                    <Option key={localidad.id} value={String(localidad.id)}>{localidad.nombre}</Option>
+                                ))}
+                            </Select>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -136,7 +180,7 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({ on
                         </Form.Item>
                     </Col>
                     <Col span={6}>
-                        <Form.Item label="Código Postal" name="codigoPostal" rules={[{ required: true, message: 'Por favor ingrese el código postal' }]}>
+                        <Form.Item label="Código Postal" name="cp" rules={[{ required: true, message: 'Por favor ingrese el código postal' }]}>
                             <Input />
                         </Form.Item>
                     </Col>
@@ -146,16 +190,15 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({ on
                         </Form.Item>
                     </Col>
                     <Col span={4}>
-                        <Form.Item label="N° de Depto" name="depto">
+                        <Form.Item label="N° de Depto" name="nroDepto">
                             <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
-                    
                     <Col span={12}>
                         <Form.Item label="Upload" valuePropName="fileList" getValueFromEvent={normFile}>
-                            <Upload action="/upload.do" listType="picture-card">
+                            <Upload listType="picture-card">
                                 <button style={{ border: 0, background: 'none' }} type="button">
                                     <PlusOutlined />
                                     <div style={{ marginTop: 8 }}>Upload</div>

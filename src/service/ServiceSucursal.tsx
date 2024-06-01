@@ -4,16 +4,16 @@ export interface Sucursal {
     nombre: string;
     horaApertura: string;
     horaCierre: string;
-    calle?: string;
-    codigoPostal?:number;
-    numero?: number;
-    piso?:string;
-    nroDepto?:number;
-    localidad?:string;
-    provincia?:string;
-    pais?:string;
-    imagen?:string;
-    // Cambiado a string para que coincida con el formato de la API
+    calle: string;
+    cp: string;
+    numero: string;
+    piso: string;
+    nroDepto: string;
+    localidad: string;
+    provincia: string;
+    pais: string;
+    imagen?: string; // Añadido opcional
+    idEmpresa: string;
     empresa?: Empresa;
     file?: File; // Añadido para manejar el archivo
 }
@@ -45,8 +45,8 @@ export const getSucursalId = async (id: number): Promise<Sucursal[]> => {
 };
 
 export async function crearSucursal(formData: Sucursal) {
-    console.log("estoy en el crearEmpresa");
-    
+    console.log("estoy en el crearSucursal");
+
     try {
         console.log("estoy en el fetch");
 
@@ -54,42 +54,59 @@ export async function crearSucursal(formData: Sucursal) {
 
         const urlServer = "http://localhost:8080/api/sucursal/";
 
-        // Crear un objeto FormData
-        const data = new FormData();
-        data.append('nombre', formData.nombre || ''); // Provide a default value of an empty string
-        data.append('horaApertura', formData.horaApertura);
-        data.append('horaCierre', formData.horaCierre);
-        data.append('empresa', JSON.stringify({ id: formData.empresa?.id }));
-        if (formData.file) {
-            data.append('file', formData.file);
-        }
-
+        
         const response = await fetch(urlServer, {
             method: "POST",
             headers: {
+                "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
             },
             mode: "cors",
-            body: data, // Enviar el objeto FormData en lugar de un objeto JSON
+            body: JSON.stringify({
+                nombre: formData.nombre,
+                horaApertura: formData.horaApertura,
+                horaCierre: formData.horaCierre,
+                calle: formData.calle,
+                cp: formData.cp,
+                numero: formData.numero,
+                piso: formData.piso,
+                nroDepto: formData.nroDepto,
+                localidad: formData.localidad,
+                provincia: formData.provincia,
+                pais: formData.pais,
+                idEmpresa: formData.idEmpresa
+            }),
         });
 
         if (!response.ok) {
-            // throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         return await response.json();
     } catch (error) {
         console.log("Error: ", error);
+        throw error; // Asegurarse de propagar el error para que el componente pueda manejarlo
     }
 }
 
 export async function eliminarSucursal(id: string) {
     const urlServer = "http://localhost:8080/api/sucursal/" + id;
     await fetch(urlServer, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-      mode: "cors",
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+        },
+        mode: "cors",
+    });
+}
+export async function activarSucursal(id: string) {
+    const urlServer = "http://localhost:8080/api/sucursal/reactivate" + id;
+    await fetch(urlServer, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+        },
+        mode: "cors",
     });
 }

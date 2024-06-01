@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { EditOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { Card, Switch, Modal, Row, Col, Carousel } from "antd"; // Importa Carousel de Ant Design
+import { EditOutlined } from "@ant-design/icons";
+import { Card, Switch, Modal, Row, Col } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import TarjetaAgregar from "../../element/tarjeta/TarjetaAgregar";
 import {
@@ -23,14 +23,15 @@ const Sucursal = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  const handleSwitchChange = async (checked, sucursalId, event) => {
-    event.stopPropagation();
+  const handleSwitchChange = async (checked: boolean, sucursalId: string | number | undefined) => {
     if (checked) {
-      await eliminarSucursal(sucursalId);
+      await eliminarSucursal(sucursalId as string);
+    } else {
+      await eliminarSucursal(sucursalId as string);
     }
     setSucursales((prevSucursales) =>
       prevSucursales.map((sucursal) =>
-        sucursal.id === sucursalId ? { ...sucursal, eliminado: checked } : sucursal
+        sucursal.id === sucursalId ? { ...sucursal, eliminado: !checked } : sucursal
       )
     );
   };
@@ -52,7 +53,7 @@ const Sucursal = () => {
       title: 'Sucursal deshabilitada',
       content: 'Para ingresar a la sucursal, primero debes habilitarla.',
       okText: 'Aceptar',
-      onOk() {},
+      onOk() { },
     });
   };
 
@@ -68,50 +69,41 @@ const Sucursal = () => {
   return (
     <div>
       <h1>Sucursales</h1>
-      <Carousel 
-        style={{ width: "100%" }} 
-        autoplay 
-        prevArrow={<LeftOutlined style={{ fontSize: '24px', color: '#08c', cursor: 'pointer' }} />}
-        nextArrow={<RightOutlined style={{ fontSize: '24px', color: '#08c', cursor: 'pointer' }} />}
-      >
+      <Row gutter={16}>
         {Array.isArray(sucursales) &&
-          sucursales.map((sucursal, index) => (
-            index % 3 === 0 ? (
-              <div key={sucursal.id}>
-                <Row gutter={16}>
-                  {sucursales.slice(index, index + 4).map((sucursal) => (
-                    <Col key={sucursal.id} span={5}>
-                      <Card
-                        style={{ marginBottom: 10, backgroundColor: sucursal.eliminado ? 'red' : 'white' }}
-                        onClick={() => handleCardClick(sucursal)}
-                        cover={<img alt={sucursal.nombre} src={imagenSucursal} />}
-                        actions={[
-                          <Switch 
-                            checked={sucursal.eliminado}
-                            onChange={(checked, event) => handleSwitchChange(checked, sucursal.id, event)}
-                            onClick={(e) => e.stopPropagation()}
-                          />,
-                          <EditOutlined 
-                            key="edit" 
-                            disabled={sucursal.eliminado} 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          />,
-                        ]}
-                      >
-                        <Meta
-                          title={sucursal.nombre}
-                          description={sucursal.horaApertura}
-                        />
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
-              </div>
-            ) : null
+          sucursales.map((sucursal) => (
+            <Col key={sucursal.id} span={5}>
+              <Card
+                style={{ marginBottom: 10, backgroundColor: sucursal.eliminado ? '#ff3d3d' : 'white' }}
+                cover={
+                  <img
+                    alt={sucursal.nombre}
+                    src={imagenSucursal}
+                    onClick={() => handleCardClick(sucursal)}
+                  />
+                }
+                actions={[
+                  <Switch
+                    checked={!sucursal.eliminado}
+                    onChange={(checked) => handleSwitchChange(checked, sucursal.id)}
+                  />,
+                  <EditOutlined
+                    key="edit"
+                    disabled={sucursal.eliminado}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  />,
+                ]}
+              >
+                <Meta
+                  title={sucursal.nombre}
+                  description={sucursal.horaApertura}
+                />
+              </Card>
+            </Col>
           ))}
-      </Carousel>
+      </Row>
       <TarjetaAgregar />
     </div>
   );
