@@ -101,3 +101,51 @@ export const realizarPedido = async (pedido: Pedido) => {
     console.error("Error:", error);
   }
 };
+
+export const obtenerSubCategorias = async (id: number) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/categorias/subcategorias/${id}`
+    );
+    if (!response.ok) {
+      throw new Error("Error al obtener las subcategorías");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+};
+
+export const obtenerCategoriasPadre = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:8080/api/categorias/categoriasPadre/"
+    );
+    if (!response.ok) {
+      throw new Error("Error al obtener las categorías padre");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+};
+
+export const tieneSubCategorias = async (id: number) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/categorias/${id}/tieneSubCategorias`
+    );
+    if (!response.ok) {
+      throw new Error("Error al verificar si la categoría tiene subcategorías");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+};
