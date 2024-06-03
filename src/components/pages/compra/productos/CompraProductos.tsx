@@ -2,21 +2,23 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getProductosPorCategoria } from "../../../../service/Compra";
 import DetalleProducto from "./DetalleProducto";
+import { realizarPedido, Pedido } from "../../../../service/Compra"; // Asegúrate de reemplazar esto con la ruta correcta a tu función realizarPedido
 
 interface Producto {
   id: number;
   denominacion: string;
+  descripcion: string;
+  codigo: string;
+  precioVenta: number;
+  categoria: any;
+  sucursal: any;
+  imagenes: [];
   // Agrega aquí las demás propiedades de un producto
 }
 
 interface DetallePedido {
   producto: Producto;
   cantidad: number;
-}
-
-interface Pedido {
-  detalles: DetallePedido[];
-  // Agrega aquí las demás propiedades de un pedido
 }
 
 const CompraProductos = () => {
@@ -86,12 +88,43 @@ const CompraProductos = () => {
     }
   };
 
-  const finalizarCompra = () => {
-    // Aquí puedes agregar la lógica para finalizar la compra
-    // Por ejemplo, puedes crear un Pedido con los detalles del carrito
-    setPedido({ detalles: carrito });
-    // Y luego vaciar el carrito
-    setCarrito([]);
+  const realizarCompra = async () => {
+    // Preparar el pedido a partir del carrito
+    const detalles = carrito.map((detalle) => ({
+      productoId: detalle.producto.id,
+      cantidad: detalle.cantidad,
+    }));
+
+    const pedido: Pedido = {
+      hora: "10:00", // Reemplaza esto con la hora actual
+      total: carrito.reduce(
+        (total, detalle) =>
+          total + detalle.cantidad * detalle.producto.precioVenta,
+        0
+      ), // Asume que Producto tiene una propiedad 'precio'
+      TotalCostoProduccion: 0, // Reemplaza esto con el costo de producción total
+      estado: "pendiente", // Asume que este es un estado válido
+      formaPago: "tarjeta", // Asume que este es un método de pago válido
+      TipoEnvio: "normal", // Asume que este es un tipo de envío válido
+      fechaPedido: new Date().toISOString(), // Fecha actual en formato ISO
+      preferenceMPId: "", // Reemplaza esto con el ID de preferencia de MercadoPago
+      sucursal: null, // Reemplaza esto con la sucursal correspondiente
+      domicilio: null, // Reemplaza esto con el domicilio correspondiente
+      cliente: null, // Reemplaza esto con el cliente correspondiente
+      pedidoDetalle: detalles, // Detalles del pedido
+      factura: null, // Reemplaza esto con la factura correspondiente
+    }; // Asegúrate de agregar aquí cualquier otra propiedad que necesite el pedido
+
+    // Llamar a la función realizarPedido
+    const data = await realizarPedido(pedido);
+
+    // Manejar la respuesta
+    if (data) {
+      console.log("Pedido realizado con éxito:", data);
+      setCarrito([]); // Vaciar el carrito
+    } else {
+      console.error("Error al realizar el pedido");
+    }
   };
 
   return (
@@ -137,7 +170,7 @@ const CompraProductos = () => {
           style={{ display: "flex", flexDirection: "column", marginTop: "1em" }}
         >
           <button onClick={() => setCarrito([])}>Limpiar carrito</button>
-          <button onClick={finalizarCompra} style={{ marginTop: "1em" }}>
+          <button onClick={realizarCompra} style={{ marginTop: "1em" }}>
             Realizar pedido
           </button>
         </div>
