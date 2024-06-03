@@ -1,32 +1,15 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getProducto } from "../../../../service/Compra";
+import { useState } from "react";
 import { Modal, Button } from "antd";
 
 interface DetalleProductoProps {
-  productoId: number;
+  producto: any;
   onClose: () => void;
 }
 
 const DetalleProducto: React.FC<DetalleProductoProps> = ({
-  productoId,
+  producto,
   onClose,
 }) => {
-  const [producto, setProducto] = useState({
-    denominacion: "",
-    descripcion: "",
-    codigo: "",
-    precioVenta: 0,
-  });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getProducto(Number(productoId));
-      setProducto(data);
-    };
-    fetchData();
-  }, [productoId]);
-
   if (!producto) {
     return <div>Cargando...</div>;
   }
@@ -45,6 +28,9 @@ const DetalleProducto: React.FC<DetalleProductoProps> = ({
       <p>{producto.descripcion}</p>
       <p>Código: {producto.codigo}</p>
       <p>Precio de venta: {producto.precioVenta}</p>
+      <p>Categoría: {producto.categoriaId}</p>
+      <p>Sucursal: {producto.sucursalId}</p>
+
       {/* Aquí puedes agregar más detalles del producto según sea necesario */}
     </Modal>
   );
