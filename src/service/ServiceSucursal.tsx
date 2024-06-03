@@ -13,7 +13,8 @@ export interface Sucursal {
     imagen?: string; // Añadido opcional
     idEmpresa: string;
     empresa?: Empresa;
-    file?: File; // Añadido para manejar el archivo
+    file?: File;
+    domicilio?: Domicilio // Añadido para manejar el archivo
 }
 
 export interface Empresa {
@@ -23,7 +24,13 @@ export interface Empresa {
     razonSocial?: string;
     cuil?: number;
 }
-
+export interface Domicilio {
+    id?: number;
+    eliminado?: boolean;
+    calle?: string;
+    numero?: string;
+    cp?: number;
+}
 export const getSucursalId = async (id: number): Promise<Sucursal[]> => {
     console.log("----->" + id);
 

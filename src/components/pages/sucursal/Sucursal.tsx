@@ -21,6 +21,7 @@ const Sucursal = () => {
   const dispatch = useDispatch();
   console.log(empresa);
 
+
   const [sucursales, setSucursales] = useState<sucursalInterface[]>([]);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -31,8 +32,20 @@ const Sucursal = () => {
   const handleSwitchChange = async (checked: boolean, sucursalId: string | number | undefined) => {
     if (checked) {
       await eliminarSucursal(sucursalId as string);
+      info({
+        title: 'Sucursal habilitada',
+        content: 'La sucursal ha sido habilitada.',
+        okText: 'Aceptar',
+        onOk() { },
+      });
     } else {
       await eliminarSucursal(sucursalId as string);
+      info({
+        title: 'Sucursal deshabilitada',
+        content: 'La sucursal ha sido deshabilitada.',
+        okText: 'Aceptar',
+        onOk() { },
+      });
     }
     setSucursales((prevSucursales) =>
       prevSucursales.map((sucursal) =>
@@ -46,6 +59,7 @@ const Sucursal = () => {
       .then((response) => {
         console.log(response);
         setSucursales(response);
+        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
@@ -90,6 +104,7 @@ const Sucursal = () => {
       <Row gutter={16}>
         {Array.isArray(sucursales) &&
           sucursales.map((sucursal) => (
+            
             <Col key={sucursal.id} span={5}>
               <Card
                 style={{ marginBottom: 10, backgroundColor: sucursal.eliminado ? '#ff3d3d' : 'white' }}
@@ -114,7 +129,7 @@ const Sucursal = () => {
               >
                 <Meta
                   title={sucursal.nombre}
-                  description={sucursal.horaApertura}
+                  description={`Hora: ${sucursal?.horaApertura || 'No disponible'} a ${sucursal?.horaCierre || 'No disponible'}, Domicilio: ${sucursal?.domicilio?.calle || 'No disponible'} n°: ${sucursal?.domicilio?.numero || ''}`}
                 />
               </Card>
             </Col>
