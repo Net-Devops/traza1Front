@@ -1,5 +1,5 @@
 import React from "react";
-import { Producto, PedidoDetalle } from "../../../entidades/compras/interface";
+import { PedidoDetalle } from "../../../entidades/compras/interface";
 
 interface CarritoProps {
   carrito: PedidoDetalle[];

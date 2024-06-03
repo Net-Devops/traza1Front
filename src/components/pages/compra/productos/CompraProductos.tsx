@@ -4,23 +4,10 @@ import { getProductosPorCategoria } from "../../../../service/Compra";
 import DetalleProducto from "./DetalleProducto";
 import { realizarPedido, Pedido } from "../../../../service/Compra"; // Asegúrate de reemplazar esto con la ruta correcta a tu función realizarPedido
 import Carrito from "../Carrito";
-
-export interface Producto {
-  id: number;
-  denominacion: string;
-  descripcion: string;
-  codigo: string;
-  precioVenta: number;
-  categoria: any;
-  sucursal: any;
-  imagenes: [];
-  // Agrega aquí las demás propiedades de un producto
-}
-
-export interface PedidoDetalle {
-  producto: Producto;
-  cantidad: number;
-}
+import {
+  PedidoDetalle,
+  Producto,
+} from "../../../../entidades/compras/interface";
 
 const CompraProductos = () => {
   const { categoriaId } = useParams();
