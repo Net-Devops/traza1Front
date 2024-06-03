@@ -1,11 +1,13 @@
 import React from "react";
 import { PedidoDetalle } from "../../../entidades/compras/interface";
+import CheckoutMP from "../../mercadoPago/CheckoutMP";
 
 interface CarritoProps {
   carrito: PedidoDetalle[];
   quitarDelCarrito: (productoId: number) => void;
   realizarCompra: () => void;
   limpiarCarrito: () => void;
+  preferenceId: string | null;
 }
 
 const Carrito: React.FC<CarritoProps> = ({
@@ -13,6 +15,7 @@ const Carrito: React.FC<CarritoProps> = ({
   quitarDelCarrito,
   realizarCompra,
   limpiarCarrito,
+  preferenceId,
 }) => {
   return (
     <div
@@ -30,9 +33,11 @@ const Carrito: React.FC<CarritoProps> = ({
           <div key={detalle.producto.id}>
             {detalle.producto.denominacion} - Cantidad: {detalle.cantidad} -
             Subtotal: {subtotal}
-            <button onClick={() => quitarDelCarrito(detalle.producto.id)}>
-              Quitar
-            </button>
+            {!preferenceId && (
+              <button onClick={() => quitarDelCarrito(detalle.producto.id)}>
+                Quitar
+              </button>
+            )}
           </div>
         );
       })}
@@ -44,14 +49,17 @@ const Carrito: React.FC<CarritoProps> = ({
           0
         )}
       </div>{" "}
-      <div
-        style={{ display: "flex", flexDirection: "column", marginTop: "1em" }}
-      >
-        <button onClick={limpiarCarrito}>Limpiar carrito</button>
-        <button onClick={realizarCompra} style={{ marginTop: "1em" }}>
-          Realizar pedido
-        </button>
-      </div>
+      {!preferenceId && (
+        <div
+          style={{ display: "flex", flexDirection: "column", marginTop: "1em" }}
+        >
+          <button onClick={limpiarCarrito}>Limpiar carrito</button>
+          <button onClick={realizarCompra} style={{ marginTop: "1em" }}>
+            Realizar pedido
+          </button>
+        </div>
+      )}
+      {preferenceId && <CheckoutMP preferenceId={preferenceId} />}
     </div>
   );
 };

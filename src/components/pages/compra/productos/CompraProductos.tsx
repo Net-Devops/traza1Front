@@ -5,7 +5,7 @@ import DetalleProducto from "./DetalleProducto";
 import {
   realizarPedido,
   Pedido,
-  //createPreferenceMP,
+  createPreferenceMP,
 } from "../../../../service/Compra"; // Asegúrate de reemplazar esto con la ruta correcta a tu función realizarPedido
 import Carrito from "../Carrito";
 import {
@@ -21,6 +21,7 @@ const CompraProductos = () => {
     null
   );
   const [carrito, setCarrito] = useState<PedidoDetalle[]>([]);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,11 +121,12 @@ const CompraProductos = () => {
 
     // Manejar la respuesta
     if (data) {
-      //await createPreferenceMP(data);
+      const preferenceMP = await createPreferenceMP(data);
 
-      console.log("Pedido realizado con éxito:", data);
+      console.log("preferenciaMp:", preferenceMP);
+      setPreferenceId(preferenceMP.id);
       toast.success("Pedido realizado con éxito. Ahora realiza el pago.");
-      setCarrito([]); // Vaciar el carrito
+      //setCarrito([]); // Vaciar el carrito
     } else {
       console.error("Error al realizar el pedido");
       toast.error("Error al realizar el pedido.");
@@ -158,6 +160,7 @@ const CompraProductos = () => {
         quitarDelCarrito={quitarDelCarrito}
         realizarCompra={realizarCompra}
         limpiarCarrito={() => setCarrito([])}
+        preferenceId={preferenceId}
       />
     </div>
   );
