@@ -8,6 +8,7 @@ interface CarritoProps {
   realizarCompra: () => void;
   limpiarCarrito: () => void;
   preferenceId: string | null;
+  pedidoRealizado: boolean;
 }
 
 const Carrito: React.FC<CarritoProps> = ({
@@ -16,6 +17,7 @@ const Carrito: React.FC<CarritoProps> = ({
   realizarCompra,
   limpiarCarrito,
   preferenceId,
+  pedidoRealizado,
 }) => {
   return (
     <div
@@ -33,7 +35,7 @@ const Carrito: React.FC<CarritoProps> = ({
           <div key={detalle.producto.id}>
             {detalle.producto.denominacion} - Cantidad: {detalle.cantidad} -
             Subtotal: {subtotal}
-            {!preferenceId && (
+            {!preferenceId && !pedidoRealizado && (
               <button onClick={() => quitarDelCarrito(detalle.producto.id)}>
                 Quitar
               </button>
@@ -49,7 +51,7 @@ const Carrito: React.FC<CarritoProps> = ({
           0
         )}
       </div>{" "}
-      {!preferenceId && (
+      {!preferenceId && !pedidoRealizado && (
         <div
           style={{ display: "flex", flexDirection: "column", marginTop: "1em" }}
         >

@@ -22,6 +22,7 @@ const CompraProductos = () => {
   );
   const [carrito, setCarrito] = useState<PedidoDetalle[]>([]);
   const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  const [pedidoRealizado, setPedidoRealizado] = useState(false); // Nuevo estado
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,6 +41,8 @@ const CompraProductos = () => {
   };
 
   const agregarAlCarrito = (producto: Producto) => {
+    if (pedidoRealizado) return; // No permitir agregar al carrito si el pedido ha sido realizado
+
     const detallePedidoEnCarrito = carrito.find(
       (detalle) => detalle.producto.id === producto.id
     );
@@ -60,6 +63,8 @@ const CompraProductos = () => {
   };
 
   const quitarDelCarrito = (productoId: number) => {
+    if (pedidoRealizado) return; // No permitir quitar del carrito si el pedido ha sido realizado
+
     const detallePedidoEnCarrito = carrito.find(
       (detalle) => detalle.producto.id === productoId
     );
@@ -104,9 +109,6 @@ const CompraProductos = () => {
         0
       ), // Asume que Producto tiene una propiedad 'precio'
       TotalCostoProduccion: 0, // Reemplaza esto con el costo de producción total
-      //estado: "pendiente", // Asume que este es un estado válido
-      //formaPago: "tarjeta", // Asume que este es un método de pago válido
-      //TipoEnvio: "normal", // Asume que este es un tipo de envío válido
       fechaPedido: new Date().toISOString(), // Fecha actual en formato ISO
       preferenceMPId: "", // Reemplaza esto con el ID de preferencia de MercadoPago
       sucursal: null, // Reemplaza esto con la sucursal correspondiente
@@ -126,7 +128,7 @@ const CompraProductos = () => {
       console.log("preferenciaMp:", preferenceMP);
       setPreferenceId(preferenceMP.id);
       toast.success("Pedido realizado con éxito. Ahora realiza el pago.");
-      //setCarrito([]); // Vaciar el carrito
+      setPedidoRealizado(true); // Establecer pedidoRealizado en true después de realizar el pedido
     } else {
       console.error("Error al realizar el pedido");
       toast.error("Error al realizar el pedido.");
@@ -161,6 +163,7 @@ const CompraProductos = () => {
         realizarCompra={realizarCompra}
         limpiarCarrito={() => setCarrito([])}
         preferenceId={preferenceId}
+        pedidoRealizado={pedidoRealizado} // Pasar pedidoRealizado como prop a Carrito
       />
     </div>
   );
