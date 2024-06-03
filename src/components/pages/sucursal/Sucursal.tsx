@@ -11,6 +11,8 @@ import {
 import imagenSucursal from "../../../util/empresa.jpeg";
 import { useSelector, useDispatch } from "react-redux";
 import { EmpresaSlice } from "../../../redux/slice/empresa/EmpresaRedux";
+import FormularioEditarSucursal from '../../element/formularios/FormularioEditarSucursal'; // Import your modal component
+
 const { Meta } = Card;
 const { info } = Modal;
 
@@ -22,6 +24,9 @@ const Sucursal = () => {
   const [sucursales, setSucursales] = useState<sucursalInterface[]>([]);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentSucursal, setCurrentSucursal] = useState<sucursalInterface | null>(null);
 
   const handleSwitchChange = async (checked: boolean, sucursalId: string | number | undefined) => {
     if (checked) {
@@ -66,6 +71,19 @@ const Sucursal = () => {
     }
   };
 
+  const handleEditClick = (e: React.MouseEvent, sucursal: sucursalInterface) => {
+    e.stopPropagation();
+    if (!sucursal.eliminado) {
+      setCurrentSucursal(sucursal);
+      setIsModalVisible(true);
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setCurrentSucursal(null);
+  };
+
   return (
     <div>
       <h1>Sucursales</h1>
@@ -90,9 +108,7 @@ const Sucursal = () => {
                   <EditOutlined
                     key="edit"
                     disabled={sucursal.eliminado}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
+                    onClick={(e) => handleEditClick(e, sucursal)}
                   />,
                 ]}
               >
@@ -105,6 +121,15 @@ const Sucursal = () => {
           ))}
       </Row>
       <TarjetaAgregar />
+       
+
+      {isModalVisible && currentSucursal && (
+    <FormularioEditarSucursal
+        visible={isModalVisible}
+        sucursalId={currentSucursal.id}
+        onClose={handleModalClose}
+    />
+      )}
     </div>
   );
 };
