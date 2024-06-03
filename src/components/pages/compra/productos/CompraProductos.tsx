@@ -16,7 +16,7 @@ interface Producto {
   // Agrega aquí las demás propiedades de un producto
 }
 
-interface DetallePedido {
+interface PedidoDetalle {
   producto: Producto;
   cantidad: number;
 }
@@ -27,7 +27,7 @@ const CompraProductos = () => {
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(
     null
   );
-  const [carrito, setCarrito] = useState<DetallePedido[]>([]);
+  const [carrito, setCarrito] = useState<PedidoDetalle[]>([]);
   const [pedido, setPedido] = useState<Pedido | null>(null);
 
   useEffect(() => {
@@ -93,6 +93,7 @@ const CompraProductos = () => {
     const detalles = carrito.map((detalle) => ({
       productoId: detalle.producto.id,
       cantidad: detalle.cantidad,
+      producto: detalle.producto,
     }));
 
     const pedido: Pedido = {
@@ -103,9 +104,9 @@ const CompraProductos = () => {
         0
       ), // Asume que Producto tiene una propiedad 'precio'
       TotalCostoProduccion: 0, // Reemplaza esto con el costo de producción total
-      estado: "pendiente", // Asume que este es un estado válido
-      formaPago: "tarjeta", // Asume que este es un método de pago válido
-      TipoEnvio: "normal", // Asume que este es un tipo de envío válido
+      //estado: "pendiente", // Asume que este es un estado válido
+      //formaPago: "tarjeta", // Asume que este es un método de pago válido
+      //TipoEnvio: "normal", // Asume que este es un tipo de envío válido
       fechaPedido: new Date().toISOString(), // Fecha actual en formato ISO
       preferenceMPId: "", // Reemplaza esto con el ID de preferencia de MercadoPago
       sucursal: null, // Reemplaza esto con la sucursal correspondiente
@@ -158,14 +159,26 @@ const CompraProductos = () => {
         }}
       >
         <h2>Carrito</h2>
-        {carrito.map((detalle) => (
-          <div key={detalle.producto.id}>
-            {detalle.producto.denominacion} - Cantidad: {detalle.cantidad}
-            <button onClick={() => quitarDelCarrito(detalle.producto.id)}>
-              Quitar
-            </button>
-          </div>
-        ))}
+        {carrito.map((detalle) => {
+          const subtotal = detalle.producto.precioVenta * detalle.cantidad; // Calcula el subtotal aquí
+          return (
+            <div key={detalle.producto.id}>
+              {detalle.producto.denominacion} - Cantidad: {detalle.cantidad} -
+              Subtotal: {subtotal}
+              <button onClick={() => quitarDelCarrito(detalle.producto.id)}>
+                Quitar
+              </button>
+            </div>
+          );
+        })}
+        <div>
+          Total:{" "}
+          {carrito.reduce(
+            (total, detalle) =>
+              total + detalle.producto.precioVenta * detalle.cantidad,
+            0
+          )}
+        </div>{" "}
         <div
           style={{ display: "flex", flexDirection: "column", marginTop: "1em" }}
         >

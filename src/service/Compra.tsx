@@ -2,16 +2,31 @@ export interface Pedido {
   hora: string;
   total: number;
   TotalCostoProduccion: number;
-  estado: string;
-  formaPago: string;
-  TipoEnvio: string;
+  //estado: string;
+  //formaPago: string;
+  //TipoEnvio: string;
   fechaPedido: string;
   preferenceMPId: string;
   sucursal: any;
   domicilio: any;
   cliente: any;
-  pedidoDetalle: any[];
+  pedidoDetalle: PedidoDetalle[];
   factura: any;
+}
+interface PedidoDetalle {
+  producto: Producto;
+  cantidad: number;
+}
+interface Producto {
+  id: number;
+  denominacion: string;
+  descripcion: string;
+  codigo: string;
+  precioVenta: number;
+  categoria: any;
+  sucursal: any;
+  imagenes: [];
+  // Agrega aquí las demás propiedades de un producto
 }
 
 export const getCategorias = async () => {
@@ -66,13 +81,16 @@ export const getProducto = async (id: number) => {
 
 export const realizarPedido = async (pedido: Pedido) => {
   try {
-    const response = await fetch("http://localhost:8080/api/pedidos/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(pedido),
-    });
+    const response = await fetch(
+      "http://localhost:8080/api/compra/productos/crear-pedido",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(pedido),
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Error al realizar el pedido");
