@@ -11,11 +11,13 @@ export interface Producto {
 }
 
 export interface PedidoDetalle {
+  id?: number;
   producto: Producto;
   cantidad: number;
 }
 
 export interface Pedido {
+  id?: number;
   hora: string;
   total: number;
   TotalCostoProduccion: number;

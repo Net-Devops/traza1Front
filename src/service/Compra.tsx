@@ -1,6 +1,7 @@
 import PreferenceMP from "../entidades/mercadoPago/PreferenceMp";
 
 export interface Pedido {
+  id?: number;
   hora: string;
   total: number;
   TotalCostoProduccion: number;
@@ -16,6 +17,7 @@ export interface Pedido {
   factura: any;
 }
 interface PedidoDetalle {
+  id?: number;
   producto: Producto;
   cantidad: number;
 }
@@ -163,4 +165,20 @@ export async function createPreferenceMP(pedido?: Pedido) {
     },
   });
   return (await response.json()) as PreferenceMP;
+}
+
+export async function setPreferenceMPId(
+  pedidoId: number,
+  preferenceMPId: string
+) {
+  let urlServer = `http://localhost:8080/api/compra/productos/${pedidoId}/setPreferenceMPId`;
+  let method: string = "POST";
+  const response = await fetch(urlServer, {
+    method: method,
+    body: JSON.stringify(preferenceMPId),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return (await response.json()) as Pedido;
 }

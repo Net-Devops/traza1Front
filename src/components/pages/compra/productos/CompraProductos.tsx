@@ -2,12 +2,17 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getProductosPorCategoria } from "../../../../service/Compra";
 import DetalleProducto from "./DetalleProducto";
-import { realizarPedido, Pedido } from "../../../../service/Compra"; // Asegúrate de reemplazar esto con la ruta correcta a tu función realizarPedido
+import {
+  realizarPedido,
+  Pedido,
+  //createPreferenceMP,
+} from "../../../../service/Compra"; // Asegúrate de reemplazar esto con la ruta correcta a tu función realizarPedido
 import Carrito from "../Carrito";
 import {
   PedidoDetalle,
   Producto,
 } from "../../../../entidades/compras/interface";
+import { toast } from "react-toastify";
 
 const CompraProductos = () => {
   const { categoriaId } = useParams();
@@ -76,6 +81,13 @@ const CompraProductos = () => {
   };
 
   const realizarCompra = async () => {
+    if (carrito.length === 0) {
+      toast.error(
+        "El carrito está vacío. Agrega al menos un producto al carrito antes de realizar el pedido."
+      );
+      return;
+    }
+
     // Preparar el pedido a partir del carrito
     const detalles = carrito.map((detalle) => ({
       productoId: detalle.producto.id,
@@ -108,10 +120,14 @@ const CompraProductos = () => {
 
     // Manejar la respuesta
     if (data) {
+      //await createPreferenceMP(data);
+
       console.log("Pedido realizado con éxito:", data);
+      toast.success("Pedido realizado con éxito. Ahora realiza el pago.");
       setCarrito([]); // Vaciar el carrito
     } else {
       console.error("Error al realizar el pedido");
+      toast.error("Error al realizar el pedido.");
     }
   };
 
