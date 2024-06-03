@@ -11,6 +11,8 @@ import {
 import imagenSucursal from "../../../util/empresa.jpeg";
 import { useSelector, useDispatch } from "react-redux";
 import { EmpresaSlice } from "../../../redux/slice/empresa/EmpresaRedux";
+import FormularioEditarSucursal from '../../element/formularios/FormularioEditarSucursal'; // Import your modal component
+
 const { Meta } = Card;
 const { info } = Modal;
 
@@ -19,15 +21,31 @@ const Sucursal = () => {
   const dispatch = useDispatch();
   console.log(empresa);
 
+
   const [sucursales, setSucursales] = useState<sucursalInterface[]>([]);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentSucursal, setCurrentSucursal] = useState<sucursalInterface | null>(null);
+
   const handleSwitchChange = async (checked: boolean, sucursalId: string | number | undefined) => {
     if (checked) {
       await eliminarSucursal(sucursalId as string);
+      info({
+        title: 'Sucursal habilitada',
+        content: 'La sucursal ha sido habilitada.',
+        okText: 'Aceptar',
+        onOk() { },
+      });
     } else {
       await eliminarSucursal(sucursalId as string);
+      info({
+        title: 'Sucursal deshabilitada',
+        content: 'La sucursal ha sido deshabilitada.',
+        okText: 'Aceptar',
+        onOk() { },
+      });
     }
     setSucursales((prevSucursales) =>
       prevSucursales.map((sucursal) =>
@@ -41,6 +59,7 @@ const Sucursal = () => {
       .then((response) => {
         console.log(response);
         setSucursales(response);
+        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
@@ -66,12 +85,26 @@ const Sucursal = () => {
     }
   };
 
+  const handleEditClick = (e: React.MouseEvent, sucursal: sucursalInterface) => {
+    e.stopPropagation();
+    if (!sucursal.eliminado) {
+      setCurrentSucursal(sucursal);
+      setIsModalVisible(true);
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setCurrentSucursal(null);
+  };
+
   return (
     <div>
       <h1>Sucursales</h1>
       <Row gutter={16}>
         {Array.isArray(sucursales) &&
           sucursales.map((sucursal) => (
+            
             <Col key={sucursal.id} span={5}>
               <Card
                 style={{ marginBottom: 10, backgroundColor: sucursal.eliminado ? '#ff3d3d' : 'white' }}
@@ -90,21 +123,28 @@ const Sucursal = () => {
                   <EditOutlined
                     key="edit"
                     disabled={sucursal.eliminado}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
+                    onClick={(e) => handleEditClick(e, sucursal)}
                   />,
                 ]}
               >
                 <Meta
                   title={sucursal.nombre}
-                  description={sucursal.horaApertura}
+                  description={`Hora: ${sucursal?.horaApertura || 'No disponible'} a ${sucursal?.horaCierre || 'No disponible'}, Domicilio: ${sucursal?.domicilio?.calle || 'No disponible'} n°: ${sucursal?.domicilio?.numero || ''}`}
                 />
               </Card>
             </Col>
           ))}
       </Row>
       <TarjetaAgregar />
+       
+
+      {isModalVisible && currentSucursal && (
+    <FormularioEditarSucursal
+        visible={isModalVisible}
+        sucursalId={currentSucursal.id}
+        onClose={handleModalClose}
+    />
+      )}
     </div>
   );
 };
