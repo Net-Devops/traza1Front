@@ -46,7 +46,6 @@ export const getCategorias = async () => {
 };
 
 export const getProductosPorCategoria = async (categoriaId: number) => {
-  console.log("--------------------" + categoriaId + "-------------------");
   try {
     const response = await fetch(
       `http://localhost:8080/api/compra/productos/${categoriaId}`

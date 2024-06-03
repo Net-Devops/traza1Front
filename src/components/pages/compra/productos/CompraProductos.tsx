@@ -28,7 +28,6 @@ const CompraProductos = () => {
     null
   );
   const [carrito, setCarrito] = useState<PedidoDetalle[]>([]);
-  const [pedido, setPedido] = useState<Pedido | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
