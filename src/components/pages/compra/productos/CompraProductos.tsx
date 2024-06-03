@@ -3,8 +3,9 @@ import { useParams } from "react-router-dom";
 import { getProductosPorCategoria } from "../../../../service/Compra";
 import DetalleProducto from "./DetalleProducto";
 import { realizarPedido, Pedido } from "../../../../service/Compra"; // Asegúrate de reemplazar esto con la ruta correcta a tu función realizarPedido
+import Carrito from "../Carrito";
 
-interface Producto {
+export interface Producto {
   id: number;
   denominacion: string;
   descripcion: string;
@@ -16,7 +17,7 @@ interface Producto {
   // Agrega aquí las demás propiedades de un producto
 }
 
-interface PedidoDetalle {
+export interface PedidoDetalle {
   producto: Producto;
   cantidad: number;
 }
@@ -149,44 +150,12 @@ const CompraProductos = () => {
           />
         )}
       </div>
-      <div
-        style={{
-          marginLeft: "2em",
-          border: "1px solid black",
-          padding: "1em",
-          borderRadius: "10px",
-        }}
-      >
-        <h2>Carrito</h2>
-        {carrito.map((detalle) => {
-          const subtotal = detalle.producto.precioVenta * detalle.cantidad; // Calcula el subtotal aquí
-          return (
-            <div key={detalle.producto.id}>
-              {detalle.producto.denominacion} - Cantidad: {detalle.cantidad} -
-              Subtotal: {subtotal}
-              <button onClick={() => quitarDelCarrito(detalle.producto.id)}>
-                Quitar
-              </button>
-            </div>
-          );
-        })}
-        <div>
-          Total:{" "}
-          {carrito.reduce(
-            (total, detalle) =>
-              total + detalle.producto.precioVenta * detalle.cantidad,
-            0
-          )}
-        </div>{" "}
-        <div
-          style={{ display: "flex", flexDirection: "column", marginTop: "1em" }}
-        >
-          <button onClick={() => setCarrito([])}>Limpiar carrito</button>
-          <button onClick={realizarCompra} style={{ marginTop: "1em" }}>
-            Realizar pedido
-          </button>
-        </div>
-      </div>
+      <Carrito
+        carrito={carrito}
+        quitarDelCarrito={quitarDelCarrito}
+        realizarCompra={realizarCompra}
+        limpiarCarrito={() => setCarrito([])}
+      />
     </div>
   );
 };
