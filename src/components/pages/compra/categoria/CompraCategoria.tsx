@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Card } from 'antd';
 import {
   obtenerCategoriasPadre,
   tieneSubCategorias,
-} from "../../../../service/Compra"; // Importa tus funciones
+} from "../../../../service/Compra"; 
 
 const CompraCategoria = () => {
   const navigate = useNavigate();
@@ -11,19 +12,19 @@ const CompraCategoria = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await obtenerCategoriasPadre(); // Usa obtenerCategoriasPadre
+      const data = await obtenerCategoriasPadre(); 
       setCategorias(data);
     };
     fetchData();
   }, []);
 
   const handleCategoriaClick = async (id: number) => {
-    const tieneSubs = await tieneSubCategorias(id); // Verifica si la categoría tiene subcategorías
+    const tieneSubs = await tieneSubCategorias(id); 
     if (tieneSubs) {
-      // Si la categoría tiene subcategorías, navega a la vista de subcategorías
+     
       navigate(`/compra/subcategorias/${id}`);
     } else {
-      // Si la categoría no tiene subcategorías, navega a la vista de productos
+      
       navigate(`/compra/productos/${id}`);
     }
   };
@@ -31,18 +32,19 @@ const CompraCategoria = () => {
   return (
     <div>
       <h1>Elige una categoría</h1>
-      <div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
         {categorias.map((categoria: { id: number; denominacion: string }) => (
-          <button
+          <Card
             key={categoria.id}
-            onClick={() => handleCategoriaClick(categoria.id)} // Usa handleCategoriaClick
+            onClick={() => handleCategoriaClick(categoria.id)}
+            style={{ width: 300, height: 300 }}
+            cover={<img alt="example" src={`/src/util/${categoria.denominacion}.jpeg`} style={{ width: '100%', height: '200px', objectFit: 'cover' }}/>}
           >
-            {categoria.denominacion}
-          </button>
+            <Card.Meta title={categoria.denominacion} />
+          </Card>
         ))}
       </div>
     </div>
   );
-};
-
+}
 export default CompraCategoria;
