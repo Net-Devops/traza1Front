@@ -13,6 +13,8 @@ import {
   Producto,
 } from "../../../../entidades/compras/interface";
 import { toast } from "react-toastify";
+import { Card, Button } from 'antd';
+
 
 const CompraProductos = () => {
   const { categoriaId } = useParams();
@@ -139,15 +141,16 @@ const CompraProductos = () => {
     <div style={{ display: "flex", justifyContent: "space-between" }}>
       <div>
         <h1>Productos</h1>
-        <div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
           {productos.map((producto) => (
-            <div key={producto.id}>
-              {producto.denominacion}
-              <button onClick={() => verDetalle(producto)}>Ver detalles</button>
-              <button onClick={() => agregarAlCarrito(producto)}>
-                Agregar al carrito
-              </button>
-            </div>
+            <Card
+              key={producto.id}
+              style={{ width: 300 }}
+            >
+              <Card.Meta title={producto.denominacion} />
+              <Button type="primary" onClick={() => verDetalle(producto)}>Ver detalles</Button>
+              <Button type="primary" onClick={() => agregarAlCarrito(producto)}>Agregar al carrito</Button>
+            </Card>
           ))}
         </div>
         {selectedProducto && (
