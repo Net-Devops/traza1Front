@@ -54,7 +54,7 @@ const CompraProductos = () => {
       setCarrito(
         carrito.map((detalle) =>
           detalle.producto.id === producto.id
-            ? { ...detalle, cantidad: detalle.cantidad + 1 }
+            ? { ...detalle, cantidad: detalle.cantidad  }
             : detalle
         )
       );

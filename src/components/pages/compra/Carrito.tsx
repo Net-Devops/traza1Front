@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { PedidoDetalle } from "../../../entidades/compras/interface";
 import CheckoutMP from "../../mercadoPago/CheckoutMP";
 
@@ -19,6 +19,55 @@ const Carrito: React.FC<CarritoProps> = ({
   preferenceId,
   pedidoRealizado,
 }) => {
+  const [carritos, setCarritos] = useState<PedidoDetalle[]>(() => {
+    // Intenta cargar el carrito desde el almacenamiento local cuando se inicializa el estado
+    const carritoGuardado = localStorage.getItem('carrito');
+    return carritoGuardado ? JSON.parse(carritoGuardado) : [];
+  });
+
+  // Sincronizar carritos con carrito prop cuando cambie
+  useEffect(() => {
+    if (carrito.length > 0) {
+      setCarritos(prevCarritos => {
+        // Combina el estado previo del carrito con los nuevos elementos del carrito
+        const nuevoCarrito = [...prevCarritos];
+        carrito.forEach(detalle => {
+          const index = nuevoCarrito.findIndex(item => item.producto.id === detalle.producto.id);
+          if (index !== -1) {
+            // Si el producto ya está en el carrito, actualiza la cantidad
+            nuevoCarrito[index].cantidad += detalle.cantidad;
+          } else {
+            // Si el producto no está en el carrito, lo agrega
+            nuevoCarrito.push(detalle);
+          }
+        });
+        return nuevoCarrito;
+      });
+    }
+  }, [carrito]);
+
+  // Almacenar carrito en localStorage en cada renderizado
+  useEffect(() => {
+    localStorage.setItem('carrito', JSON.stringify(carritos));
+  }, [carritos]);
+
+  const quitarProducto = (productoId: number) => {
+    quitarDelCarrito(productoId);
+    const nuevoCarrito = carritos.filter(item => item.producto.id !== productoId);
+    setCarritos(nuevoCarrito);
+  };
+
+  const realizarCompraConLimpieza = () => {
+    realizarCompra();
+    // Aquí no se limpia el carrito
+  };
+
+  const limpiarCarritoConLimpieza = () => {
+    limpiarCarrito();
+    setCarritos([]);
+    localStorage.removeItem('carrito');
+  };
+
   return (
     <div
       style={{
@@ -29,14 +78,14 @@ const Carrito: React.FC<CarritoProps> = ({
       }}
     >
       <h2>Carrito</h2>
-      {carrito.map((detalle) => {
+      {carritos.map((detalle) => {
         const subtotal = detalle.producto.precioVenta * detalle.cantidad; // Calcula el subtotal aquí
         return (
           <div key={detalle.producto.id}>
             {detalle.producto.denominacion} - Cantidad: {detalle.cantidad} -
             Subtotal: {subtotal}
             {!preferenceId && !pedidoRealizado && (
-              <button onClick={() => quitarDelCarrito(detalle.producto.id)}>
+              <button onClick={() => quitarProducto(detalle.producto.id)}>
                 Quitar
               </button>
             )}
@@ -45,7 +94,7 @@ const Carrito: React.FC<CarritoProps> = ({
       })}
       <div>
         Total:{" "}
-        {carrito.reduce(
+        {carritos.reduce(
           (total, detalle) =>
             total + detalle.producto.precioVenta * detalle.cantidad,
           0
@@ -55,8 +104,8 @@ const Carrito: React.FC<CarritoProps> = ({
         <div
           style={{ display: "flex", flexDirection: "column", marginTop: "1em" }}
         >
-          <button onClick={limpiarCarrito}>Limpiar carrito</button>
-          <button onClick={realizarCompra} style={{ marginTop: "1em" }}>
+          <button onClick={limpiarCarritoConLimpieza}>Limpiar carrito</button>
+          <button onClick={realizarCompraConLimpieza} style={{ marginTop: "1em" }}>
             Realizar pedido
           </button>
         </div>
