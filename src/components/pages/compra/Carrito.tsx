@@ -1,4 +1,5 @@
-import { Card, Button } from "antd";
+import { Card, Button, InputNumber } from "antd";
+import { PlusOutlined, MinusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import {
   removeToCarrito,
@@ -6,6 +7,7 @@ import {
   decrementarCantidad,
   limpiarCarrito,
   enviarPedido,
+  cambiarCantidad,
 } from "../../../redux/slice/Carrito.slice";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -52,46 +54,78 @@ const Carrito = () => {
     }
   };
 
+  const cambiarCantidadProducto = (productoId: number, cantidad: number) => {
+    dispatch(cambiarCantidad({ id: productoId, cantidad }));
+  };
+
   return (
-    <div>
-      <h1>Carrito</h1>
+    <div style={{ padding: "20px" }}>
+      <h1 style={{ textAlign: "center" }}>Carrito</h1>
       {carrito.map((item) => {
         const subtotal = item.producto.precioVenta * item.cantidad;
         return (
-          <Card key={item.id} style={{ width: 300 }}>
-            <Card.Meta
-              title={item.producto.denominacion}
-              description={`Cantidad: ${item.cantidad}, Precio: ${item.producto.precioVenta}, Subtotal: ${subtotal}`}
-            />
+          <Card key={item.id} style={{ width: 300, marginBottom: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Card.Meta
+                title={item.producto.denominacion}
+                description={
+                  <>
+                    Cantidad:
+                    <InputNumber
+                      min={1}
+                      value={item.cantidad}
+                      onChange={(value) =>
+                        cambiarCantidadProducto(item.id, value ?? 0)
+                      }
+                      disabled={pedidoRealizado} // Deshabilita el input si el pedido ha sido realizado
+                    />
+                    <br />
+                    Subtotal: {subtotal}
+                  </>
+                }
+              />
+              <p>Precio: {item.producto.precioVenta}</p>
+            </div>
             {!pedidoRealizado && (
-              <>
-                <Button type="primary" onClick={() => incrementar(item.id)}>
-                  Incrementar cantidad
-                </Button>
-                <Button type="primary" onClick={() => decrementar(item.id)}>
-                  Decrementar cantidad
-                </Button>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div style={{ display: "flex" }}>
+                  <Button
+                    type="primary"
+                    icon={<MinusOutlined />}
+                    onClick={() => decrementar(item.id)}
+                    style={{ marginRight: "5px" }}
+                  />
+
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => incrementar(item.id)}
+                  />
+                </div>
                 <Button
                   type="primary"
+                  icon={<DeleteOutlined />}
                   onClick={() => quitarDelCarrito(item.id)}
-                >
-                  Quitar del carrito
-                </Button>
-              </>
+                />
+              </div>
             )}
           </Card>
         );
       })}
-      <h2>Total: {total}</h2>
+      <h2 style={{ textAlign: "center" }}>Total: {total}</h2>
       {!pedidoRealizado && (
-        <>
-          <Button type="primary" onClick={limpiar}>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <Button
+            type="primary"
+            style={{ marginRight: "10px" }}
+            onClick={limpiar}
+          >
             Limpiar carrito
           </Button>
           <Button type="primary" onClick={handleEnviarPedido}>
             Realizar pedido
           </Button>
-        </>
+        </div>
       )}
       {preferenceId && <CheckoutMP preferenceId={preferenceId} />}
     </div>

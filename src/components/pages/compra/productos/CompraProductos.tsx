@@ -7,7 +7,7 @@ import { Producto } from "../../../../types/compras/interface";
 import { Card, Button } from "antd";
 import { useAppDispatch } from "../../../../redux/hooks";
 import { addToCarrito } from "../../../../redux/slice/Carrito.slice";
-const CompraProductos = () => {
+const CompraProductos = ({ pedidoRealizado }: { pedidoRealizado: boolean }) => {
   const dispatch = useAppDispatch();
   const { categoriaId } = useParams();
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -15,7 +15,7 @@ const CompraProductos = () => {
     null
   );
 
-  const [pedidoRealizado] = useState(false); // Nuevo estado
+  //const [pedidoRealizado] = useState(false); // Nuevo estado
 
   useEffect(() => {
     const fetchData = async () => {

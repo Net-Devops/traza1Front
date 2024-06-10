@@ -91,6 +91,16 @@ export const carritoSlice = createSlice({
         productoExistente.cantidad -= 1;
       }
     },
+    cambiarCantidad: (
+      state,
+      action: PayloadAction<{ id: number; cantidad: number }>
+    ) => {
+      const { id, cantidad } = action.payload;
+      const productoExistente = state.find((item) => item.id === id);
+      if (productoExistente) {
+        productoExistente.cantidad = cantidad;
+      }
+    },
     limpiarCarrito: () => {
       return initialState;
     },
@@ -103,4 +113,5 @@ export const {
   limpiarCarrito,
   decrementarCantidad,
   incrementarCantidad,
+  cambiarCantidad,
 } = carritoSlice.actions;
