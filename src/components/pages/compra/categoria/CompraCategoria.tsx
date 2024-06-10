@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from 'antd';
-import {
-  obtenerCategoriasPadre,
-  tieneSubCategorias,
-} from "../../../../service/Compra"; 
+import { Card } from "antd";
+import { obtenerCategoriasPadre } from "../../../../service/Compra";
 
 const CompraCategoria = () => {
   const navigate = useNavigate();
@@ -12,33 +9,32 @@ const CompraCategoria = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await obtenerCategoriasPadre(); 
+      const data = await obtenerCategoriasPadre();
       setCategorias(data);
     };
     fetchData();
   }, []);
 
   const handleCategoriaClick = async (id: number) => {
-    const tieneSubs = await tieneSubCategorias(id); 
-    if (tieneSubs) {
-     
-      navigate(`/compra/subcategorias/${id}`);
-    } else {
-      
-      navigate(`/compra/productos/${id}`);
-    }
+    navigate(`/compra/productos/${id}`);
   };
 
   return (
     <div>
       <h1>Elige una categoría</h1>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
         {categorias.map((categoria: { id: number; denominacion: string }) => (
           <Card
             key={categoria.id}
             onClick={() => handleCategoriaClick(categoria.id)}
             style={{ width: 300, height: 300 }}
-            cover={<img alt="example" src={`/src/util/${categoria.denominacion}.jpeg`} style={{ width: '100%', height: '200px', objectFit: 'cover' }}/>}
+            cover={
+              <img
+                alt="example"
+                src={`/src/util/${categoria.denominacion}.jpeg`}
+                style={{ width: "100%", height: "200px", objectFit: "cover" }}
+              />
+            }
           >
             <Card.Meta title={categoria.denominacion} />
           </Card>
@@ -46,5 +42,5 @@ const CompraCategoria = () => {
       </div>
     </div>
   );
-}
+};
 export default CompraCategoria;
