@@ -1,6 +1,6 @@
 // CarritoRedux.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Producto, PedidoDetalle } from "../../../entidades/compras/interface";
+import { Producto, PedidoDetalle } from "../../../types/compras/interface";
 
 interface CarritoState {
   items: PedidoDetalle[];
