@@ -95,9 +95,6 @@ export const carritoSlice = createSlice({
       return initialState;
     },
   },
-  // extraReducers: (builder) => {
-  //   builder.addCase(enviarPedido.fulfilled, (state, action) => {});
-  // },
 });
 
 export const {
