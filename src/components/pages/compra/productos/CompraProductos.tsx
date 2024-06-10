@@ -7,7 +7,7 @@ import { Producto } from "../../../../types/compras/interface";
 import { Card, Button } from "antd";
 import { useAppDispatch } from "../../../../redux/hooks";
 import { addToCarrito } from "../../../../redux/slice/Carrito.slice";
-const CompraProductos = ({ pedidoRealizado }: { pedidoRealizado: boolean }) => {
+const CompraProductos = () => {
   const dispatch = useAppDispatch();
   const { categoriaId } = useParams();
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -34,8 +34,6 @@ const CompraProductos = ({ pedidoRealizado }: { pedidoRealizado: boolean }) => {
   };
 
   const agregarAlCarrito = (producto: Producto) => {
-    if (pedidoRealizado) return;
-
     dispatch(addToCarrito({ id: producto.id, producto, cantidad: 1 }));
   };
 
