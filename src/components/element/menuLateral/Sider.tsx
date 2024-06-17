@@ -1,12 +1,20 @@
-import React from 'react';
-import { SettingOutlined, LogoutOutlined, BankOutlined, FileOutlined, HomeOutlined, DollarCircleOutlined, ShoppingCartOutlined } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import { Layout, Menu, theme } from 'antd';
-import { Dropdown, Button } from 'antd';
-import { UserOutlined, } from '@ant-design/icons';
+import React from "react";
+import {
+  SettingOutlined,
+  LogoutOutlined,
+  BankOutlined,
+  FileOutlined,
+  HomeOutlined,
+  DollarCircleOutlined,
+  ShoppingCartOutlined,
+} from "@ant-design/icons";
+import type { MenuProps } from "antd";
+import { Layout, Menu, theme } from "antd";
+import { Dropdown, Button } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import { MenuInfo } from 'rc-menu/lib/interface';
-import Rutas from '../../../routes/Routes';
+import { MenuInfo } from "rc-menu/lib/interface";
+import Rutas from "../../../routes/Routes";
 
 const { Header, Content, Sider } = Layout;
 
@@ -28,7 +36,7 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem('/', "HOME", "1", <HomeOutlined />),
+  getItem("/", "HOME", "1", <HomeOutlined />),
   getItem("/empresas", "EMPRESA", "2", <BankOutlined />),
   getItem("/productos", "PRODUCTOS", "sub1", <ShoppingCartOutlined />, [
     getItem("/productos", "LISTA DE PRODUCTOS", "3"),
@@ -41,6 +49,7 @@ const items: MenuItem[] = [
   ]),
 
   getItem("/insumos", "INSUMOS", "8", <FileOutlined />),
+  getItem("/compra/categorias", "COMPRA", "9", <ShoppingCartOutlined />),
 ];
 
 const App: React.FC = () => {
@@ -64,7 +73,14 @@ const App: React.FC = () => {
 
   return (
     <Layout>
-      <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: "50px" }}>
+      <Header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: "50px",
+        }}
+      >
         <div className="demo-logo" />
         <Dropdown overlay={menu}>
           <Button>
@@ -73,16 +89,25 @@ const App: React.FC = () => {
         </Dropdown>
       </Header>
       <Layout>
-        <Sider width={'15%'} style={{ background: colorBgContainer, height: '90vh', marginTop: '0.7%', }}>
+        <Sider
+          width={"15%"}
+          style={{
+            background: colorBgContainer,
+            height: "90vh",
+            marginTop: "0.7%",
+          }}
+        >
           <Menu
             mode="inline"
-            defaultSelectedKeys={['1']}
-            defaultOpenKeys={['sub1']}
-            style={{ height: '100%', borderRight: 0 }}
+            defaultSelectedKeys={["1"]}
+            defaultOpenKeys={["sub1"]}
+            style={{ height: "100%", borderRight: 0 }}
             items={items}
           />
         </Sider>
-        <Layout style={{ padding: '0 24px 24px', marginTop: '0.7%', height: '93vh' }}>
+        <Layout
+          style={{ padding: "0 24px 24px", marginTop: "0.7%", height: "93vh" }}
+        >
           <Content
             style={{
               padding: 24,
@@ -90,7 +115,7 @@ const App: React.FC = () => {
               minHeight: 280,
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
-              overflow: 'auto', // Add this line
+              overflow: "auto", // Add this line
             }}
           >
             <Rutas />
@@ -104,5 +129,5 @@ const App: React.FC = () => {
 export default App;
 
 function handleMenuClick(info: MenuInfo): void {
-  console.log('Menu item clicked:', info.key);
+  console.log("Menu item clicked:", info.key);
 }
