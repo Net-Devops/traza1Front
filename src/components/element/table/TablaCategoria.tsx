@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input, List, Switch, Modal, Drawer } from "antd";
+import { Button, Input, Modal, Tree, Switch } from "antd";
 import { EditOutlined, PlusOutlined } from "@ant-design/icons";
+
+const { TreeNode } = Tree;
 
 const CategoryInput = () => {
   const [categories, setCategories] = useState([]);
   const [editingCategory, setEditingCategory] = useState(null);
   const [editCategoryName, setEditCategoryName] = useState("");
-  const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [editingSubcategory, setEditingSubcategory] = useState(null);
   const [editSubcategoryName, setEditSubcategoryName] = useState("");
   const [updateKey, setUpdateKey] = useState(Date.now());
-  
+  const [addSubcategoryModalVisible, setAddSubcategoryModalVisible] =
+    useState(false);
+  const [denominacion, setDenominacion] = useState("");
+  const [selectedParentCategory, setSelectedParentCategory] = useState(null);
+
   useEffect(() => {
     fetchCategories();
   }, [updateKey]);
@@ -22,24 +27,7 @@ const CategoryInput = () => {
         "http://localhost:8080/api/categorias/traer-todo/"
       );
       const data = await response.json();
-      const sortedCategories = data
-        .map((category) => ({
-          ...category,
-          subCategoriaDtos: category.subCategoriaDtos
-            ? category.subCategoriaDtos.sort((a, b) =>
-                a.denominacion.localeCompare(b.denominacion)
-              )
-            : [],
-        }))
-        .sort((a, b) => a.denominacion.localeCompare(b.denominacion));
-      setCategories(sortedCategories);
-
-      if (selectedCategory) {
-        const updatedSelectedCategory = sortedCategories.find(
-          (cat) => cat.id === selectedCategory.id
-        );
-        setSelectedCategory(updatedSelectedCategory);
-      }
+      setCategories(data);
     } catch (error) {
       console.error("Error al obtener las categorías:", error);
     }
@@ -72,8 +60,6 @@ const CategoryInput = () => {
         url = `http://localhost:8080/api/categorias/${editingSubcategory.id}`;
         body = { denominacion: editSubcategoryName };
       }
-      
-      console.log('Saving:', url, body); // Logging the URL and body
 
       const response = await fetch(url, {
         method: "PUT",
@@ -100,26 +86,19 @@ const CategoryInput = () => {
     }
   };
 
-  const handleSwitchChange = async (checked, item, isSubcategory) => {
+  const handleSwitchChange = async (checked, item) => {
     try {
       let url, method;
       if (checked) {
-        url = isSubcategory
-          ? `http://localhost:8080/api/categorias/reactivate/${item.id}`
-          : `http://localhost:8080/api/categorias/reactivate/${item.id}`;
+        url = `http://localhost:8080/api/categorias/reactivate/${item.id}`;
         method = "POST";
       } else {
-        url = isSubcategory
-          ? `http://localhost:8080/api/categorias/${item.id}`
-          : `http://localhost:8080/api/categorias/${item.id}`;
+        url = `http://localhost:8080/api/categorias/${item.id}`;
         method = "DELETE";
       }
-      const response = await fetch(url, {
-        method: method,
-      });
+      const response = await fetch(url, { method });
       if (response.ok) {
         setUpdateKey(Date.now());
-        fetchCategories(); // Actualizar las categorías después de modificar
       } else {
         Modal.error({
           title: "Error al realizar la operación",
@@ -132,21 +111,24 @@ const CategoryInput = () => {
     }
   };
 
-  const handleAddSubcategory = async (categoryId) => {
+  const openAddSubcategoryModal = (category) => {
+    setSelectedParentCategory(category);
+    setAddSubcategoryModalVisible(true);
+  };
+
+  const handleAddSubcategory = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/categorias/agregar/subcategoria/${categoryId}`,
+        `http://localhost:8080/api/categorias/agregar/subcategoria/${selectedParentCategory.id}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ denominacion: "Nueva subcategoría" }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ denominacion: denominacion }),
         }
       );
       if (response.ok) {
         setUpdateKey(Date.now());
-        fetchCategories();
+        setAddSubcategoryModalVisible(false);
       } else {
         Modal.error({
           title: "Error al agregar subcategoría",
@@ -159,87 +141,48 @@ const CategoryInput = () => {
     }
   };
 
-  const showDrawer = (category) => {
-    setSelectedCategory(category);
-    setDrawerVisible(true);
+  const handleCancelAddSubcategory = () => {
+    setAddSubcategoryModalVisible(false);
+    setSelectedParentCategory(null);
   };
 
-  const onCloseDrawer = () => {
-    setDrawerVisible(false);
-  };
-
-  const handleSwitchChangeInDrawer = async (checked, subcategory) => {
-    try {
-      let url = `http://localhost:8080/api/categorias/${subcategory.id}`;
-      let method = "DELETE";
-
-      if (checked) {
-        url = `http://localhost:8080/api/categorias/reactivate/${subcategory.id}`;
-        method = "POST";
-      }
-
-      const response = await fetch(url, { method });
-
-      if (response.ok) {
-        setUpdateKey(Date.now());
-        fetchCategories(); // Actualizar las categorías después de modificar
-      } else {
-        Modal.error({
-          title: "Error al realizar la operación",
-          content:
-            "Hubo un problema al intentar realizar la operación. Por favor, inténtalo de nuevo más tarde.",
-        });
-      }
-    } catch (error) {
-      console.error("Error al realizar la operación:", error);
-    }
-  };
-
+  const renderTreeNodes = (data) =>
+    data.map((item) => (
+      <TreeNode
+        title={
+          <div>
+            <span>{item.denominacion}</span>
+            <Switch
+              checked={!item.eliminado}
+              onChange={(checked) => handleSwitchChange(checked, item)}
+              style={{ marginLeft: 10 }}
+            />
+            <Button
+              onClick={() => handleEditCategory(item)}
+              type="primary"
+              icon={<EditOutlined />}
+              disabled={item.eliminado}
+              style={{ marginLeft: 10 }}
+            />
+            <Button
+              onClick={() => openAddSubcategoryModal(item)}
+              type="primary"
+              icon={<PlusOutlined />}
+              disabled={item.eliminado}
+              style={{ marginLeft: 10 }}
+            />
+          </div>
+        }
+        key={item.id}
+      >
+        {item.subCategoriaDtos &&
+          item.subCategoriaDtos.length > 0 &&
+          renderTreeNodes(item.subCategoriaDtos)}
+      </TreeNode>
+    ));
   return (
     <div>
-      {categories.map((category) => (
-        <div key={category.id}>
-          <List
-            bordered
-            dataSource={[category]}
-            renderItem={(categoryItem) => (
-              <List.Item
-                key={categoryItem.id}
-                style={{
-                  padding: "3px",
-                  backgroundColor: categoryItem.eliminado
-                    ? "#FFB6C1"
-                    : "#D3D3D3",
-                }}
-                actions={[
-                  <Switch
-                    checked={!categoryItem.eliminado}
-                    onChange={(checked) =>
-                      handleSwitchChange(checked, categoryItem, false)
-                    }
-                  />,
-                  <Button
-                    onClick={() => handleEditCategory(categoryItem)}
-                    type="primary"
-                    disabled={categoryItem.eliminado===true}
-                  >
-                    <EditOutlined />
-                  </Button>,
-                  <Button
-                    onClick={() => showDrawer(categoryItem)}
-                    type="primary"
-                    disabled={categoryItem.eliminado===true}
-                  >
-                    SubCategorias
-                  </Button>,
-                ]}
-              >
-                <List.Item.Meta title={categoryItem.denominacion} />
-              </List.Item>
-            )}
-          />
-        </div>
-      ))}
+      <Tree>{renderTreeNodes(categories)}</Tree>
       {editingCategory && (
         <Modal
           title="Editar Categoría"
@@ -253,75 +196,21 @@ const CategoryInput = () => {
           />
         </Modal>
       )}
-      {editingSubcategory && (
-        <Modal
-          title="Editar Subcategoría"
-          visible={!!editingSubcategory}
-          onCancel={handleCancelEdit}
-          onOk={handleSaveEdit}
-        >
-          <Input
-            value={editSubcategoryName}
-            onChange={(e) => setEditSubcategoryName(e.target.value)}
-          />
-        </Modal>
-      )}
-      <Drawer
-        title="Categoria"
-        placement="right"
-        closable={false}
-        onClose={onCloseDrawer}
-        visible={drawerVisible}
+      <Modal
+        title="Agregar SubCategoría"
+        visible={addSubcategoryModalVisible}
+        onCancel={handleCancelAddSubcategory}
+        onOk={handleAddSubcategory}
       >
-        {selectedCategory && (
-          <div>
-            <h1>{selectedCategory.denominacion}</h1>
-            <p>
-              <h2>SubCategorias:</h2>
-            </p>
-            <List
-              style={{ padding: "3px" }}
-              bordered
-              dataSource={selectedCategory.subCategoriaDtos}
-              renderItem={(subcategory) => (
-                <List.Item
-                  key={subcategory.id}
-                  style={{
-                    backgroundColor: subcategory.eliminado
-                      ? "#FFB6C1"
-                      : "#98FB98",
-                  }}
-                  actions={[
-                    <Switch
-                      checked={!subcategory.eliminado}
-                      onChange={(checked) =>
-                        handleSwitchChangeInDrawer(checked, subcategory)
-                      }
-                    />,
-                    <Button
-                      onClick={() => handleEditSubcategory(subcategory)}
-                      type="primary"
-                      disabled={subcategory.eliminado===true  }
-                    >
-                      <EditOutlined />
-                    </Button>,
-                  ]}
-                >
-                  {subcategory.denominacion as string}
-                </List.Item>
-              )}
-            />
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => handleAddSubcategory(selectedCategory.id)}
-              
-            >
-              Agregar SubCategoria
-            </Button>
-          </div>
-        )}
-      </Drawer>
+        <p>
+          ¿Desea agregar una nueva subcategoría a{" "}
+          {selectedParentCategory?.denominacion}?
+        </p>
+        <Input
+          placeholder="Ingrese la denominación de la subcategoría"
+          onChange={(e) => setDenominacion(e.target.value)}
+        />
+      </Modal>
     </div>
   );
 };
