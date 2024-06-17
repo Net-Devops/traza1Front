@@ -7,15 +7,14 @@ export interface Sucursal {
     calle: string;
     cp: string;
     numero: string;
-    piso: string;
-    nroDepto: string;
     localidad: string;
     provincia: string;
     pais: string;
     imagen?: string; // Añadido opcional
     idEmpresa: string;
     empresa?: Empresa;
-    file?: File; // Añadido para manejar el archivo
+    file?: File;
+    domicilio?: Domicilio // Añadido para manejar el archivo
 }
 
 export interface Empresa {
@@ -25,7 +24,13 @@ export interface Empresa {
     razonSocial?: string;
     cuil?: number;
 }
-
+export interface Domicilio {
+    id?: number;
+    eliminado?: boolean;
+    calle?: string;
+    numero?: string;
+    cp?: number;
+}
 export const getSucursalId = async (id: number): Promise<Sucursal[]> => {
     console.log("----->" + id);
 
@@ -69,8 +74,6 @@ export async function crearSucursal(formData: Sucursal) {
                 calle: formData.calle,
                 cp: formData.cp,
                 numero: formData.numero,
-                piso: formData.piso,
-                nroDepto: formData.nroDepto,
                 localidad: formData.localidad,
                 provincia: formData.provincia,
                 pais: formData.pais,
@@ -109,4 +112,60 @@ export async function activarSucursal(id: string) {
         },
         mode: "cors",
     });
+}
+export async function getSucursalXId(id: string) {
+    const urlServer = "http://localhost:8080/api/sucursal/" + id;
+    console.log(urlServer);
+    const response = await fetch(urlServer, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      mode: "cors",
+    });
+  
+    return await response.json();
+  }
+export async function actualizarSucursal(id: number,formData: Sucursal) {
+    console.log("estoy en el actualizarSucursal");
+
+    try {
+        console.log("estoy en el fetch");
+
+        console.log(formData);
+
+        const urlServer = "http://localhost:8080/api/sucursal/" + id;
+
+        
+        const response = await fetch(urlServer, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+            mode: "cors",
+            body: JSON.stringify({
+                id: id,
+                nombre: formData.nombre,
+                horaApertura: formData.horaApertura,
+                horaCierre: formData.horaCierre,
+                calle: formData.calle,
+                cp: formData.cp,
+                numero: formData.numero,
+                                localidad: formData.localidad,
+                provincia: formData.provincia,
+                pais: formData.pais,
+                idEmpresa: formData.idEmpresa
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.log("Error: ", error);
+        throw error; // Asegurarse de propagar el error para que el componente pueda manejarlo
+    }
 }
