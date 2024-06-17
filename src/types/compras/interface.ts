@@ -18,17 +18,17 @@ export interface PedidoDetalle {
 
 export interface Pedido {
   id?: number;
-  hora: string;
-  total: number;
-  TotalCostoProduccion: number;
+  hora?: string;
+  total?: number;
+  TotalCostoProduccion?: number;
   //estado: string;
   //formaPago: string;
   //TipoEnvio: string;
-  fechaPedido: string;
-  preferenceMPId: string;
-  sucursal: any;
-  domicilio: any;
-  cliente: any;
-  pedidoDetalle: PedidoDetalle[];
-  factura: any;
+  fechaPedido?: string;
+  preferenceMPId?: string;
+  sucursal?: any;
+  domicilio?: any;
+  cliente?: any;
+  pedidoDetalle?: PedidoDetalle[];
+  factura?: any;
 }
