@@ -3,10 +3,13 @@ import { Button, Input, Modal, Tree, Switch } from "antd";
 import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 
 const { TreeNode } = Tree;
-
+type Category = {
+  id: number;
+  denominacion: string;
+};
 const CategoryInput = () => {
   const [categories, setCategories] = useState([]);
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [editingSubcategory, setEditingSubcategory] = useState(null);
@@ -38,11 +41,6 @@ const CategoryInput = () => {
     setEditCategoryName(category.denominacion);
   };
 
-  const handleEditSubcategory = (subcategory) => {
-    setEditingSubcategory(subcategory);
-    setEditSubcategoryName(subcategory.denominacion);
-  };
-
   const handleCancelEdit = () => {
     setEditingCategory(null);
     setEditCategoryName("");
@@ -53,13 +51,11 @@ const CategoryInput = () => {
   const handleSaveEdit = async () => {
     try {
       let url, body;
-      if (editingCategory) {
-        url = `http://localhost:8080/api/categorias/${editingCategory.id}`;
-        body = { denominacion: editCategoryName };
-      } else if (editingSubcategory) {
-        url = `http://localhost:8080/api/categorias/${editingSubcategory.id}`;
-        body = { denominacion: editSubcategoryName };
+      if (editingCategory === null) {
+        throw new Error("No se puede editar la categoría seleccionada");
       }
+      url = `http://localhost:8080/api/categorias/${editingCategory.id}`;
+      body = { denominacion: editCategoryName };
 
       const response = await fetch(url, {
         method: "PUT",
@@ -81,7 +77,7 @@ const CategoryInput = () => {
       console.error("Error al editar:", error);
       Modal.error({
         title: "Error al editar",
-        content: `Hubo un problema al intentar editar. Error: ${error.message}`,
+        content: `Hubo un problema al intentar editar. Error: ${error}`,
       });
     }
   };
@@ -175,8 +171,12 @@ const CategoryInput = () => {
         }
         key={item.id}
       >
-        {item.subCategoriaDtos && item.subCategoriaDtos.length > 0 && renderTreeNodes(item.subCategoriaDtos)}
-        {item.subSubCategoriaDtos && item.subSubCategoriaDtos.length > 0 && renderTreeNodes(item.subSubCategoriaDtos)}
+        {item.subCategoriaDtos &&
+          item.subCategoriaDtos.length > 0 &&
+          renderTreeNodes(item.subCategoriaDtos)}
+        {item.subSubCategoriaDtos &&
+          item.subSubCategoriaDtos.length > 0 &&
+          renderTreeNodes(item.subSubCategoriaDtos)}
       </TreeNode>
     ));
   return (
