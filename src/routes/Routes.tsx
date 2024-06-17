@@ -7,7 +7,7 @@ import Productos from "../components/pages/productos/Productos";
 import CompraCategoria from "../components/pages/compra/categoria/CompraCategoria";
 import CompraSubCategoria from "../components/pages/compra/categoria/CompraSubCategoria"; // Importa CompraSubCategoria
 import CompraProductos from "../components/pages/compra/productos/CompraProductos";
-
+import Insumo from "../components/pages/insumos/Insumos";
 const Rutas: React.FC = () => {
   return (
     <Routes>
@@ -15,6 +15,7 @@ const Rutas: React.FC = () => {
       <Route path="/empresas" element={<Empresa />} />
       <Route path="/sucursal/:id" element={<Sucursal />} />
       <Route path="/productos" element={<Productos />} />
+      <Route path='/insumos' element={<Insumo/>}/>
       <Route path="/compra/categorias" element={<CompraCategoria />} />
       <Route
         path="/compra/subcategorias/:id"
