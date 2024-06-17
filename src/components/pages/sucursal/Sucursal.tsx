@@ -10,7 +10,7 @@ import {
 } from "../../../service/ServiceSucursal";
 import imagenSucursal from "../../../util/empresa.jpeg";
 import { useSelector, useDispatch } from "react-redux";
-import { EmpresaSlice } from "../../../redux/slice/empresa/EmpresaRedux";
+import { EmpresaSlice } from "../../../redux/slice/EmpresaRedux";
 import FormularioEditarSucursal from '../../element/formularios/FormularioEditarSucursal'; // Import your modal component
 
 const { Meta } = Card;
@@ -25,11 +25,16 @@ const Sucursal = () => {
   const [sucursales, setSucursales] = useState<sucursalInterface[]>([]);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentSucursal, setCurrentSucursal] = useState<sucursalInterface | null>(null);
 
-  const handleSwitchChange = async (checked: boolean, sucursalId: string | number | undefined) => {
+  const handleSwitchChange = async (
+    checked: boolean,
+    sucursalId: string | number | undefined
+  ) => {
+
+ 
+
     if (checked) {
       await eliminarSucursal(sucursalId as string);
       info({
@@ -49,7 +54,9 @@ const Sucursal = () => {
     }
     setSucursales((prevSucursales) =>
       prevSucursales.map((sucursal) =>
-        sucursal.id === sucursalId ? { ...sucursal, eliminado: !checked } : sucursal
+        sucursal.id === sucursalId
+          ? { ...sucursal, eliminado: !checked }
+          : sucursal
       )
     );
   };
@@ -69,10 +76,10 @@ const Sucursal = () => {
 
   const showInfo = () => {
     info({
-      title: 'Sucursal deshabilitada',
-      content: 'Para ingresar a la sucursal, primero debes habilitarla.',
-      okText: 'Aceptar',
-      onOk() { },
+      title: "Sucursal deshabilitada",
+      content: "Para ingresar a la sucursal, primero debes habilitarla.",
+      okText: "Aceptar",
+      onOk() {},
     });
   };
 
@@ -107,7 +114,10 @@ const Sucursal = () => {
             
             <Col key={sucursal.id} span={5}>
               <Card
-                style={{ marginBottom: 10, backgroundColor: sucursal.eliminado ? '#ff3d3d' : 'white' }}
+                style={{
+                  marginBottom: 10,
+                  backgroundColor: sucursal.eliminado ? "#ff3d3d" : "white",
+                }}
                 cover={
                   <img
                     alt={sucursal.nombre}
@@ -118,7 +128,9 @@ const Sucursal = () => {
                 actions={[
                   <Switch
                     checked={!sucursal.eliminado}
-                    onChange={(checked) => handleSwitchChange(checked, sucursal.id)}
+                    onChange={(checked) =>
+                      handleSwitchChange(checked, sucursal.id)
+                    }
                   />,
                   <EditOutlined
                     key="edit"

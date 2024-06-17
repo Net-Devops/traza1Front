@@ -1,37 +1,5 @@
-import PreferenceMP from "../entidades/mercadoPago/PreferenceMp";
-
-export interface Pedido {
-  id?: number;
-  hora: string;
-  total: number;
-  TotalCostoProduccion: number;
-  //estado: string;
-  //formaPago: string;
-  //TipoEnvio: string;
-  fechaPedido: string;
-  preferenceMPId: string;
-  sucursal: any;
-  domicilio: any;
-  cliente: any;
-  pedidoDetalle: PedidoDetalle[];
-  factura: any;
-}
-interface PedidoDetalle {
-  id?: number;
-  producto: Producto;
-  cantidad: number;
-}
-interface Producto {
-  id: number;
-  denominacion: string;
-  descripcion: string;
-  codigo: string;
-  precioVenta: number;
-  categoria: any;
-  sucursal: any;
-  imagenes: [];
-  // Agrega aquí las demás propiedades de un producto
-}
+import PreferenceMP from "../types/mercadoPago/PreferenceMp";
+import { Pedido } from "../types/compras/interface";
 
 export const getCategorias = async () => {
   try {
