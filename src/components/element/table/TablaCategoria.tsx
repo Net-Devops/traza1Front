@@ -6,6 +6,7 @@ const { TreeNode } = Tree;
 type Category = {
   id: number;
   denominacion: string;
+
 };
 const CategoryInput = () => {
   const [categories, setCategories] = useState([]);
@@ -18,7 +19,10 @@ const CategoryInput = () => {
   const [addSubcategoryModalVisible, setAddSubcategoryModalVisible] =
     useState(false);
   const [denominacion, setDenominacion] = useState("");
-  const [selectedParentCategory, setSelectedParentCategory] = useState(null);
+
+
+  const [selectedParentCategory, setSelectedParentCategory] =
+    useState<Category | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -36,7 +40,7 @@ const CategoryInput = () => {
     }
   };
 
-  const handleEditCategory = (category) => {
+  const handleEditCategory = (category: any) => {
     setEditingCategory(category);
     setEditCategoryName(category.denominacion);
   };
@@ -82,7 +86,7 @@ const CategoryInput = () => {
     }
   };
 
-  const handleSwitchChange = async (checked, item) => {
+  const handleSwitchChange = async (checked: any, item: any) => {
     try {
       let url, method;
       if (checked) {
@@ -107,13 +111,16 @@ const CategoryInput = () => {
     }
   };
 
-  const openAddSubcategoryModal = (category) => {
+  const openAddSubcategoryModal = (category: any) => {
     setSelectedParentCategory(category);
     setAddSubcategoryModalVisible(true);
   };
 
   const handleAddSubcategory = async () => {
     try {
+      if (selectedParentCategory === null)
+        throw new Error("No se ha seleccionado una categoría padre");
+      
       const response = await fetch(
         `http://localhost:8080/api/categorias/agregar/subcategoria/${selectedParentCategory.id}`,
         {
@@ -142,8 +149,8 @@ const CategoryInput = () => {
     setSelectedParentCategory(null);
   };
 
-  const renderTreeNodes = (data) =>
-    data.map((item) => (
+  const renderTreeNodes = (data: any) =>
+    data.map((item: any) => (
       <TreeNode
         title={
           <div>
