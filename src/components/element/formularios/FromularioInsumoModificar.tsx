@@ -39,6 +39,7 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
   id,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formData, setFormData] = useState<any>(null);
   const [form] = Form.useForm();
   const [images, setImages] = useState<ImageData[]>([]);
@@ -80,12 +81,14 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
 
     fetchUnidadesMedida();
   }, []);
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const onFinish = async (values: any) => {
   try {
     let uploadedImages = [];
     // Si se han subido nuevas imágenes, procesarlas
     if (values.uploadImagenes) {
       uploadedImages = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         values.uploadImagenes.map(async (file: any) => {
           return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -136,6 +139,7 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
   window.location.reload();
 
 };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const normFile = (e: any) => {
     if (Array.isArray(e)) {
       return e;

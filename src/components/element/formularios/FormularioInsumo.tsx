@@ -19,6 +19,7 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
         setIsSwitchOn(checked);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onFinish = async (values: any) => {
         console.log('Received values of form: ', values);
 
@@ -35,6 +36,7 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
             const files = values.imagenes; // Lista de archivos
 
             // Convertir cada archivo a base64
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             promises = files.map((file: any) => {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -47,7 +49,7 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
                     reader.readAsDataURL(file.originFileObj);
                 });
             });
-        };
+        }
 
         Promise.all(promises)
             .then(async (imagenes) => {
@@ -77,21 +79,25 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
 
     const isModalVisible: boolean = true;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function handleOk(_e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
         console.log('OK clicked');
         onClose();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function handleCancel(_e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
         console.log('Cancel clicked');
         onClose();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const normFile = (e: any) => {
         if (Array.isArray(e)) {
             return e;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return e && e.fileList.map((file: any) => {
             if (file.originFileObj) {
                 const reader = new FileReader();
