@@ -175,9 +175,8 @@ const CategoryInput = () => {
         }
         key={item.id}
       >
-        {item.subCategoriaDtos &&
-          item.subCategoriaDtos.length > 0 &&
-          renderTreeNodes(item.subCategoriaDtos)}
+        {item.subCategoriaDtos && item.subCategoriaDtos.length > 0 && renderTreeNodes(item.subCategoriaDtos)}
+        {item.subSubCategoriaDtos && item.subSubCategoriaDtos.length > 0 && renderTreeNodes(item.subSubCategoriaDtos)}
       </TreeNode>
     ));
   return (

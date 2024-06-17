@@ -25,14 +25,15 @@ const Sucursal = () => {
   const [sucursales, setSucursales] = useState<sucursalInterface[]>([]);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentSucursal, setCurrentSucursal] = useState<sucursalInterface | null>(null);
 
   const handleSwitchChange = async (
     checked: boolean,
     sucursalId: string | number | undefined
   ) => {
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentSucursal, setCurrentSucursal] = useState<sucursalInterface | null>(null);
+ 
 
     if (checked) {
       await eliminarSucursal(sucursalId as string);
