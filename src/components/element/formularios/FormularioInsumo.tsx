@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, Modal, Row, Select, Switch, Upload, notification } from 'antd';
 import { CheckCircleOutlined } from '@ant-design/icons';
@@ -11,7 +11,7 @@ interface FormularioInsumoProps {
 
 const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
     const [form] = Form.useForm();
-  
+
     const [, setIsSwitchOn] = useState(false);
     const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
 
@@ -19,7 +19,7 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
         setIsSwitchOn(checked);
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const onFinish = async (values: any) => {
         console.log('Received values of form: ', values);
 
@@ -36,7 +36,7 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
             const files = values.imagenes; // Lista de archivos
 
             // Convertir cada archivo a base64
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             promises = files.map((file: any) => {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -79,25 +79,24 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
 
     const isModalVisible: boolean = true;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     function handleOk(_e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
         console.log('OK clicked');
         onClose();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     function handleCancel(_e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
         console.log('Cancel clicked');
         onClose();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const normFile = (e: any) => {
         if (Array.isArray(e)) {
             return e;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         return e && e.fileList.map((file: any) => {
             if (file.originFileObj) {
                 const reader = new FileReader();
@@ -168,7 +167,15 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
                         <Form.Item label="Precio de compra" name="precioCompra" initialValue={0}>
                             <Input type="number" />
                         </Form.Item>
-
+                        <Form.Item label="Sucursal" name="sucursal" initialValue="">
+                            <Select>
+                                {unidadesMedida.map((unidad) => (
+                                    <Select.Option key={unidad.id} value={unidad.id}>
+                                        {unidad.denominacion}
+                                    </Select.Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
                         <Form.Item label="Es para elaborar" name="esParaElaborar" valuePropName="checked" initialValue={false}>
                             <Switch onChange={handleSwitchChange} />
                         </Form.Item>

@@ -88,7 +88,7 @@ export async function crearInsumo(formData: ArticuloInsumo) {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export async function modificarInsumoId(formData: any, id: number) {
     try {
         console.log("estoy en el fetc");
