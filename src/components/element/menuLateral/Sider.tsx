@@ -7,6 +7,7 @@ import {
   HomeOutlined,
   DollarCircleOutlined,
   ShoppingCartOutlined,
+  FundProjectionScreenOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Layout, Menu, theme } from "antd";
@@ -50,6 +51,7 @@ const items: MenuItem[] = [
 
   getItem("/insumos", "INSUMOS", "8", <FileOutlined />),
   getItem("/compra/categorias", "COMPRA", "9", <ShoppingCartOutlined />),
+  getItem("/unidadMedida", "Unidad de Medida", "10", <FundProjectionScreenOutlined />),
 ];
 
 const App: React.FC = () => {
