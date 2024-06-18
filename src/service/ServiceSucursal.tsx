@@ -169,3 +169,18 @@ export async function actualizarSucursal(id: number,formData: Sucursal) {
         throw error; // Asegurarse de propagar el error para que el componente pueda manejarlo
     }
 }
+
+
+export const getSucursal = async (id: string): Promise<Sucursal[]> => {
+    const endpoint = `http://localhost:8080/api/sucursal/lista-sucursal/${id}`;
+    const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+        },
+        mode: "cors",
+    });
+    console.log(response);
+    return await response.json();
+};
