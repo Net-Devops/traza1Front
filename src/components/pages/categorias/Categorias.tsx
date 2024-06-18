@@ -8,8 +8,8 @@ import NuevaCategoria from '../../element/botones/BotonAgregarCategoria';
 const { Option } = Select;
 
 export default function Categorias() {
-  const [selectedSucursal, setSelectedSucursal] = useState(null);
-  const [sucursales, setSucursales] = useState([]);
+  const [selectedSucursal, setSelectedSucursal] = useState<string | null>(null);
+  const [sucursales, setSucursales] = useState<any[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const { empresa } = useSelector((state: any) => state);

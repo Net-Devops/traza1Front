@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Button, Modal, Form, Input } from 'antd';
-import TransferSucursales from '../transfer/TransferCategoria'; // Suponiendo que TransferSucursales es el componente para seleccionar sucursales
+import AgregarSucursalACatgoria from '../transfer/TransferCategoria'; // Suponiendo que TransferSucursales es el componente para seleccionar sucursales
+
 
 export default function BotonAgregarCategoria() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const [selectedSucursales, setSelectedSucursales] = useState([]);
+  const [selectedSucursales, setSelectedSucursales] = useState<string[]>([]);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -14,8 +15,7 @@ export default function BotonAgregarCategoria() {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      form.resetFields();
-      // Agregar las sucursales seleccionadas a los valores del formulario
+      console.log('Success:', selectedSucursales);
       values.sucursales = selectedSucursales;
       await createCategory(values);
     } catch (error) {
@@ -26,14 +26,16 @@ export default function BotonAgregarCategoria() {
 
   const handleCancel = () => {
     setIsModalVisible(false);
-    // Limpiar las sucursales seleccionadas cuando se cancela el modal
     setSelectedSucursales([]);
   };
 
   const createCategory = async (values) => {
     try {
-      // Agregar las sucursales seleccionadas al objeto de valores
-      values.sucursales = selectedSucursales;
+      // Convertir los IDs de sucursales en objetos con un campo "id"
+      const sucursalesObj = values.sucursales.map(id => ({ id }));
+  
+      // Asignar la lista de objetos de sucursales al valor "sucursales"
+      values.sucursales = sucursalesObj;
   
       const response = await fetch('http://localhost:8080/api/categorias/', {
         method: 'POST',
@@ -51,7 +53,6 @@ export default function BotonAgregarCategoria() {
       console.error(error);
     }
   };
-  
 
   return (
     <>
@@ -71,7 +72,7 @@ export default function BotonAgregarCategoria() {
           >
             <Input placeholder="Nombre de la categoría" />
           </Form.Item>
-          <TransferSucursales setSelectedSucursales={setSelectedSucursales} />
+          <AgregarSucursalACatgoria setSelectedSucursales={setSelectedSucursales} />
         </Form>
       </Modal>
     </>
