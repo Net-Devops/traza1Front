@@ -7,9 +7,12 @@ interface Sucursal {
   nombre: string;
 }
 
-const AgregarSucursalACatgoria: React.FC = () => {
+interface Props {
+  setSelectedSucursales: (selectedSucs: string[]) => void;
+}
+
+const AgregarSucursalACatgoria: React.FC<Props> = ({ setSelectedSucursales }) => {
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
-  const [selectedSucursales, setSelectedSucursales] = useState<string[]>([]);
   const { empresa } = useSelector((state: any) => state);
 
   useEffect(() => {
@@ -29,11 +32,12 @@ const AgregarSucursalACatgoria: React.FC = () => {
   }, [empresa]);
 
   const handleChange = (selectedSucs: string[]) => {
-    setSelectedSucursales(selectedSucs);
+    console.log('Selected:', selectedSucs);
+    setSelectedSucursales(selectedSucs); // Establece directamente los IDs seleccionados
   };
 
   return (
-    <Checkbox.Group onChange={handleChange} value={selectedSucursales}>
+    <Checkbox.Group onChange={handleChange}>
       {sucursales.map(sucursal => (
         <Checkbox key={sucursal.id} value={sucursal.id}>
           {sucursal.nombre}
