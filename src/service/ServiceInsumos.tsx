@@ -72,7 +72,7 @@ export async function crearInsumo(formData: ArticuloInsumo) {
             },
             mode: "cors",
             body: JSON.stringify({
-                codigo: formData.codigo,
+                codigo: 'I-'+formData.codigo,
                 denominacion: formData.denominacion,
                 precioCompra: formData.precioCompra,
                 precioVenta: formData.precioVenta,
