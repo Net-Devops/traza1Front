@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Select } from "antd";
+import { Select, Card } from "antd";
 
 import { getSucursal } from "../../../service/ServiceSucursal";
 import { getEmpresas } from "../../../service/ServiceEmpresa";
 import { Sucursal } from "../../../service/ServiceSucursal";
 import { Empresas } from "../../../service/ServiceEmpresa";
+import {
+  promocionesPorSucursal,
+  Promocion,
+} from "../../../service/PromocionService";
 
 const { Option } = Select;
 
@@ -12,6 +16,7 @@ const Promociones = () => {
   const [empresas, setEmpresas] = useState<Empresas[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
+  const [promociones, setPromociones] = useState([]);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -32,6 +37,11 @@ const Promociones = () => {
 
     fetchSucursales();
   }, [selectedEmpresa]);
+
+  const handleSucursalChange = async (value: string) => {
+    const promocionesData = await promocionesPorSucursal(Number(value));
+    setPromociones(promocionesData);
+  };
 
   return (
     <div>
@@ -68,7 +78,7 @@ const Promociones = () => {
             placeholder="Seleccione una sucursal"
             style={{ width: 200 }}
             disabled={!selectedEmpresa}
-            onChange={(value) => console.log("Sucursal seleccionada:", value)}
+            onChange={handleSucursalChange}
           >
             {sucursales.map((sucursal) => (
               <Option key={sucursal.id} value={sucursal.id}>
@@ -76,10 +86,16 @@ const Promociones = () => {
               </Option>
             ))}
           </Select>
+          <div>
+            {promociones.map((promocion: Promocion) => (
+              <Card title={promocion.nombre} style={{ width: 300 }}>
+                <p>{promocion.descripcion}</p>
+                {/* Añade más detalles de la promoción aquí */}
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
-
-      <div></div>
     </div>
   );
 };
