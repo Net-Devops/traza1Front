@@ -4,27 +4,35 @@ import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
 import { Button, Input, Space, Table } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
-import { getArticulosInsumos, ArticuloInsumo, deleteInsumoXId } from '../../../service/ServiceInsumos'; // Asegúrate de que la ruta sea correcta
-// import FormularioInsumo from '../formularios/FormularioInsumo'; // Asegúrate de importar el componente FormularioInsumo desde la ruta correcta
+import { getInsumoXSucursal, ArticuloInsumo, deleteInsumoXId } from '../../../service/ServiceInsumos';
 import FormularioInsumoModificar from '../formularios/FromularioInsumoModificar';
+
 type DataIndex = keyof ArticuloInsumo;
+type TablaInsumoProps = {
+  empresaId: string;
+  sucursalId: string;
+};
 
-
-const TablaInsumo: React.FC = () => {
-
-
-
+const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef<InputRef>(null);
-  const [data, setData] = useState<ArticuloInsumo[]>([]); // Estado para almacenar los datos
-  const [, setModalVisible] = useState(false); // Estado para controlar la visibilidad del modal
+  const [data, setData] = useState<ArticuloInsumo[]>([]);
+  const [, setModalVisible] = useState(false);
   const [selectedInsumo, setSelectedInsumo] = useState<ArticuloInsumo | null>(null); // Estado para almacenar los datos del insumo seleccionado
 
   useEffect(() => {
-    // Llamar a getArticulosInsumos cuando el componente se monta
-    getArticulosInsumos().then(setData);
-  }, []);
+    console.log('Obteniendo insumos de la sucursal:', sucursalId);
+    
+    getInsumoXSucursal(sucursalId)
+      .then(data => {
+        console.log('Datos recibidos:', data);
+        setData(data);
+      })
+      .catch(error => {
+        console.error('Error al obtener los insumos:', error);
+      });
+  }, [sucursalId]); // Eliminamos selectedInsumo de las dependencias
 
   const handleSearch = (
     selectedKeys: string[],
@@ -115,8 +123,16 @@ const TablaInsumo: React.FC = () => {
     
     // If the user confirms, delete the insumo
     await deleteInsumoXId(id);
-    window.location.reload();
-};
+    // En lugar de recargar la página, recargamos los datos de la tabla
+    getInsumoXSucursal(sucursalId)
+      .then(data => {
+        console.log('Datos actualizados:', data);
+        setData(data);
+      })
+      .catch(error => {
+        console.error('Error al actualizar los insumos:', error);
+      });
+  };
   const handleEdit = (record: ArticuloInsumo) => {
     if (record.id) {
       setSelectedInsumo(record);
