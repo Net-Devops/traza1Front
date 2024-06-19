@@ -156,3 +156,18 @@ export async function getInsumoXId(id: string) {
       mode: "cors",
     });
   }
+
+  export async function getInsumoXSucursal(id: string) {
+    const urlServer = "http://localhost:8080/api/local/articulo/insumo/sucursal/"+id;
+    console.log(urlServer);
+    const response = await fetch(urlServer, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      mode: "cors",
+    });
+  
+    return await response.json();
+  }
