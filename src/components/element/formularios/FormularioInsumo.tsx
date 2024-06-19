@@ -3,8 +3,9 @@ import { PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, Modal, Row, Select, Switch, Upload, notification } from 'antd';
 import { FormInstance } from 'antd/es/form';
 import { UploadFile } from 'antd/es/upload/interface';
-import { crearInsumo, getUnidadMedida,unidadMedida } from '../../../service/ServiceInsumos';
-import { getSucursal,  Sucursal} from '../../../service/ServiceSucursal';
+import { crearInsumo, getUnidadMedida, unidadMedida } from '../../../service/ServiceInsumos';
+import { getSucursal, Sucursal } from '../../../service/ServiceSucursal';
+import { crearManufacturado } from '../../../service/ServiceProducto';
 interface FormularioInsumoProps {
     onClose: () => void;
     empresaId: string;
@@ -17,15 +18,6 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose, empresaId,
     const [, setIsSwitchOn] = useState(false);
     const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
     const [sucursales, setSucursales] = useState<Sucursal[]>([]);
-
-    const handleSwitchChange = (checked: boolean) => {
-        setIsSwitchOn(checked);
-    };
-console.log("estoy en el formulario insumo");
-console.log(empresaId);
-console.log(sucursalId);
-
-
 
     useEffect(() => {
         const fetchSucursales = async () => {
@@ -85,11 +77,23 @@ console.log(sucursalId);
         try {
             const imagenes = await Promise.all(promises);
             formattedValues.imagenes = imagenes;
-            const response = await crearInsumo(formattedValues);
+            let response; // Declaración de la variable fuera del bloque condicional
+            if (values.esParaElaborar) {
+                response = await crearInsumo(formattedValues);
+            } else {
+                response = await crearInsumo(formattedValues);
+                formattedValues.articuloManufacturadoDetalles = {
+                    cantidad: 1,
+                    articuloInsumo: {
+                        id: response.id
+                    }
+                };
+                response = await crearManufacturado(formattedValues);
+            }
             console.log('Response: ', response);
             form.resetFields();
             onClose();
-            // window.location.reload();
+            // window.location.reload(); // Considera recargar los datos de manera más eficiente si es necesario
             notification.open({
                 message: (
                     <span>
@@ -100,6 +104,9 @@ console.log(sucursalId);
         } catch (error) {
             console.error('Error: ', error);
         }
+    };
+    const handleSwitchChange = (checked: boolean) => {
+        setIsSwitchOn(checked);
     };
 
     const normFile = (e: any) => {

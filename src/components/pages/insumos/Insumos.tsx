@@ -35,7 +35,7 @@ const Insumos = () => {
 
     fetchSucursales();
   }, [selectedEmpresa]);
-  
+
   const handleOpenFormularioInsumo = () => {
     setShowFormularioInsumo(true);
     // Aquí asumimos que tienes una forma de pasar estos IDs al componente FormularioInsumo
@@ -73,13 +73,17 @@ const Insumos = () => {
         {/* Button is now only shown when both empresa and sucursal are selected */}
         {selectedEmpresa && selectedSucursal && (
           <Button type="primary" onClick={handleOpenFormularioInsumo} id={`empresa-${selectedEmpresa}-sucursal-${selectedSucursal}`}>
-          Agregar Insumo
-        </Button>
+            Agregar Insumo
+          </Button>
         )}
       </div>
       {showFormularioInsumo && <FormularioInsumo onClose={closeFormularioInsumo} empresaId={selectedEmpresa} sucursalId={selectedSucursal} />}
       <div>
-        {selectedSucursal && <TablaInsumo empresaId={selectedEmpresa} sucursalId={selectedSucursal} />}
+        {selectedSucursal ? (
+          <TablaInsumo empresaId={selectedEmpresa} sucursalId={selectedSucursal} />
+        ) : (
+          <p>Por favor, seleccione la sucursal para ver los insumos.</p>
+        )}
       </div>
     </div>
   );
