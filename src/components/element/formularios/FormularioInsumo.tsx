@@ -1,131 +1,126 @@
-import { useState, useEffect } from 'react';
-import { PlusOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, Modal, Row, Select, Switch, Upload, notification } from 'antd';
-import { CheckCircleOutlined } from '@ant-design/icons';
-import { crearInsumo } from '../../../service/ServiceInsumos';
-import { getUnidadMedida, unidadMedida } from '../../../service/ServiceInsumos';
+import { FormInstance } from 'antd/es/form';
+import { UploadFile } from 'antd/es/upload/interface';
+import { crearInsumo, getUnidadMedida,unidadMedida } from '../../../service/ServiceInsumos';
+import { getSucursal,  Sucursal} from '../../../service/ServiceSucursal';
 interface FormularioInsumoProps {
     onClose: () => void;
+    empresaId: string;
+    sucursalId: string;
 }
 
-
-const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
+const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose, empresaId, sucursalId }) => {
     const [form] = Form.useForm();
-
+    const [isModalVisible, setIsModalVisible] = useState(true);
     const [, setIsSwitchOn] = useState(false);
     const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
+    const [sucursales, setSucursales] = useState<Sucursal[]>([]);
 
     const handleSwitchChange = (checked: boolean) => {
         setIsSwitchOn(checked);
     };
+console.log("estoy en el formulario insumo");
+console.log(empresaId);
+console.log(sucursalId);
 
+
+
+    useEffect(() => {
+        const fetchSucursales = async () => {
+            if (empresaId) {
+                try {
+                    const sucursalesData = await getSucursal(empresaId);
+                    setSucursales(sucursalesData);
+                } catch (error) {
+                    console.error('Error al obtener las sucursales:', error);
+                }
+            }
+        };
+        fetchSucursales();
+    }, [empresaId]);
+
+    useEffect(() => {
+        const fetchUnidadesMedida = async () => {
+            try {
+                const data = await getUnidadMedida();
+                setUnidadesMedida(data);
+            } catch (error) {
+                console.error('Error al obtener las unidades de medida:', error);
+            }
+        };
+        fetchUnidadesMedida();
+    }, []);
 
     const onFinish = async (values: any) => {
         console.log('Received values of form: ', values);
-
         const formattedValues = { ...values };
-        let promises = [];
+        let promises: Promise<{ url: string }>[] = [];
 
-        // Formatear unidadMedida como un objeto
         formattedValues.unidadMedida = {
             id: values.unidadMedida,
-            denominacion: values.denominacionUnidadMedida // Usa el valor real del formulario
+            denominacion: values.denominacionUnidadMedida
         };
-
+        formattedValues.sucursal = {
+            id: values.sucursal,
+            denominacion: values.nombreSucursal
+        };
         if (values.imagenes) {
-            const files = values.imagenes; // Lista de archivos
+            const files: UploadFile[] = values.imagenes;
 
-            // Convertir cada archivo a base64
-
-            promises = files.map((file: any) => {
-                return new Promise((resolve, reject) => {
+            promises = files.map((file) => {
+                return new Promise<{ url: string }>((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                        // Eliminar 'data:image/jpeg;base64,' del inicio de la cadena
                         const base64String = (reader.result as string).replace(/^data:image\/\w+;base64,/, '');
                         resolve({ url: base64String });
                     };
                     reader.onerror = reject;
-                    reader.readAsDataURL(file.originFileObj);
+                    reader.readAsDataURL(file.originFileObj as File);
                 });
             });
         }
 
-        Promise.all(promises)
-            .then(async (imagenes) => {
-                formattedValues.imagenes = imagenes;
-
-                // Luego de convertir todas las imágenes a base64, procedemos a crear el insumo
-                try {
-                    const response = await crearInsumo(formattedValues); // Llama a la función de la API
-                    console.log('Response: ', response);
-                    form.resetFields();
-                    onClose(); // Cierra el modal después de agregar un insumo
-                    window.location.reload();
-                    // Muestra la notificación
-                    notification.open({
-                        message: (
-                            <span>
-                                <CheckCircleOutlined style={{ color: 'green' }} /> Agregado correctamente
-                            </span>
-                        ),
-                    });
-                } catch (error) {
-                    console.error('Error: ', error);
-                }
-            })
-            .catch((error) => console.error('Error al convertir las imágenes a base64: ', error));
+        try {
+            const imagenes = await Promise.all(promises);
+            formattedValues.imagenes = imagenes;
+            const response = await crearInsumo(formattedValues);
+            console.log('Response: ', response);
+            form.resetFields();
+            onClose();
+            // window.location.reload();
+            notification.open({
+                message: (
+                    <span>
+                        <CheckCircleOutlined style={{ color: 'green' }} /> Agregado correctamente
+                    </span>
+                ),
+            });
+        } catch (error) {
+            console.error('Error: ', error);
+        }
     };
-
-    const isModalVisible: boolean = true;
-
-
-    function handleOk(_e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
-        console.log('OK clicked');
-        onClose();
-    }
-
-
-    function handleCancel(_e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
-        console.log('Cancel clicked');
-        onClose();
-    }
 
     const normFile = (e: any) => {
         if (Array.isArray(e)) {
             return e;
         }
-
-
         return e && e.fileList.map((file: any) => {
             if (file.originFileObj) {
                 const reader = new FileReader();
                 reader.readAsDataURL(file.originFileObj);
                 reader.onloadend = () => {
-                    file.url = reader.result;
+                    file.url = reader.result as string;
                 };
             }
             return file;
         });
     };
 
-    useEffect(() => {
-        const fetchUnidadesMedida = async () => {
-            const data = await getUnidadMedida();
-            setUnidadesMedida(data);
-        };
-
-        fetchUnidadesMedida();
-    }, []);
-
     return (
-        <Modal title="Agregar Insumo" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} footer={null}>
-            <Form
-                form={form}
-                layout="vertical"
-                style={{ maxWidth: 600, justifyContent: 'center' }}
-                onFinish={onFinish}
-            >
+        <Modal title="Agregar Insumo" visible={isModalVisible} onOk={onClose} onCancel={onClose} footer={null}>
+            <Form form={form} layout="vertical" style={{ maxWidth: 600, justifyContent: 'center' }} onFinish={onFinish}>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="Codigo" name="codigo" initialValue="">
@@ -154,24 +149,22 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
                                 </button>
                             </Upload>
                         </Form.Item>
-
                     </Col>
                     <Col span={12}>
                         <Form.Item label="Denominación" name="denominacion" initialValue="">
                             <Input />
                         </Form.Item>
-
                         <Form.Item label="Stock maximo" name="stockMaximo" initialValue={0}>
                             <Input type="number" />
                         </Form.Item>
                         <Form.Item label="Precio de compra" name="precioCompra" initialValue={0}>
                             <Input type="number" />
                         </Form.Item>
-                        <Form.Item label="Sucursal" name="sucursal" initialValue="">
-                            <Select>
-                                {unidadesMedida.map((unidad) => (
-                                    <Select.Option key={unidad.id} value={unidad.id}>
-                                        {unidad.denominacion}
+                        <Form.Item label="Sucursal" name="sucursal" initialValue={sucursalId}>
+                            <Select disabled>
+                                {sucursales.map((sucursal) => (
+                                    <Select.Option key={sucursal.id} value={sucursal.id}>
+                                        {sucursal.nombre}
                                     </Select.Option>
                                 ))}
                             </Select>
@@ -179,7 +172,6 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose }) => {
                         <Form.Item label="Es para elaborar" name="esParaElaborar" valuePropName="checked" initialValue={false}>
                             <Switch onChange={handleSwitchChange} />
                         </Form.Item>
-
                     </Col>
                 </Row>
                 <Form.Item style={{ textAlign: 'right' }}>

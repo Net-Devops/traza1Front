@@ -10,6 +10,7 @@ export interface ArticuloInsumo {
     esParaElaborar: boolean;
     imagenes: Imagen[];
     unidadMedida: unidadMedida;
+    sucursal: sucursal;
 }
 
 export interface Imagen {
@@ -19,6 +20,10 @@ export interface Imagen {
 export interface unidadMedida {
     id: number;
     denominacion: string;
+}
+export interface sucursal {
+    id: number;
+    nombre: string;
 }
 
 export const getUnidadMedida = async (): Promise<unidadMedida[]> => {
@@ -76,6 +81,7 @@ export async function crearInsumo(formData: ArticuloInsumo) {
                 esParaElaborar: formData.esParaElaborar,
                 imagenes: formData.imagenes,
                 unidadMedida: formData.unidadMedida,
+                sucursal: formData.sucursal,
             }),
         });
 
