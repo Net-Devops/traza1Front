@@ -9,7 +9,7 @@ import {
   promocionesPorSucursal,
   Promocion,
   PromocionDetalle,
-  Articulo,
+  ArticuloManufacturado,
 } from "../../../service/PromocionService";
 
 const { Option } = Select;
@@ -21,20 +21,9 @@ const Promociones = () => {
   const [promociones, setPromociones] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedPromocionDetail, setSelectedPromocionDetail] = useState(null);
-
-  const columns = [
-    {
-      title: "Denominación del artículo",
-      dataIndex: "articulo",
-      key: "articulo",
-      render: (articulo: Articulo) => articulo.denominacion,
-    },
-    {
-      title: "Cantidad",
-      dataIndex: "cantidad",
-      key: "cantidad",
-    },
-  ];
+  const [promocionDetail, setPromocionDetail] = useState<
+    ArticuloManufacturado[]
+  >([]);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -62,9 +51,43 @@ const Promociones = () => {
   };
   const handleShowDetail = async (promocionId: number) => {
     const detalle = await PromocionDetalle(promocionId);
-    setSelectedPromocionDetail(detalle);
+    setPromocionDetail(detalle); // Aquí cambiamos setSelectedPromocionDetail por setPromocionDetail
     setIsModalVisible(true);
   };
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+  };
+
+  const columns = [
+    {
+      title: "Imagen",
+      dataIndex: "articuloManufacturadoDto",
+      key: "imagen",
+      render: (articuloManufacturadoDto: any) =>
+        articuloManufacturadoDto.imagenes &&
+        articuloManufacturadoDto.imagenes.length > 0 ? (
+          <img
+            src={articuloManufacturadoDto.imagenes[0]}
+            alt={articuloManufacturadoDto.denominacion}
+            style={{ width: "50px" }}
+          />
+        ) : (
+          "No image"
+        ),
+    },
+    {
+      title: "Denominación",
+      dataIndex: "articuloManufacturadoDto",
+      key: "denominacion",
+      render: (articuloManufacturadoDto: any) =>
+        articuloManufacturadoDto.denominacion,
+    },
+    {
+      title: "Cantidad",
+      dataIndex: "cantidad",
+      key: "cantidad",
+    },
+  ];
 
   return (
     <div>
@@ -120,18 +143,16 @@ const Promociones = () => {
               </Card>
             ))}
           </div>
-          <Modal
-            title="Detalle de la promoción"
-            visible={isModalVisible}
-            onCancel={() => setIsModalVisible(false)}
-            footer={null}
-          >
-            {/* Aquí puedes renderizar los detalles de la promoción seleccionada */}
-            {selectedPromocionDetail && (
-              <Table dataSource={selectedPromocionDetail} columns={columns} />
-            )}
-          </Modal>
         </div>
+
+        <Modal
+          title="Detalles de la promoción"
+          visible={isModalVisible}
+          onCancel={handleModalClose}
+          footer={null}
+        >
+          <Table dataSource={promocionDetail} columns={columns} />
+        </Modal>
       </div>
     </div>
   );

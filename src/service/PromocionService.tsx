@@ -4,7 +4,7 @@ export interface Promocion {
   descripcionDescuento: string;
   // Añade aquí cualquier otra propiedad que tenga una promoción
 }
-export interface Articulo {
+export interface ArticuloManufacturado {
   id: number;
   denominacion: string;
   descripcion: string;
