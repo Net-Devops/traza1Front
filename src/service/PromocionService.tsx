@@ -1,8 +1,17 @@
 export interface Promocion {
   id: number;
-  nombre: string;
-  descripcion: string;
+  denominacion: string;
+  descripcionDescuento: string;
   // Añade aquí cualquier otra propiedad que tenga una promoción
+}
+export interface Articulo {
+  id: number;
+  denominacion: string;
+  descripcion: string;
+  precioVenta: number;
+  imagenes: string[];
+  codigo: string;
+  // Añade aquí cualquier otra propiedad que tenga un artículo
 }
 
 export const promocionesPorSucursal = async (sucursalId: number) => {
