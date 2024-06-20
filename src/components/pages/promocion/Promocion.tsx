@@ -208,7 +208,6 @@ const Promociones = () => {
         onCancel={() => setIsFormVisible(false)}
         onSubmit={handleSubmitPromocion}
         initialValues={undefined}
-        articulosManufacturados={articulosManufacturados}
         tiposPromocion={[]}
         selectedSucursalId={selectedSucursalId}
       />
