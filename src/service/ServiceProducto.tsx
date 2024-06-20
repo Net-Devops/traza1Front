@@ -79,3 +79,31 @@ export async function crearManufacturado(formData: ArticuloProducto) {
         console.log("Error: ", error);
     }
 }
+
+export async function deleteProductoXId(id: string) {
+    const urlServer = "http://localhost:8080/api/articulos/manufacturados/" + id;
+    await fetch(urlServer, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      mode: "cors",
+    });
+  }
+
+
+  export async function getProductoXSucursal(id: string) {
+    const urlServer = "http://localhost:8080/api/local/articulo/manufacturado/sucursal/"+id;
+    console.log(urlServer);
+    const response = await fetch(urlServer, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      mode: "cors",
+    });
+  
+    return await response.json();
+  }
