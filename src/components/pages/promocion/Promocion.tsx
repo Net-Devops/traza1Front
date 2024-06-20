@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Select, Card, Button, Modal, Table } from "antd";
+import { Select, Card, Button, Modal, Table, Switch } from "antd";
 
 import { getSucursal } from "../../../service/ServiceSucursal";
 import { getEmpresas } from "../../../service/ServiceEmpresa";
@@ -85,6 +85,23 @@ const Promociones = () => {
     } catch (error) {
       console.error("Error al guardar la promoción:", error);
     }
+  };
+
+  const handleTogglePromotion = async (
+    promocionId: number,
+    checked: boolean
+  ) => {
+    // Aquí puedes llamar a la función que maneja la habilitación/deshabilitación de la promoción
+    console.log(
+      `Promoción ID: ${promocionId}, Estado: ${
+        checked ? "Habilitado" : "Deshabilitado"
+      }`
+    );
+  };
+
+  const handleEditPromotion = (promocionId: number) => {
+    // Aquí puedes llamar a la función que maneja la edición de la promoción
+    console.log(`Editar promoción ID: ${promocionId}`);
   };
 
   const columns = [
@@ -186,6 +203,15 @@ const Promociones = () => {
             <Button onClick={() => handleShowDetail(promocion.id)}>
               Detalle
             </Button>
+            <Button onClick={() => handleEditPromotion(promocion.id)}>
+              Modificar
+            </Button>
+            <Switch
+              defaultChecked
+              onChange={(checked) =>
+                handleTogglePromotion(promocion.id, checked)
+              }
+            />
           </Card>
         ))}
       </div>
