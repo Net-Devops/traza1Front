@@ -11,19 +11,23 @@ export interface Promocion {
   promocionDetalles?: PromocionDetalle[];
   imagenes?: ImagenPromocion[];
   sucursales?: Sucursal[];
+  eliminado?: boolean;
 }
 export interface ImagenPromocion {
   id?: number;
   url?: string;
+  eliminado?: boolean;
 }
 export interface Sucursal {
   id?: number;
   nombre?: string;
+  eliminado?: boolean;
 }
 export interface PromocionDetalle {
   id?: number;
   cantidad?: number;
   articuloManufacturado?: ArticuloManufacturado;
+  eliminado?: boolean;
 }
 export interface ArticuloManufacturado {
   id?: number;
@@ -32,6 +36,7 @@ export interface ArticuloManufacturado {
   precioVenta?: number;
   imagenes?: string[];
   codigo?: string;
+  eliminado?: boolean;
   // Añade aquí cualquier otra propiedad que tenga un artículo
 }
 
@@ -92,6 +97,27 @@ export const savePromocion = async (promocion: Promocion) => {
       },
       body: JSON.stringify(promocion),
     });
+
+    if (!response.ok) {
+      throw new Error("Error en la solicitud");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+};
+
+export const togglePromocion = async (id: number) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/promociones/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Error en la solicitud");

@@ -12,7 +12,10 @@ import {
   ArticuloManufacturado,
 } from "../../../service/PromocionService";
 import FormularioPromocion from "./FormularioPromocion";
-import { savePromocion } from "../../../service/PromocionService";
+import {
+  savePromocion,
+  togglePromocion,
+} from "../../../service/PromocionService";
 
 const { Option } = Select;
 
@@ -91,12 +94,19 @@ const Promociones = () => {
     promocionId: number,
     checked: boolean
   ) => {
-    // Aquí puedes llamar a la función que maneja la habilitación/deshabilitación de la promoción
-    console.log(
-      `Promoción ID: ${promocionId}, Estado: ${
-        checked ? "Habilitado" : "Deshabilitado"
-      }`
-    );
+    try {
+      const response = await togglePromocion(promocionId);
+      if (response) {
+        console.log(
+          `Promoción ID: ${promocionId}, Estado: ${
+            checked ? "Habilitado" : "Deshabilitado"
+          }`
+        );
+        // Aquí puedes actualizar el estado de las promociones si es necesario
+      }
+    } catch (error) {
+      console.error("Error al cambiar el estado de la promoción:", error);
+    }
   };
 
   const handleEditPromotion = (promocionId: number) => {
@@ -197,7 +207,11 @@ const Promociones = () => {
         {promociones.map((promocion: Promocion) => (
           <Card
             title={promocion.denominacion}
-            style={{ width: 300, marginBottom: "10px" }}
+            style={{
+              width: 300,
+              marginBottom: "10px",
+              backgroundColor: promocion.eliminado ? "lightgray" : "white",
+            }}
           >
             <p>{promocion.descripcionDescuento}</p>
             <Button onClick={() => handleShowDetail(promocion.id)}>
@@ -207,7 +221,7 @@ const Promociones = () => {
               Modificar
             </Button>
             <Switch
-              defaultChecked
+              defaultChecked={!promocion.eliminado}
               onChange={(checked) =>
                 handleTogglePromotion(promocion.id, checked)
               }
