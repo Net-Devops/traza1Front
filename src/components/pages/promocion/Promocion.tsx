@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Select, Card, Button, Modal, Table, Switch } from "antd";
-
 import { getSucursal } from "../../../service/ServiceSucursal";
 import { getEmpresas } from "../../../service/ServiceEmpresa";
 import { Sucursal } from "../../../service/ServiceSucursal";
@@ -12,6 +11,7 @@ import {
   ArticuloManufacturado,
 } from "../../../service/PromocionService";
 import FormularioPromocion from "./FormularioPromocion";
+import FormularioActualizacionPromocion from "./FormularioActualizacion"; // Importar el formulario de actualización
 import {
   savePromocion,
   togglePromocion,
@@ -29,7 +29,11 @@ const Promociones = () => {
     ArticuloManufacturado[]
   >([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isUpdateFormVisible, setIsUpdateFormVisible] = useState(false); // Estado para la visibilidad del formulario de actualización
   const [selectedSucursalId, setSelectedSucursalId] = useState<number>(0);
+  const [selectedPromocionId, setSelectedPromocionId] = useState<number | null>(
+    null
+  ); // Estado para el ID de la promoción seleccionada
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -56,11 +60,13 @@ const Promociones = () => {
     const promocionesData = await promocionesPorSucursal(Number(value));
     setPromociones(promocionesData);
   };
+
   const handleShowDetail = async (promocionId: number) => {
     const detalle = await PromocionDetalle(promocionId);
     setPromocionDetail(detalle);
     setIsModalVisible(true);
   };
+
   const handleModalClose = () => {
     setIsModalVisible(false);
   };
@@ -110,8 +116,24 @@ const Promociones = () => {
   };
 
   const handleEditPromotion = (promocionId: number) => {
-    // Aquí puedes llamar a la función que maneja la edición de la promoción
-    console.log(`Editar promoción ID: ${promocionId}`);
+    setSelectedPromocionId(promocionId); // Establece el ID de la promoción seleccionada
+    setIsUpdateFormVisible(true); // Muestra el formulario de actualización
+  };
+
+  const handleUpdatePromotion = async (values: any) => {
+    try {
+      const response = await savePromocion({
+        ...values,
+        id: selectedPromocionId,
+      });
+      if (response) {
+        console.log("Promoción actualizada con éxito:", response);
+        setIsUpdateFormVisible(false); // Cierra el formulario si se actualiza con éxito
+        handleSucursalChange(selectedSucursalId.toString()); // Recarga las promociones
+      }
+    } catch (error) {
+      console.error("Error al actualizar la promoción:", error);
+    }
   };
 
   const columns = [
@@ -206,6 +228,7 @@ const Promociones = () => {
       >
         {promociones.map((promocion: Promocion) => (
           <Card
+            key={promocion.id}
             title={promocion.denominacion}
             style={{
               width: 300,
@@ -245,7 +268,18 @@ const Promociones = () => {
         tiposPromocion={[]}
         selectedSucursalId={selectedSucursalId}
       />
+      {selectedPromocionId !== null && (
+        <FormularioActualizacionPromocion
+          visible={isUpdateFormVisible}
+          onCancel={() => setIsUpdateFormVisible(false)}
+          promocionId={selectedPromocionId}
+          onSubmit={handleUpdatePromotion}
+          selectedSucursalId={selectedSucursalId}
+          tiposPromocion={[]}
+        />
+      )}
     </div>
   );
 };
+
 export default Promociones;

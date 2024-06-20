@@ -130,3 +130,54 @@ export const togglePromocion = async (id: number) => {
     return null;
   }
 };
+
+export const fetchPromocionById = async (promocionId: number) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/promociones/${promocionId}`
+    );
+    if (!response.ok) {
+      throw new Error("Error al obtener los detalles de la promoción");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+export const actualizarPromocion = async (id: number, promocion: any) => {
+  const response = await fetch(`http://localhost:8080/api/promociones/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(promocion),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return await response.json();
+};
+
+export const eliminarDetallesPromocion = async (id: number) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/promociones/eliminar-detalles/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    console.log("Detalles de la promoción eliminados con éxito");
+  } catch (error) {
+    console.error("Error al eliminar los detalles de la promoción:", error);
+  }
+};
