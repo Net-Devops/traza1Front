@@ -1,16 +1,37 @@
 export interface Promocion {
   id: number;
-  denominacion: string;
-  descripcionDescuento: string;
-  // Añade aquí cualquier otra propiedad que tenga una promoción
+  denominacion?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+  horaDesde?: string;
+  horaHasta?: string;
+  descripcionDescuento?: string;
+  precioPromocional?: number;
+  tipoPromocion?: string;
+  promocionDetalles?: PromocionDetalle[];
+  imagenes?: ImagenPromocion[];
+  sucursales?: Sucursal[];
+}
+export interface ImagenPromocion {
+  id?: number;
+  url?: string;
+}
+export interface Sucursal {
+  id?: number;
+  nombre?: string;
+}
+export interface PromocionDetalle {
+  id?: number;
+  cantidad?: number;
+  articuloManufacturado?: ArticuloManufacturado;
 }
 export interface ArticuloManufacturado {
-  id: number;
-  denominacion: string;
-  descripcion: string;
-  precioVenta: number;
-  imagenes: string[];
-  codigo: string;
+  id?: number;
+  denominacion?: string;
+  descripcion?: string;
+  precioVenta?: number;
+  imagenes?: string[];
+  codigo?: string;
   // Añade aquí cualquier otra propiedad que tenga un artículo
 }
 
@@ -64,7 +85,7 @@ export const fetchArticulosManufacturados = async (sucursalId: number) => {
 
 export const savePromocion = async (promocion: Promocion) => {
   try {
-    const response = await fetch("http://localhost:8080/api/local/promocion", {
+    const response = await fetch("http://localhost:8080/api/promociones/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

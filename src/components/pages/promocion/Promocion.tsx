@@ -13,6 +13,7 @@ import {
   fetchArticulosManufacturados,
 } from "../../../service/PromocionService";
 import FormularioPromocion from "./FormularioPromocion";
+import { savePromocion } from "../../../service/PromocionService";
 
 const { Option } = Select;
 
@@ -80,8 +81,16 @@ const Promociones = () => {
   };
 
   const handleSubmitPromocion = async (values: any) => {
-    // Lógica para enviar la promoción al backend
-    console.log("Submit values:", values); // Aquí puedes enviar los datos al backend si es necesario
+    try {
+      const response = await savePromocion(values);
+      if (response) {
+        console.log("Promoción guardada con éxito:", response);
+        setIsFormVisible(false); // Cierra el formulario si se guarda con éxito
+        handleSucursalChange(selectedSucursalId.toString()); // Recarga las promociones
+      }
+    } catch (error) {
+      console.error("Error al guardar la promoción:", error);
+    }
   };
 
   const columns = [
@@ -167,9 +176,18 @@ const Promociones = () => {
           Crear Promoción
         </Button>
       </div>
-      <div>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+        }}
+      >
         {promociones.map((promocion: Promocion) => (
-          <Card title={promocion.denominacion} style={{ width: 300 }}>
+          <Card
+            title={promocion.denominacion}
+            style={{ width: 300, marginBottom: "10px" }}
+          >
             <p>{promocion.descripcionDescuento}</p>
             <Button onClick={() => handleShowDetail(promocion.id)}>
               Detalle

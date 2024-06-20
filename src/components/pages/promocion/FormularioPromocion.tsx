@@ -14,7 +14,11 @@ import {
   Space,
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-import { fetchArticulosManufacturados } from "../../../service/PromocionService";
+import {
+  fetchArticulosManufacturados,
+  savePromocion,
+  Promocion,
+} from "../../../service/PromocionService";
 
 const { Option } = Select;
 
@@ -191,9 +195,32 @@ const FormularioPromocion: React.FC<Props> = ({
     }
   }, [selectedSucursalId]);
 
-  const handleButtonClick = () => {
-    // Aquí va el código para crear o modificar la promoción
+  const handleButtonClick = async () => {
+    try {
+      const formValues = await form.validateFields();
+      const promocionData: Promocion = {
+        id: 0, // Add the id property with a default value
+        denominacion: formValues.denominacion,
+        fechaDesde: formValues.fechaDesde.format("YYYY-MM-DD"),
+        fechaHasta: formValues.fechaHasta.format("YYYY-MM-DD"),
+        horaDesde: formValues.horaDesde.format("HH:mm"),
+        horaHasta: formValues.horaHasta.format("HH:mm"),
+        descripcionDescuento: formValues.descripcionDescuento,
+        precioPromocional: formValues.precioPromocional,
+        sucursales: [{ id: selectedSucursalId }],
+        promocionDetalles: selectedArticulosData.map((articulo) => ({
+          cantidad: articulo.cantidad,
+          articuloManufacturado: { id: articulo.id },
+        })),
+      };
+      await savePromocion(promocionData);
+      onCancel();
+    } catch (error) {
+      console.error("Error al guardar la promoción:", error);
+    }
   };
+
+  const [form] = Form.useForm();
 
   return (
     <Modal
@@ -203,15 +230,38 @@ const FormularioPromocion: React.FC<Props> = ({
       footer={null}
       width={800}
     >
-      <Form initialValues={initialValues} onFinish={onSubmit} layout="vertical">
+      <Form
+        form={form}
+        initialValues={initialValues}
+        onFinish={onSubmit}
+        layout="vertical"
+      >
         <div>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Denominación:" name="denominacion">
+              <Form.Item
+                label="Denominación:"
+                name="denominacion"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa la denominación",
+                  },
+                ]}
+              >
                 <Input style={{ width: "100%" }} />
               </Form.Item>
 
-              <Form.Item label="Fecha Desde:" name="fechaDesde">
+              <Form.Item
+                label="Fecha Desde:"
+                name="fechaDesde"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa la denominación",
+                  },
+                ]}
+              >
                 <DatePicker
                   onChange={(value) => setFieldValue("fechaDesde", value)}
                   style={{ width: "100%" }}
@@ -225,7 +275,16 @@ const FormularioPromocion: React.FC<Props> = ({
                 />
               </Form.Item>
 
-              <Form.Item label="Hora Desde:" name="horaDesde">
+              <Form.Item
+                label="Hora Desde:"
+                name="horaDesde"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa la denominación",
+                  },
+                ]}
+              >
                 <TimePicker
                   format="HH:mm"
                   onChange={(value) =>
@@ -237,7 +296,16 @@ const FormularioPromocion: React.FC<Props> = ({
             </Col>
 
             <Col span={12}>
-              <Form.Item label="Hora Hasta:" name="horaHasta">
+              <Form.Item
+                label="Hora Hasta:"
+                name="horaHasta"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa la denominación",
+                  },
+                ]}
+              >
                 <TimePicker
                   format="HH:mm"
                   onChange={(value) =>
@@ -254,8 +322,27 @@ const FormularioPromocion: React.FC<Props> = ({
                 <Input style={{ width: "100%" }} />
               </Form.Item>
 
-              <Form.Item label="Precio Promocional:" name="precioPromocional">
-                <InputNumber style={{ width: "100%" }} />
+              <Form.Item
+                label="Precio Promocional:"
+                name="precioPromocional"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa el precio promocional",
+                  },
+                  {
+                    validator: (_, value) =>
+                      value > 0
+                        ? Promise.resolve()
+                        : Promise.reject(
+                            new Error(
+                              "El precio promocional debe ser un número mayor a 0"
+                            )
+                          ),
+                  },
+                ]}
+              >
+                <InputNumber style={{ width: "100%" }} min={1} />
               </Form.Item>
 
               <Form.Item label="Tipo Promoción:" name="tipoPromocion">
@@ -291,11 +378,33 @@ const FormularioPromocion: React.FC<Props> = ({
                 dataIndex: "cantidad",
                 key: "cantidad",
                 render: (text: string, record: any) => (
-                  <InputNumber
-                    min={1}
-                    value={record.cantidad}
-                    onChange={(value) => handleCantidadChange(record.id, value)}
-                  />
+                  <Form.Item
+                    name={`cantidad_${record.id}`}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Por favor ingresa la cantidad",
+                      },
+                      {
+                        validator: (_, value) =>
+                          value > 0
+                            ? Promise.resolve()
+                            : Promise.reject(
+                                new Error(
+                                  "La cantidad debe ser un número positivo"
+                                )
+                              ),
+                      },
+                    ]}
+                  >
+                    <InputNumber
+                      min={1}
+                      value={record.cantidad}
+                      onChange={(value) =>
+                        handleCantidadChange(record.id, value)
+                      }
+                    />
+                  </Form.Item>
                 ),
               },
             ]}
