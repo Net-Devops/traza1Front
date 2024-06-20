@@ -10,7 +10,6 @@ import {
   Promocion,
   PromocionDetalle,
   ArticuloManufacturado,
-  fetchArticulosManufacturados,
 } from "../../../service/PromocionService";
 import FormularioPromocion from "./FormularioPromocion";
 import { savePromocion } from "../../../service/PromocionService";
@@ -27,7 +26,6 @@ const Promociones = () => {
     ArticuloManufacturado[]
   >([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [articulosManufacturados, setArticulosManufacturados] = useState([]);
   const [selectedSucursalId, setSelectedSucursalId] = useState<number>(0);
 
   useEffect(() => {
@@ -67,10 +65,6 @@ const Promociones = () => {
   const handleCreatePromotion = async () => {
     if (selectedSucursalId !== null) {
       try {
-        const articulos = await fetchArticulosManufacturados(
-          selectedSucursalId
-        );
-        setArticulosManufacturados(articulos);
         setIsFormVisible(true);
       } catch (error) {
         console.error("Error fetching articulos manufacturados:", error);
