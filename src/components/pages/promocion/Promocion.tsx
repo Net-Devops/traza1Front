@@ -65,12 +65,23 @@ const Promociones = () => {
 
   const handleCreatePromotion = async () => {
     if (selectedSucursalId !== null) {
-      const articulos = await fetchArticulosManufacturados(selectedSucursalId);
-      setArticulosManufacturados(articulos);
-      setIsFormVisible(true);
+      try {
+        const articulos = await fetchArticulosManufacturados(
+          selectedSucursalId
+        );
+        setArticulosManufacturados(articulos);
+        setIsFormVisible(true);
+      } catch (error) {
+        console.error("Error fetching articulos manufacturados:", error);
+      }
     } else {
       console.error("No se seleccionó ninguna sucursal");
     }
+  };
+
+  const handleSubmitPromocion = async (values: any) => {
+    // Lógica para enviar la promoción al backend
+    console.log("Submit values:", values); // Aquí puedes enviar los datos al backend si es necesario
   };
 
   const columns = [
@@ -174,22 +185,14 @@ const Promociones = () => {
       >
         <Table dataSource={promocionDetail} columns={columns} />
       </Modal>
-      {/* <Modal
-title="Crear Promoción"
-visible={isFormVisible}
-onCancel={() => setIsFormVisible(false)}
-footer={null}
-></Modal> */}
       <FormularioPromocion
         visible={isFormVisible}
         onCancel={() => setIsFormVisible(false)}
-        onSubmit={function (values: any): void {
-          throw new Error("Function not implemented.");
-        }}
+        onSubmit={handleSubmitPromocion}
         initialValues={undefined}
-        articulosManufacturados={[]}
+        articulosManufacturados={articulosManufacturados}
         tiposPromocion={[]}
-        selectedSucursalId={selectedSucursalId} // Pasar el ID de la sucursal seleccionada
+        selectedSucursalId={selectedSucursalId}
       />
     </div>
   );
