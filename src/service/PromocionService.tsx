@@ -9,7 +9,7 @@ export interface Promocion {
   precioPromocional?: number;
   tipoPromocion?: string;
   promocionDetalles?: PromocionDetalle[];
-  imagenes?: ImagenPromocion[];
+  imagen?: string;
   sucursales?: Sucursal[];
   eliminado?: boolean;
 }

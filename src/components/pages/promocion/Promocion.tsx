@@ -229,26 +229,79 @@ const Promociones = () => {
         {promociones.map((promocion: Promocion) => (
           <Card
             key={promocion.id}
-            title={promocion.denominacion}
             style={{
-              width: 300,
+              width: 350, // Aumenta el ancho de la tarjeta según tus necesidades
               marginBottom: "10px",
               backgroundColor: promocion.eliminado ? "lightgray" : "white",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
             }}
           >
-            <p>{promocion.descripcionDescuento}</p>
-            <Button onClick={() => handleShowDetail(promocion.id)}>
-              Detalle
-            </Button>
-            <Button onClick={() => handleEditPromotion(promocion.id)}>
-              Modificar
-            </Button>
-            <Switch
-              defaultChecked={!promocion.eliminado}
-              onChange={(checked) =>
-                handleTogglePromotion(promocion.id, checked)
-              }
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: "0.8em",
+                color: "gray",
+              }}
+            >
+              <p>Inicio: {promocion.fechaDesde}</p>
+              <p>Fin: {promocion.fechaHasta}</p>
+            </div>
+            <h2
+              style={{
+                overflowWrap: "break-word",
+                wordWrap: "break-word",
+                hyphens: "auto",
+              }}
+            >
+              {promocion.denominacion}
+            </h2>
+            <img
+              src={promocion.imagen}
+              alt={"sin imagen"}
+              style={{
+                width: "100%", // Esto asegura que la imagen no sea más ancha que la tarjeta
+                height: "200px", // Esto establece una altura fija para la imagen
+                objectFit: "cover", // Esto asegura que la imagen cubra el espacio disponible sin distorsionarse
+              }}
             />
+            <p>{promocion.descripcionDescuento}</p>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: "0.8em",
+                color: "gray",
+              }}
+            >
+              <p>Desde: {promocion.horaDesde}</p>
+              <p>Hasta: {promocion.horaHasta}</p>
+            </div>
+            <p style={{ fontSize: "1.5em", fontWeight: "bold" }}>
+              Precio: ${promocion.precioPromocional}
+            </p>
+            <div style={{ marginTop: "auto", padding: "10px 0" }}>
+              <Button
+                onClick={() => handleShowDetail(promocion.id)}
+                style={{ marginRight: "10px" }}
+              >
+                Detalle
+              </Button>
+              <Button
+                onClick={() => handleEditPromotion(promocion.id)}
+                style={{ marginRight: "10px" }}
+              >
+                Modificar
+              </Button>
+              <Switch
+                defaultChecked={!promocion.eliminado}
+                onChange={(checked) =>
+                  handleTogglePromotion(promocion.id, checked)
+                }
+              />
+            </div>
           </Card>
         ))}
       </div>
