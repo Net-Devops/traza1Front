@@ -7,6 +7,7 @@ export interface ArticuloInsumo {
     precioVenta: number;
     stockActual: number;
     stockMaximo: number;
+    stockMinimo: number;
     esParaElaborar: boolean;
     imagenes: Imagen[];
     unidadMedida: unidadMedida;
@@ -78,6 +79,7 @@ export async function crearInsumo(formData: ArticuloInsumo) {
                 precioVenta: formData.precioVenta,
                 stockActual: formData.stockActual,
                 stockMaximo: formData.stockMaximo,
+                stockMinimo: formData.stockMinimo,
                 esParaElaborar: formData.esParaElaborar,
                 imagenes: formData.imagenes,
                 unidadMedida: formData.unidadMedida,
@@ -115,13 +117,13 @@ export async function modificarInsumoId(formData: any, id: number) {
                 id: id,
                 codigo: formData.codigo,
                 denominacion: formData.denominacion,
-                precioCompra: formData.precioCompra,
-                precioVenta: formData.precioVenta,
-                stockActual: formData.stockActual,
+                       
                 stockMaximo: formData.stockMaximo,
+                stockMinimo: formData.stockMinimo,
                 esParaElaborar: formData.esParaElaborar,
-                imagenes: formData.uploadImagenes,
+                imagenes: formData.imagenes,
                 unidadMedida: formData.unidadMedida,
+               
             }),
         });
 

@@ -193,6 +193,14 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
       sortDirections: ['descend', 'ascend'],
     },
     {
+      title: 'Stock Minimo',
+      dataIndex: 'stockMinimo',
+      key: 'stockMinimo',
+      ...getColumnSearchProps('stockMinimo'),
+      sorter: (a, b) => a.stockMinimo - b.stockMinimo,
+      sortDirections: ['descend', 'ascend'],
+    },
+    {
       title: 'Es para Elaborar',
       dataIndex: 'esParaElaborar',
       key: 'esParaElaborar',
