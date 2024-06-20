@@ -159,6 +159,14 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
     setSelectedArticulosData((prevData) => [...prevData, articulo]);
     setSelectedArticulos((prevKeys) => [...prevKeys, articulo.id]);
   };
+  const handleRemoveArticulo = (articulo: any) => {
+    setSelectedArticulosData((prevData) =>
+      prevData.filter((item) => item.id !== articulo.id)
+    );
+    setSelectedArticulos((prevKeys) =>
+      prevKeys.filter((key) => key !== articulo.id)
+    );
+  };
 
   return (
     <Modal
@@ -291,10 +299,6 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
               columns={columns}
               dataSource={articulos}
               pagination={false}
-              rowSelection={{
-                selectedRowKeys: selectedArticulos,
-                onChange: handleArticuloSelect,
-              }}
             />
           </Col>
         </Row>
@@ -320,6 +324,19 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
                         handleCantidadChange(record.id, value || 1)
                       }
                     />
+                  ),
+                },
+                {
+                  title: "Acción",
+                  key: "accion",
+                  render: (_text: string, record: any) => (
+                    <Button
+                      type="primary"
+                      danger
+                      onClick={() => handleRemoveArticulo(record)}
+                    >
+                      Eliminar
+                    </Button>
                   ),
                 },
               ]}
