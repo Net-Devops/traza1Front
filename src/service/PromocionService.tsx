@@ -45,3 +45,19 @@ export const PromocionDetalle = async (promocionId: number) => {
     return null;
   }
 };
+
+export const fetchArticulosManufacturados = async (sucursalId: number) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/local/articulo/manufacturado/sucursal/${sucursalId}`
+    );
+    if (!response.ok) {
+      throw new Error("Error al obtener los artículos manufacturados");
+    }
+    const articulosManufacturados = await response.json();
+    return articulosManufacturados;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};

@@ -10,7 +10,9 @@ import {
   Promocion,
   PromocionDetalle,
   ArticuloManufacturado,
+  fetchArticulosManufacturados,
 } from "../../../service/PromocionService";
+import FormularioPromocion from "./FormularioPromocion";
 
 const { Option } = Select;
 
@@ -20,10 +22,12 @@ const Promociones = () => {
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
   const [promociones, setPromociones] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedPromocionDetail, setSelectedPromocionDetail] = useState(null);
   const [promocionDetail, setPromocionDetail] = useState<
     ArticuloManufacturado[]
   >([]);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [articulosManufacturados, setArticulosManufacturados] = useState([]);
+  const [selectedSucursalId, setSelectedSucursalId] = useState<number>(0);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -46,16 +50,27 @@ const Promociones = () => {
   }, [selectedEmpresa]);
 
   const handleSucursalChange = async (value: string) => {
+    setSelectedSucursalId(Number(value));
     const promocionesData = await promocionesPorSucursal(Number(value));
     setPromociones(promocionesData);
   };
   const handleShowDetail = async (promocionId: number) => {
     const detalle = await PromocionDetalle(promocionId);
-    setPromocionDetail(detalle); // Aquí cambiamos setSelectedPromocionDetail por setPromocionDetail
+    setPromocionDetail(detalle);
     setIsModalVisible(true);
   };
   const handleModalClose = () => {
     setIsModalVisible(false);
+  };
+
+  const handleCreatePromotion = async () => {
+    if (selectedSucursalId !== null) {
+      const articulos = await fetchArticulosManufacturados(selectedSucursalId);
+      setArticulosManufacturados(articulos);
+      setIsFormVisible(true);
+    } else {
+      console.error("No se seleccionó ninguna sucursal");
+    }
   };
 
   const columns = [
@@ -132,28 +147,50 @@ const Promociones = () => {
               </Option>
             ))}
           </Select>
-          <div>
-            {promociones.map((promocion: Promocion) => (
-              <Card title={promocion.denominacion} style={{ width: 300 }}>
-                <p>{promocion.descripcionDescuento}</p>
-                <Button onClick={() => handleShowDetail(promocion.id)}>
-                  Detalle
-                </Button>
-                {/* Añade más detalles de la promoción aquí */}
-              </Card>
-            ))}
-          </div>
         </div>
-
-        <Modal
-          title="Detalles de la promoción"
-          visible={isModalVisible}
-          onCancel={handleModalClose}
-          footer={null}
+        <Button
+          type="primary"
+          onClick={handleCreatePromotion}
+          style={{ marginBottom: "10px" }}
         >
-          <Table dataSource={promocionDetail} columns={columns} />
-        </Modal>
+          Crear Promoción
+        </Button>
       </div>
+      <div>
+        {promociones.map((promocion: Promocion) => (
+          <Card title={promocion.denominacion} style={{ width: 300 }}>
+            <p>{promocion.descripcionDescuento}</p>
+            <Button onClick={() => handleShowDetail(promocion.id)}>
+              Detalle
+            </Button>
+          </Card>
+        ))}
+      </div>
+      <Modal
+        title="Detalles de la promoción"
+        visible={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+      >
+        <Table dataSource={promocionDetail} columns={columns} />
+      </Modal>
+      {/* <Modal
+title="Crear Promoción"
+visible={isFormVisible}
+onCancel={() => setIsFormVisible(false)}
+footer={null}
+></Modal> */}
+      <FormularioPromocion
+        visible={isFormVisible}
+        onCancel={() => setIsFormVisible(false)}
+        onSubmit={function (values: any): void {
+          throw new Error("Function not implemented.");
+        }}
+        initialValues={undefined}
+        articulosManufacturados={[]}
+        tiposPromocion={[]}
+        selectedSucursalId={selectedSucursalId} // Pasar el ID de la sucursal seleccionada
+      />
     </div>
   );
 };
