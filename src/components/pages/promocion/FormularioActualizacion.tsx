@@ -45,6 +45,8 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
   const [selectedArticulos, setSelectedArticulos] = useState<string[]>([]);
   const [selectedArticulosData, setSelectedArticulosData] = useState<any[]>([]);
   const [articulos, setArticulos] = useState<any[]>([]);
+  const [searchArticulos, setSearchArticulos] = useState("");
+  const [searchSelectedArticulos, setSearchSelectedArticulos] = useState("");
 
   useEffect(() => {
     if (selectedSucursalId) {
@@ -82,14 +84,6 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
       });
     }
   }, [promocionId]);
-
-  const handleArticuloSelect = (
-    selectedRowKeys: React.Key[],
-    selectedRows: any[]
-  ) => {
-    setSelectedArticulos(selectedRowKeys as string[]);
-    setSelectedArticulosData(selectedRows);
-  };
 
   const handleCantidadChange = (id: string, cantidad: number) => {
     setSelectedArticulosData((prevState) =>
@@ -294,17 +288,27 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
 
         <Row gutter={16}>
           <Col span={24}>
+            <Input.Search
+              placeholder="Buscar por denominación"
+              onChange={(e) => setSearchArticulos(e.target.value)}
+            />
             <Table
               rowKey="id"
               columns={columns}
-              dataSource={articulos}
-              pagination={false}
+              dataSource={articulos.filter((articulo) =>
+                articulo.denominacion.includes(searchArticulos)
+              )}
+              pagination={{ pageSize: 5 }}
             />
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={24}>
+            <Input.Search
+              placeholder="Buscar por denominación"
+              onChange={(e) => setSearchSelectedArticulos(e.target.value)}
+            />
             <Table
               rowKey="id"
               columns={[
@@ -340,8 +344,10 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
                   ),
                 },
               ]}
-              dataSource={selectedArticulosData}
-              pagination={false}
+              dataSource={selectedArticulosData.filter((articulo) =>
+                articulo.denominacion.includes(searchSelectedArticulos)
+              )}
+              pagination={{ pageSize: 5 }}
             />
           </Col>
         </Row>
