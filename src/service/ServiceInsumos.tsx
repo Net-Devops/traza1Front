@@ -12,6 +12,7 @@ export interface ArticuloInsumo {
     imagenes: Imagen[];
     unidadMedida: unidadMedida;
     sucursal: sucursal;
+    eliminado: boolean;
 }
 
 export interface Imagen {
@@ -164,6 +165,17 @@ export async function getInsumoXId(id: string) {
       mode: "cors",
     });
   }
+  export async function activarInsumoXId(id: string) {
+    const urlServer = "http://localhost:8080/api/articulos/insumos/reactivate/" + id;
+    await fetch(urlServer, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      mode: "cors",
+    });
+  }
 
   export async function getInsumoXSucursal(id: string) {
     const urlServer = "http://localhost:8080/api/local/articulo/insumo/sucursal/"+id;
@@ -179,3 +191,29 @@ export async function getInsumoXId(id: string) {
   
     return await response.json();
   }
+
+
+  export async function agregarStockId(formData: any, id: number) {
+    try {
+        const urlServer = `http://localhost:8080/api/local/articulo/insumo/aumentarStock/${id}?cantidad=${formData.cantidad}&nuevoPrecioVenta=${formData.nuevoPrecioVenta}&nuevoPrecioCompra=${formData.nuevoPrecioCompra}`;
+        
+        const response = await fetch(urlServer, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*", // Puedes ajustar esto según la configuración de tu servidor
+            },
+            mode: "cors",
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+

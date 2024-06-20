@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, InputNumber, Modal, Row, Select, Switch, Upload, notification } from 'antd';
-import { FormInstance } from 'antd/es/form';
+
 import { UploadFile } from 'antd/es/upload/interface';
 import { crearInsumo, getUnidadMedida, unidadMedida } from '../../../service/ServiceInsumos';
 import { getSucursal, Sucursal } from '../../../service/ServiceSucursal';
@@ -14,7 +14,7 @@ interface FormularioInsumoProps {
 
 const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose, empresaId, sucursalId }) => {
     const [form] = Form.useForm();
-    const [isModalVisible, setIsModalVisible] = useState(true);
+    const [isModalVisible, ] = useState(true);
     const [, setIsSwitchOn] = useState(false);
     const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
     const [sucursales, setSucursales] = useState<Sucursal[]>([]);
@@ -94,12 +94,14 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose, empresaId,
             form.resetFields();
             onClose();
             // window.location.reload(); // Considera recargar los datos de manera más eficiente si es necesario
+           
             notification.open({
                 message: (
                     <span>
                         <CheckCircleOutlined style={{ color: 'green' }} /> Agregado correctamente
                     </span>
                 ),
+                
             });
         } catch (error) {
             console.error('Error: ', error);
@@ -125,9 +127,9 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose, empresaId,
         });
     };
 
-    function getFieldValue(arg0: string) {
-        throw new Error('Function not implemented.');
-    }
+    // function getFieldValue(arg0: string) {
+    //     throw new Error('Function not implemented.');
+    // }
 
     return (
         <Modal title="Agregar Insumo" visible={isModalVisible} onOk={onClose} onCancel={onClose} footer={null} width={800}>

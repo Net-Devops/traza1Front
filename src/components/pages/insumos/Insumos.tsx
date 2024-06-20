@@ -77,7 +77,7 @@ const Insumos = () => {
           </Button>
         )}
       </div>
-      {showFormularioInsumo && <FormularioInsumo onClose={closeFormularioInsumo} empresaId={selectedEmpresa} sucursalId={selectedSucursal} />}
+      {showFormularioInsumo && <FormularioInsumo onClose={closeFormularioInsumo} empresaId={selectedEmpresa} sucursalId={selectedSucursal}  />}
       <div>
         {selectedSucursal ? (
           <TablaInsumo empresaId={selectedEmpresa} sucursalId={selectedSucursal} />

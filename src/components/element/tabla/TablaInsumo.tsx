@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, EditOutlined} from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table } from 'antd';
+import { Button, Input, Space, Switch, Table } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
-import { getInsumoXSucursal, ArticuloInsumo, deleteInsumoXId } from '../../../service/ServiceInsumos';
+import { getInsumoXSucursal, ArticuloInsumo, deleteInsumoXId, activarInsumoXId } from '../../../service/ServiceInsumos';
 import FormularioInsumoModificar from '../formularios/FromularioInsumoModificar';
+import FormularioStock from '../formularios/FormularioStock';
 
 type DataIndex = keyof ArticuloInsumo;
 type TablaInsumoProps = {
@@ -13,26 +14,30 @@ type TablaInsumoProps = {
   sucursalId: string;
 };
 
-const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
+const TablaInsumo: React.FC<TablaInsumoProps> = ({  sucursalId }) => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef<InputRef>(null);
   const [data, setData] = useState<ArticuloInsumo[]>([]);
   const [, setModalVisible] = useState(false);
-  const [selectedInsumo, setSelectedInsumo] = useState<ArticuloInsumo | null>(null); // Estado para almacenar los datos del insumo seleccionado
+  const [selectedInsumo, setSelectedInsumo] = useState<ArticuloInsumo | null>(null); 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentRecord, setCurrentRecord] = useState<ArticuloInsumo | null>(null);
 
   useEffect(() => {
+    fetchData();
+  }, [sucursalId]);
+
+  const fetchData = async () => {
     console.log('Obteniendo insumos de la sucursal:', sucursalId);
-    
-    getInsumoXSucursal(sucursalId)
-      .then(data => {
-        console.log('Datos recibidos:', data);
-        setData(data);
-      })
-      .catch(error => {
-        console.error('Error al obtener los insumos:', error);
-      });
-  }, [sucursalId]); // Eliminamos selectedInsumo de las dependencias
+    try {
+      const data = await getInsumoXSucursal(sucursalId);
+      console.log('Datos recibidos:', data);
+      setData(data);
+    } catch (error) {
+      console.error('Error al obtener los insumos:', error);
+    }
+  };
 
   const handleSearch = (
     selectedKeys: string[],
@@ -48,6 +53,7 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
     clearFilters();
     setSearchText('');
   };
+
   const getColumnSearchProps = (
     dataIndex: DataIndex
   ): TableColumnType<ArticuloInsumo> => ({
@@ -60,7 +66,7 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Buscar ${dataIndex}`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -80,7 +86,7 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Buscar
           </Button>
           <Button
             onClick={() => handleReset(clearFilters || (() => { }))}
@@ -117,22 +123,22 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
         text
       ),
   });
-  const showDeleteConfirm = async (id: string) => {
-    // Show a confirmation dialog...
-    console.log(id);
-    
-    // If the user confirms, delete the insumo
-    await deleteInsumoXId(id);
-    // En lugar de recargar la página, recargamos los datos de la tabla
-    getInsumoXSucursal(sucursalId)
-      .then(data => {
-        console.log('Datos actualizados:', data);
-        setData(data);
-      })
-      .catch(error => {
-        console.error('Error al actualizar los insumos:', error);
-      });
+
+  const handleSwitchChange = async (checked: boolean, record: ArticuloInsumo) => {
+    try {
+      if (checked) {
+        await activarInsumoXId(record.id.toString());
+      } else {
+        await deleteInsumoXId(record.id.toString());
+      }
+      // Actualizar los datos después de cambiar el estado
+      const updatedData = await getInsumoXSucursal(sucursalId);
+      setData(updatedData);
+    } catch (error) {
+      console.error('Error al actualizar el estado del insumo:', error);
+    }
   };
+
   const handleEdit = (record: ArticuloInsumo) => {
     if (record.id) {
       setSelectedInsumo(record);
@@ -141,19 +147,58 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
       console.error("El ID del insumo es nulo o no está definido.");
     }
   };
+
+  const handleEditStock = (record: ArticuloInsumo) => {
+    if (record.id) {
+      setCurrentRecord(record);
+      setIsModalVisible(true);
+    } else {
+      console.error("El ID del insumo es nulo o no está definido.");
+    }
+  };
+
+  const handleCloseStock = async () => {
+    setIsModalVisible(false);
+    setCurrentRecord(null);
+
+    try {
+      // Actualizar los datos después de cerrar el formulario de stock
+      const updatedData = await getInsumoXSucursal(sucursalId);
+      setData(updatedData);
+    } catch (error) {
+      console.error('Error al obtener los insumos actualizados:', error);
+    }
+  };
+
+  const handleModalClose = async () => {
+    setModalVisible(false);
+    setSelectedInsumo(null);
+
+    try {
+      // Actualizar los datos después de cerrar el formulario de edición de insumo
+      const updatedData = await getInsumoXSucursal(sucursalId);
+      setData(updatedData);
+    } catch (error) {
+      console.error('Error al obtener los insumos actualizados:', error);
+    }
+  };
+
   const columns: TableColumnsType<ArticuloInsumo> = [
     {
-      title: 'Codigo',
+      title: 'Código',
       dataIndex: 'codigo',
       key: 'codigo',
       width: '20%',
       ...getColumnSearchProps('codigo'),
-      sorter: (a, b) => a.codigo.localeCompare(b.codigo),
-      sortDirections: ['descend', 'ascend'],
+      sorter: (a, b) => {
+        const numA = parseInt(a.codigo.split('-')[1], 10);
+        const numB = parseInt(b.codigo.split('-')[1], 10);
+        return numA - numB;
       },
-    
+      sortDirections: ['descend', 'ascend'],
+    },
     {
-      title: 'Denominacion',
+      title: 'Denominación',
       dataIndex: 'denominacion',
       key: 'denominacion',
       ...getColumnSearchProps('denominacion'),
@@ -185,7 +230,7 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
       sortDirections: ['descend', 'ascend'],
     },
     {
-      title: 'Stock Maximo',
+      title: 'Stock Máximo',
       dataIndex: 'stockMaximo',
       key: 'stockMaximo',
       ...getColumnSearchProps('stockMaximo'),
@@ -193,7 +238,7 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
       sortDirections: ['descend', 'ascend'],
     },
     {
-      title: 'Stock Minimo',
+      title: 'Stock Mínimo',
       dataIndex: 'stockMinimo',
       key: 'stockMinimo',
       ...getColumnSearchProps('stockMinimo'),
@@ -207,21 +252,28 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
       render: (esParaElaborar: boolean) => esParaElaborar ? 'Sí' : 'No',
     },
     {
+      title: 'Agregar Stock',
+      key: 'stock',
+      render: (_text: string, record: ArticuloInsumo) => (
+        <Space size="middle">
+          <a onClick={() => handleEditStock(record)}><EditOutlined /></a>
+        </Space>
+      ),
+    },
+    {
       title: 'Acción',
       key: 'action',
       render: (_text: string, record: ArticuloInsumo) => (
         <Space size="middle">
           <a onClick={() => handleEdit(record)}><EditOutlined /></a>
-          <a onClick={() => showDeleteConfirm(record.id.toString())}><DeleteOutlined /></a>
+          <Switch
+            checked={!record.eliminado}
+            onChange={(checked) => handleSwitchChange(checked, record)}
+          />
         </Space>
       ),
     },
   ];
-
-  const handleModalClose = () => {
-    setModalVisible(false);
-  };
-
 
   return (
     <>
@@ -230,8 +282,10 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({ empresaId, sucursalId }) => {
         dataSource={data.map(item => ({ ...item, key: item.id }))}
         pagination={{ pageSizeOptions: ['5', '10', '20', '30', '50', '100'], showSizeChanger: true }}
       />
-    {selectedInsumo && <FormularioInsumoModificar onClose={handleModalClose}  id={selectedInsumo.id} />}
+      {selectedInsumo && <FormularioInsumoModificar onClose={handleModalClose} id={selectedInsumo.id} />}
+      {currentRecord && <FormularioStock onClose={handleCloseStock} id={currentRecord.id} visible={isModalVisible} />}
     </>
   );
 }
+
 export default TablaInsumo;
