@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Select, Row } from 'antd';
+import { Select, Row, Button } from 'antd';
 
 import TablaCategoria from '../../element/table/TablaCategoria';
 import NuevaCategoria from '../../element/botones/BotonAgregarCategoria';
 import { getEmpresas } from '../../../service/ServiceEmpresa';
 import { Empresas } from '../../../service/ServiceEmpresa';
+import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 
@@ -25,6 +26,12 @@ export default function Categorias() {
   const handleRefresh = () => {
     setRefreshKey((prevKey) => prevKey + 1);
   };
+  
+    const navigate = useNavigate();
+  
+    const irACategoriasPorSucursal = (selectedEmpresa) => {
+  navigate(`/categorias/porSucursal`); // Asume que quieres usar el ID en la URL
+};
 
   return (
     <div>
@@ -42,6 +49,7 @@ export default function Categorias() {
           </Select>
         </div>
         <NuevaCategoria selectedEmpresaId={selectedEmpresa} onCategoryCreated={handleRefresh} />
+        <Button onClick={() => irACategoriasPorSucursal(selectedEmpresa)}>Categorías Por Sucursal</Button>
       </Row>
       <br />
       {selectedEmpresa ? (

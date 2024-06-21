@@ -22,10 +22,10 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editCategoryName, setEditCategoryName] = useState<string>("");
   
-  const [editingSubcategory, setEditingSubcategory] = useState<Category | null>(
+  const [, setEditingSubcategory] = useState<Category | null>(
     null
   );
-  const [editSubcategoryName, setEditSubcategoryName] = useState<string>("");
+  const [, setEditSubcategoryName] = useState<string>("");
   const [updateKey, setUpdateKey] = useState<number>(Date.now());
   const [addSubcategoryModalVisible, setAddSubcategoryModalVisible] =
     useState<boolean>(false);
@@ -152,7 +152,7 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
           body: JSON.stringify({
             denominacion: denominacion,
             idCategoriaPadre: selectedParentCategory.id,
-            idEmpresaCategoriaPadre: parseInt(selectedEmpresa)
+            idEmpresaCategoriaPadre: selectedEmpresa
           }),
         }
       );
