@@ -134,15 +134,20 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
     try {
       if (selectedParentCategory === null)
         throw new Error("No se ha seleccionado una categoría padre");
-
+  
       const response = await fetch(
-        `http://localhost:8080/api/categorias/agregar/subcategoria/${selectedParentCategory.id}`,
+        `http://localhost:8080/api/categorias/subcategoriaConEmpresa`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ denominacion: denominacion }),
+          body: JSON.stringify({
+            denominacion: denominacion,
+            idCategoriaPadre: selectedParentCategory.id,
+            idEmpresaCategoriaPadre: parseInt(selectedEmpresa)
+          }),
         }
       );
+  
       if (response.ok) {
         setUpdateKey(Date.now());
         setAddSubcategoryModalVisible(false);
