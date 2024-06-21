@@ -21,9 +21,7 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editCategoryName, setEditCategoryName] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  );
+  
   const [editingSubcategory, setEditingSubcategory] = useState<Category | null>(
     null
   );
@@ -35,10 +33,10 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
 
   const [selectedParentCategory, setSelectedParentCategory] =
     useState<Category | null>(null);
-    const [treeKey, setTreeKey] = useState<number>(Date.now());
+   
 
   useEffect(() => {
-    if (selectedEmpresa) {
+    if (selectedEmpresa !== null) {
       fetchCategories();
     }
   }, [selectedEmpresa, updateKey]);
@@ -61,6 +59,7 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
   const handleEditCategory = (category: Category) => {
     setEditingCategory(category);
     setEditCategoryName(category.denominacion);
+    setUpdateKey(Date.now()); 
   };
 
   const handleCancelEdit = () => {
@@ -75,23 +74,32 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
       if (editingCategory === null) {
         throw new Error("No se puede editar la categoría seleccionada");
       }
-
+  
       const url = `http://localhost:8080/api/categorias/${editingCategory.id}/denominacion`;
-
+  
       const response = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: editCategoryName, // Envía el string directamente sin convertir a JSON
+        body: editCategoryName , // Enviar como JSON
       });
-
+  
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
-
-      setUpdateKey(Date.now());
+  
+      // Actualiza el estado local
+      setCategories(prevCategories =>
+        prevCategories.map(category =>
+          category.id === editingCategory.id
+            ? { ...category, denominacion: editCategoryName }
+            : category
+        )
+      );
+  
+      setUpdateKey(Date.now()); // Fuerza un re-renderizado
       handleCancelEdit();
     } catch (error) {
       console.error("Error al editar:", error);
@@ -101,18 +109,19 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
       });
     }
   };
-
+  
   const handleSwitchChange = async (item: Category) => {
     try {
       const url = `http://localhost:8080/api/categorias/${item.id}/eliminado`;
       const response = await fetch(url, { method: "PUT" });
       if (response.ok) {
-        // Actualiza el estado categories con el valor actualizado de eliminado
-        const updatedCategories = categories.map((category) =>
-          category.id === item.id ? { ...category, eliminado: !category.eliminado } : category
+        // Actualiza el estado local
+        setCategories(prevCategories =>
+          prevCategories.map(category =>
+            category.id === item.id ? { ...category, eliminado: !category.eliminado } : category
+          )
         );
-        setCategories(updatedCategories);
-        setUpdateKey(Date.now());
+        setUpdateKey(Date.now()); // Fuerza un re-renderizado
         console.log("Categoría actualizada:", item.eliminado);
       } else {
         Modal.error({
