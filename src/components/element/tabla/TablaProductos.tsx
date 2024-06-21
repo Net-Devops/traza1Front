@@ -172,7 +172,10 @@ const App: React.FC<Props> = ({ empresaId, sucursalId }) => {
     {
       title: 'Imagen',
       dataIndex: 'url',
-      key: 'url',
+      key: 'image', // Identificador único para la columna
+      render: (text, record) => (
+        <img src={`http://localhost:8080/images/${record.imagen}`} style={{ width: '50px' }} alt="Imagen" />
+      ),
     },
     {
       title: 'Nombre',

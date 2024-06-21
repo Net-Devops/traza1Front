@@ -1,43 +1,60 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import {
+    Modal,
+    Form,
+    Input,
+    Select,
+    Table,
+    InputNumber,
+    Button,
+    Row,
+    Col,
+    Space,
+    Upload,
+    UploadFile,
+    notification,
+} from "antd";
+import dayjs, { Dayjs } from "dayjs";
 import { PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, InputNumber, Modal, Row, Select, Upload, notification, Table } from 'antd';
+import { getInsumoXSucursal, getUnidadMedida, unidadMedida } from "../../../service/ServiceInsumos";
+import TextArea from "antd/es/input/TextArea";
+import { ArticuloProducto, crearManufacturado } from "../../../service/ServiceProducto";
 
-import { UploadFile } from 'antd/es/upload/interface';
-import { crearInsumo, getUnidadMedida, unidadMedida } from '../../../service/ServiceInsumos';
-import { getSucursal, Sucursal } from '../../../service/ServiceSucursal';
-import { crearManufacturado } from '../../../service/ServiceProducto';
+const { Option } = Select;
 
-interface FormularioProductoProps {
+interface Props {
+    visible: boolean;
     onClose: () => void;
-    empresaId: string;
-    sucursalId: string;
+    onSubmit: (values: any) => void;
+    initialValues: any;
+    sucursalId?: string;
 }
 
-const FormularioProducto: React.FC<FormularioProductoProps> = ({ onClose, empresaId, sucursalId }) => {
-    const [form] = Form.useForm();
-    const [isModalVisible,] = useState(true);
-    const [, setIsSwitchOn] = useState(false);
+const handleSearch = (
+    _setSelectedKeys: (keys: string[]) => void,
+    _selectedKeys: string[],
+    confirm: () => void
+) => {
+    confirm();
+};
+
+const handleReset = (clearFilters: () => void) => {
+    clearFilters();
+};
+
+const FormularioProducto: React.FC<Props> = ({
+    visible,
+    onClose,
+    onSubmit,
+    initialValues,
+    sucursalId,
+}) => {
+    const [selectedInsumos, setSelectedInsumos] = useState<string[]>([]);
+    const [selectedInsumosData, setSelectedInsumosData] = useState<any[]>([]);
+    const [insumos, setInsumos] = useState<any[]>([]);
+    const [filterDenominacion, setFilterDenominacion] = useState<string>("");
+    const [filterCodigo, setFilterCodigo] = useState<string>("");
     const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
-    const [sucursales, setSucursales] = useState<Sucursal[]>([]);
-    const [dataSource, setDataSource] = useState([]);
-    const [isNestedModalVisible, setIsNestedModalVisible] = useState(false);
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [selectedInsumosToAdd, setSelectedInsumosToAdd] = useState([]);
-
-    useEffect(() => {
-        const fetchSucursales = async () => {
-            if (empresaId) {
-                try {
-                    const sucursalesData = await getSucursal(empresaId);
-                    setSucursales(sucursalesData);
-                } catch (error) {
-                    console.error('Error al obtener las sucursales:', error);
-                }
-            }
-        };
-        fetchSucursales();
-    }, [empresaId]);
-
     useEffect(() => {
         const fetchUnidadesMedida = async () => {
             try {
@@ -50,19 +67,55 @@ const FormularioProducto: React.FC<FormularioProductoProps> = ({ onClose, empres
         fetchUnidadesMedida();
     }, []);
 
-    const onFinish = async (values: any) => {
+    const handleInsumosSelect = (
+        selectedRowKeys: React.Key[],
+        selectedRows: any[]
+    ) => {
+        setSelectedInsumos(selectedRowKeys as string[]);
+        setSelectedInsumosData(selectedRows);
+    };
+
+    const setFieldValue = (_arg0: string, value: string | Dayjs): void => {
+        if (typeof value === "string") {
+            value = dayjs(value);
+        }
+        // Add logic as needed
+    };
+
+    const handleCantidadChange = (id: string, cantidad: number) => {
+        setSelectedInsumosData((prevState) =>
+            prevState.map((item) => (item.id === id ? { ...item, cantidad } : item))
+        );
+    };
+
+    useEffect(() => {
+        if (sucursalId) {
+            getInsumoXSucursal(sucursalId)
+                .then(setInsumos)
+                .catch(console.error);
+        }
+    }, [sucursalId]);
+
+    const handleButtonClick = async (values: any) => {
         console.log('Received values of form: ', values);
         const formattedValues = { ...values };
         let promises: Promise<{ url: string }>[] = [];
 
         formattedValues.unidadMedida = {
             id: values.unidadMedida,
-            denominacion: values.denominacionUnidadMedida
+            denominacion: unidadesMedida.find(u => u.id === values.unidadMedida)?.denominacion
         };
         formattedValues.sucursal = {
-            id: values.sucursal,
-            denominacion: values.nombreSucursal
+            id: sucursalId,
+            denominacion: "" // You might want to fill this with actual data if available
         };
+        formattedValues.articuloManufacturadoDetalles = selectedInsumosData.map(insumo => ({
+            cantidad: insumo.cantidad,
+            articuloInsumo: {
+                id: insumo.id
+            }
+        }));
+
         if (values.imagenes) {
             const files: UploadFile[] = values.imagenes;
 
@@ -82,13 +135,10 @@ const FormularioProducto: React.FC<FormularioProductoProps> = ({ onClose, empres
         try {
             const imagenes = await Promise.all(promises);
             formattedValues.imagenes = imagenes;
-
             const response = await crearManufacturado(formattedValues);
             console.log('Response: ', response);
             form.resetFields();
             onClose();
-            // window.location.reload(); // Considera recargar los datos de manera más eficiente si es necesario
-
             notification.open({
                 message: (
                     <span>
@@ -99,10 +149,6 @@ const FormularioProducto: React.FC<FormularioProductoProps> = ({ onClose, empres
         } catch (error) {
             console.error('Error: ', error);
         }
-    };
-
-    const handleSwitchChange = (checked: boolean) => {
-        setIsSwitchOn(checked);
     };
 
     const normFile = (e: any) => {
@@ -121,131 +167,240 @@ const FormularioProducto: React.FC<FormularioProductoProps> = ({ onClose, empres
         });
     };
 
-    const getColumnSearchProps = (dataIndex: string) => ({
-        // Custom filter UI can be added here
-    });
+    const [form] = Form.useForm();
 
     const columns = [
         {
             title: "Código",
             dataIndex: "codigo",
             key: "codigo",
-            ...getColumnSearchProps("codigo"),
+            filterDropdown: ({
+                setSelectedKeys,
+                selectedKeys,
+                confirm,
+                clearFilters,
+            }: {
+                setSelectedKeys: (keys: string[]) => void;
+                selectedKeys: string[];
+                confirm: () => void;
+                clearFilters: () => void;
+            }) => (
+                <div style={{ padding: 8 }}>
+                    <Input
+                        placeholder="Buscar Código"
+                        value={selectedKeys[0]}
+                        onChange={(e) =>
+                            setSelectedKeys(e.target.value ? [e.target.value] : [])
+                        }
+                        onPressEnter={() =>
+                            handleSearch(setSelectedKeys, selectedKeys, confirm)
+                        }
+                        style={{ width: 188, marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() =>
+                                handleSearch(setSelectedKeys, selectedKeys, confirm)
+                            }
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            Buscar
+                        </Button>
+                        <Button
+                            onClick={() => handleReset(clearFilters)}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            Reset
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value: string, record: any) =>
+                record.codigo.toLowerCase().includes(value.toLowerCase()),
         },
         {
             title: "Denominación",
             dataIndex: "denominacion",
             key: "denominacion",
-            ...getColumnSearchProps("denominacion"),
+            filterDropdown: ({
+                setSelectedKeys,
+                selectedKeys,
+                confirm,
+                clearFilters,
+            }: {
+                setSelectedKeys: (keys: string[]) => void;
+                selectedKeys: string[];
+                confirm: () => void;
+                clearFilters: () => void;
+            }) => (
+                <div style={{ padding: 8 }}>
+                    <Input
+                        placeholder="Buscar Denominación"
+                        value={selectedKeys[0]}
+                        onChange={(e) =>
+                            setSelectedKeys(e.target.value ? [e.target.value] : [])
+                        }
+                        onPressEnter={() =>
+                            handleSearch(setSelectedKeys, selectedKeys, confirm)
+                        }
+                        style={{ width: 188, marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() =>
+                                handleSearch(setSelectedKeys, selectedKeys, confirm)
+                            }
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            Buscar
+                        </Button>
+                        <Button
+                            onClick={() => handleReset(clearFilters)}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            Reset
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value: string, record: any) =>
+                record.denominacion.toLowerCase().includes(value.toLowerCase()),
         },
-    ];
-
-    const insumoColumns = [
-        ...columns,
         {
-            title: "Cantidad",
-            key: "cantidad",
-            render: (_: any, record: { cantidad: number; key: any; }) => (
-                <Input
-                    type="number"
-                    min={0}
-                    value={record.cantidad}
-                    onChange={(e) => handleQuantityChange(e.target.value, record.key)}
-                />
+            title: "Acción",
+            key: "accion",
+            render: (_text: string, record: any) => (
+                <Button
+                    type="link"
+                    onClick={() => handleAddArticulo(record)}
+                    disabled={selectedInsumos.includes(record.id)}
+                >
+                    Agregar
+                </Button>
             ),
         },
     ];
 
-    const handleAddSelected = () => {
-        const selectedInsumos = dataSource.filter((item: any) => selectedRowKeys.includes(item.key));
-        setSelectedInsumosToAdd(selectedInsumos);
-        setIsNestedModalVisible(false);
-    };
-
-    const handleQuantityChange = (value: number, key: any) => {
-        const newData = [...selectedInsumosToAdd];
-        const index = newData.findIndex(item => key === item.key);
-        if (index !== -1) {
-            newData[index].cantidad = value;
-            setSelectedInsumosToAdd(newData);
-        }
-    };
-
-    const handleNestedModalOk = () => {
-        handleAddSelected();
-    };
-
-    const handleNestedModalCancel = () => {
-        setIsNestedModalVisible(false);
-    };
-
-    const handleOpenAddInsumosModal = () => {
-        setIsNestedModalVisible(true);
-    };
-
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: (selectedRowKeys: any) => {
-            setSelectedRowKeys(selectedRowKeys);
-        },
-    };
-
-    const handleInsumosCancel = () => {
-        setIsNestedModalVisible(false);
+    const handleAddArticulo = (articulo: any) => {
+        setSelectedInsumosData((prevData) => [...prevData, articulo]);
+        setSelectedInsumos((prevKeys) => [...prevKeys, articulo.id]);
     };
 
     return (
-        <Modal title="Agregar Producto" visible={isModalVisible} onOk={onClose} onCancel={onClose} footer={null} width={800}>
+        <Modal
+            visible={visible}
+            title="Crear Promoción"
+            onCancel={onClose}
+            footer={null}
+            width={1000}
+        >
             <Form
                 form={form}
+                initialValues={initialValues}
+                onFinish={handleButtonClick}
                 layout="vertical"
-                style={{ maxWidth: 800, justifyContent: 'center' }}
-                onFinish={onFinish}
-                initialValues={{
-                    codigo: '',
-                    denominacion: '',
-                    descripcion: '',
-                    preparacion: '',
-                    tiempoEstimado: 0,
-                    precioVenta: 0,
-                    unidadMedida: '',
-                    sucursal: sucursalId,
-                }}
             >
                 <div>
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item label="Sucursal" name="sucursal">
-                                <Select disabled>
-                                    {sucursales.map((sucursal) => (
-                                        <Select.Option key={sucursal.id} value={sucursal.id}>
-                                            {sucursal.nombre}
-                                        </Select.Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
                             <Form.Item
-                                label="Código"
+                                label="Codigo:"
                                 name="codigo"
-                                rules={[{ required: true, message: 'El código no puede estar vacío' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item
-                                label="Denominación"
-                                name="denominacion"
-                                rules={[{ required: true, message: 'La denominación no puede estar vacía' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item
-                                label="Precio de venta"
-                                name="precioVenta"
                                 rules={[
-                                    { required: true, message: 'Por favor, ingresa un precio de venta válido', type: 'number', min: 0 }
+                                    {
+                                        required: true,
+                                        message: "Por favor ingresa el codigo",
+                                    },
                                 ]}
                             >
-                                <InputNumber style={{ width: '100%' }} min={0} />
+                                <Input style={{ width: "100%" }} />
+                            </Form.Item>
+                            <Form.Item
+                                label="Denominación:"
+                                name="denominacion"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Por favor ingresa la denominación",
+                                    },
+                                ]}
+                            >
+                                <Input style={{ width: "100%" }} />
+                            </Form.Item>
+                            <Form.Item
+                                label="Descripción:"
+                                name="descripcion"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Por favor ingresa la descripción",
+                                    },
+                                ]}
+                            >
+                                <Input style={{ width: "100%" }} />
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Preparación:"
+                                name="preparacion"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Por favor ingresa la preparacion",
+                                    },
+                                ]}
+                            >
+                                <TextArea rows={3} style={{ width: "100%" }} />
+                            </Form.Item>
+
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item
+                                        label="Tiempo estimado en minutos:"
+                                        name="tiempoEstimadoCocina"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Por favor ingresa el tiempo de preparacion",
+                                            },
+                                        ]}
+                                    >
+                                        <Input style={{ width: "100%" }} />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item
+                                        label="Unidad de Medida"
+                                        name="unidadMedida"
+                                        rules={[{ required: true, message: 'Por favor, selecciona una unidad de medida' }]}
+                                    >
+                                        <Select>
+                                            {unidadesMedida.map((unidad) => (
+                                                <Select.Option key={unidad.id} value={unidad.id}>
+                                                    {unidad.denominacion}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Form.Item
+                                label="Precio de venta:"
+                                name="precioVenta"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Por favor ingresa el precio de venta",
+                                    },
+                                ]}
+                            >
+                                <Input style={{ width: "100%" }} />
                             </Form.Item>
                             <Form.Item
                                 label="Foto"
@@ -260,91 +415,89 @@ const FormularioProducto: React.FC<FormularioProductoProps> = ({ onClose, empres
                                     </button>
                                 </Upload>
                             </Form.Item>
+
                         </Col>
+
                         <Col span={12}>
-                            <Form.Item
-                                label="Unidad de Medida"
-                                name="unidadMedida"
-                                rules={[{ required: true, message: 'Por favor, selecciona una unidad de medida' }]}
-                            >
-                                <Select>
-                                    {unidadesMedida.map((unidad) => (
-                                        <Select.Option key={unidad.id} value={unidad.id}>
-                                            {unidad.denominacion}
-                                        </Select.Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                            <Form.Item
-                                label="Preparacion"
-                                name="preparacion"
-                                rules={[{ required: true, message: 'La preparacion no puede estar vacía' }]}
-                            >
-                                <Input.TextArea rows={5} />
-                            </Form.Item>
-                            <Form.Item
-                                label="Tiempo estimado en minutos"
-                                name="tiempoEstimado"
-                                rules={[{ required: true, message: 'el tiempo no puede estar vacío' }]}
-                            >
-                                <Input />
+                            <Form.Item label="Artículos Manufacturados:" style={{ width: "100%" }}>
+                                <Table
+                                    dataSource={selectedInsumosData}
+                                    columns={[
+                                        { title: "Código", dataIndex: "codigo", key: "codigo" },
+                                        {
+                                            title: "Artículo",
+                                            dataIndex: "denominacion",
+                                            key: "denominacion",
+                                        },
+                                        {
+                                            title: "Cantidad",
+                                            dataIndex: "cantidad",
+                                            key: "cantidad",
+                                            render: (_text: string, record: any) => (
+                                                <Form.Item
+                                                    name={`cantidad_${record.id}`}
+                                                    rules={[
+                                                        {
+                                                            required: true,
+                                                            message: "Por favor ingresa la cantidad",
+                                                        },
+                                                        {
+                                                            validator: (_, value) =>
+                                                                value > 0
+                                                                    ? Promise.resolve()
+                                                                    : Promise.reject(
+                                                                        new Error("La cantidad debe ser mayor a 0")
+                                                                    ),
+                                                        },
+                                                    ]}
+                                                >
+                                                    <InputNumber
+                                                        min={1}
+                                                        value={record.cantidad}
+                                                        onChange={(value) =>
+                                                            handleCantidadChange(record.id, value)
+                                                        }
+                                                    />
+                                                </Form.Item>
+                                            ),
+                                        },
+                                    ]}
+                                    pagination={{ pageSize: 3 }}
+                                />
+                                <Table
+                                    rowSelection={{
+                                        type: "checkbox",
+                                        selectedRowKeys: selectedInsumos,
+                                        onChange: handleInsumosSelect,
+                                    }}
+                                    columns={columns}
+                                    dataSource={insumos.filter(
+                                        (insumo) =>
+                                            insumo.denominacion
+                                                .toLowerCase()
+                                                .includes(filterDenominacion.toLowerCase()) &&
+                                            insumo.codigo
+                                                .toLowerCase()
+                                                .includes(filterCodigo.toLowerCase())
+                                    )}
+                                    rowKey="id"
+                                    pagination={{ pageSize: 3 }}
+                                />
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Button type="primary" onClick={handleOpenAddInsumosModal} style={{ marginBottom: 20 }}>
-                        Agregar Insumos
-                    </Button>
-                    <Table
-                        dataSource={selectedInsumosToAdd}
-                        columns={insumoColumns}
-                        pagination={false}
-                    />
-                    <Form.Item style={{ textAlign: 'right' }}>
-                        <Button type="default" style={{ marginRight: '10px' }} onClick={onClose}>
-                            Cancelar
-                        </Button>
-                        <Button type="primary" htmlType="submit">
-                            Agregar
-                        </Button>
-                    </Form.Item>
                 </div>
-            </Form>
 
-            <Modal
-                title="Agregar Insumos"
-                visible={isNestedModalVisible}
-                onOk={handleNestedModalOk}
-                onCancel={handleNestedModalCancel}
-                width={1000}
-                footer={[
-                    <Button key="back" onClick={handleInsumosCancel}>
-                        Cancel
-                    </Button>,
-                    <Button key="submit" type="primary" onClick={handleNestedModalOk}>
-                        Agregar Seleccionados
-                    </Button>,
-                ]}
-            >
-                <Row gutter={16}>
-                    <Col span={24}>
-                        <Table
-                            dataSource={dataSource}
-                            columns={columns}
-                            rowKey="id"
-                            rowSelection={rowSelection}
-                        />
-                        <Button
-                            type="primary"
-                            onClick={handleAddSelected}
-                            disabled={selectedRowKeys.length === 0}
-                        >
-                            Agregar Seleccionados
-                        </Button>
-                    </Col>
-                </Row>
-            </Modal>
+                <Form.Item style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button type="primary" onClick={() => form.submit()}>
+                        Cargar
+                    </Button>
+                </Form.Item>
+            </Form>
         </Modal>
     );
 };
 
 export default FormularioProducto;
+
+

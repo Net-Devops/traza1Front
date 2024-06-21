@@ -1,4 +1,4 @@
-import { sucursal } from "./ServiceInsumos";
+
 
 export interface Imagen {
     id: number;
@@ -9,7 +9,10 @@ export interface unidadMedida {
     id: number;
     denominacion: string;
 }
-
+export interface sucursal {
+    id: number;
+    nombre: string;
+}
 export interface ArticuloInsumo {
     id: number;
     denominacion: string;
@@ -45,7 +48,7 @@ export interface ArticuloProducto {
 
 
 export async function crearManufacturado(formData: ArticuloProducto) {
-    console.log("estoy en el crearInsumo");
+    console.log("estoy en el crearManufacturado");
     
     try {
         console.log("estoy en el fetch");
@@ -70,17 +73,17 @@ export async function crearManufacturado(formData: ArticuloProducto) {
                 tiempoEstimadoMinutos: formData.tiempoEstimadoCocina || 0,
                 preparacion: formData.preparacion || "sin preparacion",
                 sucursal: formData.sucursal,
-                articuloManufacturadoDetalles: Array.isArray(formData.articuloManufacturadoDetalles) ? formData.articuloManufacturadoDetalles : [formData.articuloManufacturadoDetalles]
-                
+                articuloManufacturadoDetalles: formData.articuloManufacturadoDetalles
             }),
         });
 
         if (!response.ok) {
-            // throw new Error(HTTP error! status: ${response.status});
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         return await response.json();
     } catch (error) {
         console.log("Error: ", error);
+        throw error;
     }
 }
 
