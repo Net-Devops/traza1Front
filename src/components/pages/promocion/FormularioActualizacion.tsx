@@ -306,7 +306,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
               rowKey="id"
               columns={columns}
               dataSource={articulos.filter((articulo) =>
-                articulo.denominacion.includes(searchArticulos)
+                articulo.denominacion.toLowerCase().includes(searchArticulos)
               )}
               pagination={{ pageSize: 5 }}
             />
@@ -317,7 +317,9 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
           <Col span={24}>
             <Input.Search
               placeholder="Buscar por denominación"
-              onChange={(e) => setSearchSelectedArticulos(e.target.value)}
+              onChange={(e) =>
+                setSearchSelectedArticulos(e.target.value.toLowerCase())
+              }
             />
             <Table
               rowKey="id"
@@ -355,7 +357,9 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
                 },
               ]}
               dataSource={selectedArticulosData.filter((articulo) =>
-                articulo.denominacion.includes(searchSelectedArticulos)
+                articulo.denominacion
+                  .toLowerCase()
+                  .includes(searchSelectedArticulos)
               )}
               pagination={{ pageSize: 5 }}
             />
