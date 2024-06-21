@@ -98,6 +98,7 @@ const FormularioPromocion: React.FC<Props> = ({
         horaHasta: formValues.horaHasta.format("HH:mm"),
         descripcionDescuento: formValues.descripcionDescuento,
         precioPromocional: formValues.precioPromocional,
+        imagen: formValues.imagen,
         sucursales: [{ id: selectedSucursalId }],
         promocionDetalles: selectedArticulosData.map((articulo) => ({
           cantidad: articulo.cantidad,
@@ -105,6 +106,7 @@ const FormularioPromocion: React.FC<Props> = ({
         })),
       };
       await savePromocion(promocionData);
+      form.resetFields(); // Limpia los campos del formulario
       onCancel();
     } catch (error) {
       console.error("Error al guardar la promoción:", error);
@@ -387,6 +389,10 @@ const FormularioPromocion: React.FC<Props> = ({
                     </Option>
                   ))}
                 </Select>
+              </Form.Item>
+
+              <Form.Item label="Imagen:" name="imagen">
+                <Input style={{ width: "100%" }} />
               </Form.Item>
             </Col>
           </Row>

@@ -57,7 +57,6 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
   }, [selectedSucursalId]);
 
   useEffect(() => {
-    console.log("-------------id promocion " + promocionId);
     if (promocionId) {
       fetchPromocionById(promocionId).then((data) => {
         form.setFieldsValue({
@@ -69,6 +68,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
           descripcionDescuento: data.descripcionDescuento,
           precioPromocional: data.precioPromocional,
           tipoPromocion: data.tipoPromocion,
+          imagen: data.imagen,
         });
         setSelectedArticulosData(
           data.promocionDetalles.map((detalle: any) => ({
@@ -103,6 +103,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
         horaHasta: formValues.horaHasta.format("HH:mm"),
         descripcionDescuento: formValues.descripcionDescuento,
         precioPromocional: formValues.precioPromocional,
+        imagen: formValues.imagen,
         sucursales: [{ id: selectedSucursalId }],
         promocionDetalles: selectedArticulosData.map((articulo) => ({
           cantidad: articulo.cantidad,
@@ -111,6 +112,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
       };
       await eliminarDetallesPromocion(promocionId!);
       await actualizarPromocion(promocionId!, promocionData);
+      form.resetFields(); // Limpia los campos del formulario
       onCancel();
       onSubmit(promocionData); // Asegúrate de llamar a onSubmit aquí
     } catch (error) {
@@ -162,11 +164,16 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
     );
   };
 
+  const handleCancel = () => {
+    form.resetFields(); // Limpia los campos del formulario
+    onCancel();
+  };
+
   return (
     <Modal
       visible={visible}
       title="Actualizar Promoción"
-      onCancel={onCancel}
+      onCancel={handleCancel}
       footer={null}
       width={800}
     >
@@ -282,6 +289,9 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
                   </Option>
                 ))}
               </Select>
+            </Form.Item>
+            <Form.Item label="Imagen:" name="imagen">
+              <Input style={{ width: "100%" }} />
             </Form.Item>
           </Col>
         </Row>
