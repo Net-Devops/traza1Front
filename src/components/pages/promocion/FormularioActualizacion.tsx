@@ -94,6 +94,18 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
   const handleButtonClick = async () => {
     try {
       const formValues = await form.validateFields();
+      if (selectedArticulosData.length === 0) {
+        alert("Debe haber al menos un artículo en la tabla");
+        return;
+      }
+      const allRecordsHaveQuantity = selectedArticulosData.every(
+        (record) => record.cantidad > 0
+      );
+
+      if (!allRecordsHaveQuantity) {
+        alert("Todos los artículos deben tener una cantidad");
+        return;
+      }
       const promocionData: Promocion = {
         id: promocionId!,
         denominacion: formValues.denominacion,
@@ -336,9 +348,13 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
                     <InputNumber
                       min={1}
                       value={record.cantidad}
-                      onChange={(value) =>
-                        handleCantidadChange(record.id, value || 1)
-                      }
+                      onChange={(value) => {
+                        if (value === null || isNaN(value)) {
+                          alert("El campo Cantidad debe ser un número");
+                          return;
+                        }
+                        handleCantidadChange(record.id, value);
+                      }}
                     />
                   ),
                 },
