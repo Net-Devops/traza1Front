@@ -4,8 +4,9 @@ import TablaProductos from '../../element/tabla/TablaProductos';
 import { Empresas, getEmpresas } from '../../../service/ServiceEmpresa';
 import { Sucursal, getSucursal } from '../../../service/ServiceSucursal';
 
-import { Button, Select, Modal } from 'antd';
-import FormularioPromocion from '../../element/formularios/FormularioProducto';
+import { Button, Select } from 'antd';
+
+import FormularioProducto from '../../element/formularios/FormularioProducto';
 
 const { Option } = Select;
 
@@ -82,21 +83,15 @@ export default function Productos() {
           </Button>
         )}
       </div>
-      <Modal
-        visible={showFormularioProducto}
-        title="Agregar Producto"
-        onCancel={closeFormularioProducto}
-        footer={null}
-        width={800}
-      >
-        <FormularioPromocion
+     
+        <FormularioProducto
           visible={showFormularioProducto}
           onClose={closeFormularioProducto}
           onSubmit={handleFormSubmit}
           initialValues={null}
           sucursalId={selectedSucursal}
         />
-      </Modal>
+ 
       <div>
         {selectedSucursal ? (
           <TablaProductos empresaId={selectedEmpresa} sucursalId={selectedSucursal} />

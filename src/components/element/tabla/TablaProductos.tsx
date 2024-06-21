@@ -25,7 +25,7 @@ interface Props {
   sucursalId: string;
 }
 
-const App: React.FC<Props> = ({ empresaId, sucursalId }) => {
+const App: React.FC<Props> = ({  sucursalId }) => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef<InputRef>(null);
@@ -173,7 +173,7 @@ const App: React.FC<Props> = ({ empresaId, sucursalId }) => {
       title: 'Imagen',
       dataIndex: 'url',
       key: 'image', // Identificador único para la columna
-      render: (text, record) => (
+      render: (_text, record) => (
         <img src={`http://localhost:8080/images/${record.imagen}`} style={{ width: '50px' }} alt="Imagen" />
       ),
     },

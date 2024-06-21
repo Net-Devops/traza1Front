@@ -9,18 +9,17 @@ import {
     Button,
     Row,
     Col,
-    Space,
     Upload,
     UploadFile,
     notification,
 } from "antd";
-import dayjs, { Dayjs } from "dayjs";
+
 import { PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { getInsumoXSucursal, getUnidadMedida, unidadMedida } from "../../../service/ServiceInsumos";
 import TextArea from "antd/es/input/TextArea";
-import { ArticuloProducto, crearManufacturado } from "../../../service/ServiceProducto";
+import { crearManufacturado } from "../../../service/ServiceProducto";
 
-const { Option } = Select;
+
 
 interface Props {
     visible: boolean;
@@ -30,30 +29,21 @@ interface Props {
     sucursalId?: string;
 }
 
-const handleSearch = (
-    _setSelectedKeys: (keys: string[]) => void,
-    _selectedKeys: string[],
-    confirm: () => void
-) => {
-    confirm();
-};
-
-const handleReset = (clearFilters: () => void) => {
-    clearFilters();
-};
 
 const FormularioProducto: React.FC<Props> = ({
     visible,
     onClose,
-    onSubmit,
+   
     initialValues,
     sucursalId,
 }) => {
+    const [searchArticulos, setSearchArticulos] = useState("");
+    const [searchSelectedArticulos, setSearchSelectedArticulos] = useState("");
     const [selectedInsumos, setSelectedInsumos] = useState<string[]>([]);
     const [selectedInsumosData, setSelectedInsumosData] = useState<any[]>([]);
     const [insumos, setInsumos] = useState<any[]>([]);
-    const [filterDenominacion, setFilterDenominacion] = useState<string>("");
-    const [filterCodigo, setFilterCodigo] = useState<string>("");
+
+   
     const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
     useEffect(() => {
         const fetchUnidadesMedida = async () => {
@@ -67,20 +57,7 @@ const FormularioProducto: React.FC<Props> = ({
         fetchUnidadesMedida();
     }, []);
 
-    const handleInsumosSelect = (
-        selectedRowKeys: React.Key[],
-        selectedRows: any[]
-    ) => {
-        setSelectedInsumos(selectedRowKeys as string[]);
-        setSelectedInsumosData(selectedRows);
-    };
-
-    const setFieldValue = (_arg0: string, value: string | Dayjs): void => {
-        if (typeof value === "string") {
-            value = dayjs(value);
-        }
-        // Add logic as needed
-    };
+   
 
     const handleCantidadChange = (id: string, cantidad: number) => {
         setSelectedInsumosData((prevState) =>
@@ -97,6 +74,19 @@ const FormularioProducto: React.FC<Props> = ({
     }, [sucursalId]);
 
     const handleButtonClick = async (values: any) => {
+        if (selectedInsumosData.length === 0) {
+            alert("Debe haber al menos un artículo en la tabla");
+            return;
+        }
+        const allRecordsHaveQuantity = selectedInsumosData.every(
+            (record) => record.cantidad > 0
+        );
+
+        if (!allRecordsHaveQuantity) {
+            alert("Todos los artículos deben tener una cantidad");
+            return;
+        }
+
         console.log('Received values of form: ', values);
         const formattedValues = { ...values };
         let promises: Promise<{ url: string }>[] = [];
@@ -171,106 +161,19 @@ const FormularioProducto: React.FC<Props> = ({
 
     const columns = [
         {
-            title: "Código",
-            dataIndex: "codigo",
-            key: "codigo",
-            filterDropdown: ({
-                setSelectedKeys,
-                selectedKeys,
-                confirm,
-                clearFilters,
-            }: {
-                setSelectedKeys: (keys: string[]) => void;
-                selectedKeys: string[];
-                confirm: () => void;
-                clearFilters: () => void;
-            }) => (
-                <div style={{ padding: 8 }}>
-                    <Input
-                        placeholder="Buscar Código"
-                        value={selectedKeys[0]}
-                        onChange={(e) =>
-                            setSelectedKeys(e.target.value ? [e.target.value] : [])
-                        }
-                        onPressEnter={() =>
-                            handleSearch(setSelectedKeys, selectedKeys, confirm)
-                        }
-                        style={{ width: 188, marginBottom: 8, display: "block" }}
-                    />
-                    <Space>
-                        <Button
-                            type="primary"
-                            onClick={() =>
-                                handleSearch(setSelectedKeys, selectedKeys, confirm)
-                            }
-                            size="small"
-                            style={{ width: 90 }}
-                        >
-                            Buscar
-                        </Button>
-                        <Button
-                            onClick={() => handleReset(clearFilters)}
-                            size="small"
-                            style={{ width: 90 }}
-                        >
-                            Reset
-                        </Button>
-                    </Space>
-                </div>
-            ),
-            onFilter: (value: string, record: any) =>
-                record.codigo.toLowerCase().includes(value.toLowerCase()),
-        },
-        {
             title: "Denominación",
             dataIndex: "denominacion",
             key: "denominacion",
-            filterDropdown: ({
-                setSelectedKeys,
-                selectedKeys,
-                confirm,
-                clearFilters,
-            }: {
-                setSelectedKeys: (keys: string[]) => void;
-                selectedKeys: string[];
-                confirm: () => void;
-                clearFilters: () => void;
-            }) => (
-                <div style={{ padding: 8 }}>
-                    <Input
-                        placeholder="Buscar Denominación"
-                        value={selectedKeys[0]}
-                        onChange={(e) =>
-                            setSelectedKeys(e.target.value ? [e.target.value] : [])
-                        }
-                        onPressEnter={() =>
-                            handleSearch(setSelectedKeys, selectedKeys, confirm)
-                        }
-                        style={{ width: 188, marginBottom: 8, display: "block" }}
-                    />
-                    <Space>
-                        <Button
-                            type="primary"
-                            onClick={() =>
-                                handleSearch(setSelectedKeys, selectedKeys, confirm)
-                            }
-                            size="small"
-                            style={{ width: 90 }}
-                        >
-                            Buscar
-                        </Button>
-                        <Button
-                            onClick={() => handleReset(clearFilters)}
-                            size="small"
-                            style={{ width: 90 }}
-                        >
-                            Reset
-                        </Button>
-                    </Space>
-                </div>
-            ),
-            onFilter: (value: string, record: any) =>
-                record.denominacion.toLowerCase().includes(value.toLowerCase()),
+        },
+        {
+            title: "Código",
+            dataIndex: "codigo",
+            key: "codigo",
+        },
+        {
+            title: "Precio Venta",
+            dataIndex: "precioVenta",
+            key: "precioVenta",
         },
         {
             title: "Acción",
@@ -291,6 +194,15 @@ const FormularioProducto: React.FC<Props> = ({
         setSelectedInsumosData((prevData) => [...prevData, articulo]);
         setSelectedInsumos((prevKeys) => [...prevKeys, articulo.id]);
     };
+    const handleRemoveArticulo = (articulo: any) => {
+        setSelectedInsumosData((prevData) =>
+            prevData.filter((item) => item.id !== articulo.id)
+        );
+        setSelectedInsumos((prevKeys) =>
+            prevKeys.filter((key) => key !== articulo.id)
+        );
+    };
+
 
     return (
         <Modal
@@ -420,10 +332,27 @@ const FormularioProducto: React.FC<Props> = ({
 
                         <Col span={12}>
                             <Form.Item label="Artículos Manufacturados:" style={{ width: "100%" }}>
+                                <Input.Search
+                                    placeholder="Buscar por denominación"
+                                    onChange={(e) => setSearchArticulos(e.target.value)}
+                                />
                                 <Table
-                                    dataSource={selectedInsumosData}
+                                    rowKey="id"
+                                    columns={columns}
+                                    dataSource={insumos.filter((articulo) =>
+                                        articulo.denominacion.toLowerCase().includes(searchArticulos)
+                                    )}
+                                    pagination={{ pageSize: 3 }}
+                                />
+                                <Input.Search
+                                    placeholder="Buscar por denominación"
+                                    onChange={(e) =>
+                                        setSearchSelectedArticulos(e.target.value.toLowerCase())
+                                    }
+                                />
+                                <Table
+                                    rowKey="id"
                                     columns={[
-                                        { title: "Código", dataIndex: "codigo", key: "codigo" },
                                         {
                                             title: "Artículo",
                                             dataIndex: "denominacion",
@@ -431,56 +360,40 @@ const FormularioProducto: React.FC<Props> = ({
                                         },
                                         {
                                             title: "Cantidad",
-                                            dataIndex: "cantidad",
                                             key: "cantidad",
                                             render: (_text: string, record: any) => (
-                                                <Form.Item
-                                                    name={`cantidad_${record.id}`}
-                                                    rules={[
-                                                        {
-                                                            required: true,
-                                                            message: "Por favor ingresa la cantidad",
-                                                        },
-                                                        {
-                                                            validator: (_, value) =>
-                                                                value > 0
-                                                                    ? Promise.resolve()
-                                                                    : Promise.reject(
-                                                                        new Error("La cantidad debe ser mayor a 0")
-                                                                    ),
-                                                        },
-                                                    ]}
-                                                >
-                                                    <InputNumber
-                                                        min={1}
-                                                        value={record.cantidad}
-                                                        onChange={(value) =>
-                                                            handleCantidadChange(record.id, value)
+                                                <InputNumber
+                                                    min={1}
+                                                    value={record.cantidad}
+                                                    onChange={(value) => {
+                                                        if (!value) {
+                                                            alert("El campo Cantidad es requerido");
+                                                            return;
                                                         }
-                                                    />
-                                                </Form.Item>
+                                                        handleCantidadChange(record.id, value);
+                                                    }}
+                                                />
+                                            ),
+                                        },
+                                        {
+                                            title: "Acción",
+                                            key: "accion",
+                                            render: (_text: string, record: any) => (
+                                                <Button
+                                                    type="primary"
+                                                    danger
+                                                    onClick={() => handleRemoveArticulo(record)}
+                                                >
+                                                    Eliminar
+                                                </Button>
                                             ),
                                         },
                                     ]}
-                                    pagination={{ pageSize: 3 }}
-                                />
-                                <Table
-                                    rowSelection={{
-                                        type: "checkbox",
-                                        selectedRowKeys: selectedInsumos,
-                                        onChange: handleInsumosSelect,
-                                    }}
-                                    columns={columns}
-                                    dataSource={insumos.filter(
-                                        (insumo) =>
-                                            insumo.denominacion
-                                                .toLowerCase()
-                                                .includes(filterDenominacion.toLowerCase()) &&
-                                            insumo.codigo
-                                                .toLowerCase()
-                                                .includes(filterCodigo.toLowerCase())
+                                    dataSource={selectedInsumosData.filter((articulo) =>
+                                        articulo.denominacion
+                                            .toLowerCase()
+                                            .includes(searchSelectedArticulos)
                                     )}
-                                    rowKey="id"
                                     pagination={{ pageSize: 3 }}
                                 />
                             </Form.Item>

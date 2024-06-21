@@ -82,12 +82,12 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({ onClose, empresaId,
                 response = await crearInsumo(formattedValues);
             } else {
                 response = await crearInsumo(formattedValues);
-                formattedValues.articuloManufacturadoDetalles = {
+                formattedValues.articuloManufacturadoDetalles = [{
                     cantidad: 1,
                     articuloInsumo: {
                         id: response.id
                     }
-                };
+                }];
                 response = await crearManufacturado(formattedValues);
             }
             console.log('Response: ', response);
