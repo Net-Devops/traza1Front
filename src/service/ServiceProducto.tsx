@@ -1,3 +1,5 @@
+import { sucursal } from "./ServiceInsumos";
+
 export interface Imagen {
     id: number;
     url: string;
@@ -35,9 +37,10 @@ export interface ArticuloProducto {
     precioVenta: number;
     imagenes: Imagen[];
     unidadMedida: unidadMedida;
-    tiempoEstimadoMinutos?: number;
+    tiempoEstimadoCocina?: number;
     preparacion?: string;
     articuloManufacturadoDetalles: ArticuloManufacturadoDetalle[];
+    sucursal: sucursal
 }
 
 
@@ -64,8 +67,9 @@ export async function crearManufacturado(formData: ArticuloProducto) {
                 precioVenta: formData.precioVenta,
                 imagenes: formData.imagenes,
                 unidadMedida: formData.unidadMedida,
-                tiempoEstimadoMinutos: formData.tiempoEstimadoMinutos || 0,
+                tiempoEstimadoMinutos: formData.tiempoEstimadoCocina || 0,
                 preparacion: formData.preparacion || "sin preparacion",
+                sucursal: formData.sucursal,
                 articuloManufacturadoDetalles: Array.isArray(formData.articuloManufacturadoDetalles) ? formData.articuloManufacturadoDetalles : [formData.articuloManufacturadoDetalles]
                 
             }),

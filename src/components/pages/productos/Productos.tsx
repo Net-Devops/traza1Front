@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import FormularioProducto from '../../element/formularios/FormularioProducto';
 import TablaProductos from '../../element/tabla/TablaProductos'; // Importa el componente TablaProductos desde su ubicación correcta
 import { Empresas, getEmpresas } from '../../../service/ServiceEmpresa';
-
 import { Sucursal, getSucursal } from '../../../service/ServiceSucursal';
 import { Button, Select } from 'antd';
+
 const { Option } = Select;
+
 export default function Productos() {
-  const [showFormularioInsumo, setShowFormularioInsumo] = useState(false);
+  const [showFormularioProducto, setShowFormularioProducto] = useState(false);
   const [empresas, setEmpresas] = useState<Empresas[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState('');
@@ -34,14 +35,13 @@ export default function Productos() {
   }, [selectedEmpresa]);
 
   const handleOpenFormularioProducto = () => {
-    setShowFormularioInsumo(true);
-    // Aquí asumimos que tienes una forma de pasar estos IDs al componente FormularioInsumo
-    // Esto podría ser a través del estado global, props, o contexto, dependiendo de tu estructura
+    setShowFormularioProducto(true);
   };
+
   const closeFormularioProducto = () => {
-    setShowFormularioInsumo(false);
+    setShowFormularioProducto(false);
   };
-   
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -67,19 +67,21 @@ export default function Productos() {
             ))}
           </Select>
         </div>
-        {/* Button is now only shown when both empresa and sucursal are selected */}
+
         {selectedEmpresa && selectedSucursal && (
-          <Button type="primary" onClick={handleOpenFormularioProducto} id={`empresa-${selectedEmpresa}-sucursal-${selectedSucursal}`}>
+          <Button type="primary" onClick={handleOpenFormularioProducto}>
             Agregar Producto
           </Button>
         )}
       </div>
-      {showFormularioInsumo && <FormularioProducto onClose={closeFormularioProducto} empresaId={selectedEmpresa} sucursalId={selectedSucursal}  />}
+      {showFormularioProducto && (
+        <FormularioProducto onClose={closeFormularioProducto} empresaId={selectedEmpresa} sucursalId={selectedSucursal} />
+      )}
       <div>
         {selectedSucursal ? (
           <TablaProductos empresaId={selectedEmpresa} sucursalId={selectedSucursal} />
         ) : (
-          <p>Por favor, seleccione la sucursal para ver los insumos.</p>
+          <p>Por favor, seleccione la sucursal para ver los productos.</p>
         )}
       </div>
     </div>

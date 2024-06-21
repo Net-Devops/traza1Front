@@ -1,483 +1,350 @@
-import  { useEffect, useState, useRef, } from "react";
-import {
-  Modal,
-  Button,
-  Form,
-  Input,
-  Upload,
-  Table,
-  Select,
-  Row,
-  Col,
-  Space,
-} from "antd";
-import axios from "axios";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
-import { ValueType } from "rc-input/lib/interface";
+import React, { useState, useEffect } from 'react';
+import { PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Button, Col, Form, Input, InputNumber, Modal, Row, Select, Upload, notification, Table } from 'antd';
 
-const { Option } = Select;
+import { UploadFile } from 'antd/es/upload/interface';
+import { crearInsumo, getUnidadMedida, unidadMedida } from '../../../service/ServiceInsumos';
+import { getSucursal, Sucursal } from '../../../service/ServiceSucursal';
+import { crearManufacturado } from '../../../service/ServiceProducto';
 
-const NestedModals = () => {
-  const searchInput = useRef();
+interface FormularioProductoProps {
+    onClose: () => void;
+    empresaId: string;
+    sucursalId: string;
+}
 
-  const [isMainModalVisible, setIsMainModalVisible] = useState(false);
-  const [isNestedModalVisible, setIsNestedModalVisible] = useState(false);
-  const [insumos, setInsumos] = useState([]);
-  const [selectedInsumosToAdd, setSelectedInsumosToAdd] = useState([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+const FormularioProducto: React.FC<FormularioProductoProps> = ({ onClose, empresaId, sucursalId }) => {
+    const [form] = Form.useForm();
+    const [isModalVisible,] = useState(true);
+    const [, setIsSwitchOn] = useState(false);
+    const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
+    const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+    const [dataSource, setDataSource] = useState([]);
+    const [isNestedModalVisible, setIsNestedModalVisible] = useState(false);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [selectedInsumosToAdd, setSelectedInsumosToAdd] = useState([]);
 
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
+    useEffect(() => {
+        const fetchSucursales = async () => {
+            if (empresaId) {
+                try {
+                    const sucursalesData = await getSucursal(empresaId);
+                    setSucursales(sucursalesData);
+                } catch (error) {
+                    console.error('Error al obtener las sucursales:', error);
+                }
+            }
+        };
+        fetchSucursales();
+    }, [empresaId]);
 
-  const [formValues, setFormValues] = useState({
-    denominacion: "",
-    descripcion: "",
-    codigo: "",
-    precioVenta: "",
-    imagenes: "",
-    unidadMedida: Number,
-    tiempoEstimado: "",
-    preparacion: "",
-  });
+    useEffect(() => {
+        const fetchUnidadesMedida = async () => {
+            try {
+                const data = await getUnidadMedida();
+                setUnidadesMedida(data);
+            } catch (error) {
+                console.error('Error al obtener las unidades de medida:', error);
+            }
+        };
+        fetchUnidadesMedida();
+    }, []);
 
-  const handleQuantityChange = (value: string, key: any) => {
-    setSelectedInsumosToAdd((prevItems) =>
-      prevItems.map((item) =>
-        item.key === key ? { ...item, cantidad: parseInt(value, 10) || 0 } : item
-      )
-    );
-  };
+    const onFinish = async (values: any) => {
+        console.log('Received values of form: ', values);
+        const formattedValues = { ...values };
+        let promises: Promise<{ url: string }>[] = [];
 
-  const handleAddSelected = () => {
-    const selectedToAdd = insumos.filter((insumo) => selectedRowKeys.includes(insumo.id));
-    const filteredToAdd = selectedToAdd.filter((item) => 
-      !selectedInsumosToAdd.some((selectedItem) => selectedItem.id === item.id)
-    );
+        formattedValues.unidadMedida = {
+            id: values.unidadMedida,
+            denominacion: values.denominacionUnidadMedida
+        };
+        formattedValues.sucursal = {
+            id: values.sucursal,
+            denominacion: values.nombreSucursal
+        };
+        if (values.imagenes) {
+            const files: UploadFile[] = values.imagenes;
 
-    setSelectedInsumosToAdd((prevItems) => [
-      ...prevItems,
-      ...filteredToAdd.map((item) => ({ ...item, cantidad: 0 })),
-    ]);
-    setSelectedRowKeys([]);
-  };
+            promises = files.map((file) => {
+                return new Promise<{ url: string }>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64String = (reader.result as string).replace(/^data:image\/\w+;base64,/, '');
+                        resolve({ url: base64String });
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file.originFileObj as File);
+                });
+            });
+        }
 
-  const handleOpenAddInsumosModal = () => {
-    setIsNestedModalVisible(false);
-  };
+        try {
+            const imagenes = await Promise.all(promises);
+            formattedValues.imagenes = imagenes;
 
-  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
-    const { name, value } = e.target;
-    setFormValues({ ...formValues, [name]: value });
-  };
+            const response = await crearManufacturado(formattedValues);
+            console.log('Response: ', response);
+            form.resetFields();
+            onClose();
+            // window.location.reload(); // Considera recargar los datos de manera más eficiente si es necesario
 
-  const handleSelectChange = (value: NumberConstructor, field: string) => {
-    setFormValues({ ...formValues, [field]: value });
-  };
-
-  const handleSearch = (selectedKeys: SetStateAction<string>[], confirm: () => void, dataIndex: SetStateAction<string>) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-  };
-
-  const handleReset = (clearFilters: () => void) => {
-    clearFilters();
-    setSearchText("");
-  };
-
-  const getColumnSearchProps = (dataIndex: SetStateAction<string>) => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-      close,
-    }) => (
-      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
-        <Input
-          ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ marginBottom: 8, display: "block" }}
-        />
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            icon={<SearchOutlined />}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Search
-          </Button>
-          <Button
-            onClick={() => clearFilters && handleReset(clearFilters)}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Reset
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              confirm({ closeDropdown: false });
-              setSearchText(selectedKeys[0]);
-              setSearchedColumn(dataIndex);
-            }}
-          >
-            Filter
-          </Button>
-          <Button type="link" size="small" onClick={() => close()}>
-            close
-          </Button>
-        </Space>
-      </div>
-    ),
-    filterIcon: (filtered: any) => (
-      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-    ),
-    onFilter: (value: string, record: { [x: string]: { toString: () => string; }; }) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible: any) => {
-      if (visible) {
-        setTimeout(() => searchInput.current.select(), 100);
-      }
-    },
-    render: (text: { toString: () => string; }) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:8080/api/articulos/insumos/")
-      .then((response) => {
-        const dataWithKeys = response.data.map((item: { id: { toString: () => any; }; }) => ({
-          ...item,
-          key: item.id.toString(),
-        }));
-        setInsumos(dataWithKeys);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
-  }, []);
-
-  const columns = [
-    {
-      title: "Código",
-      dataIndex: "codigo",
-      key: "codigo",
-      ...getColumnSearchProps("codigo"),
-    },
-    {
-      title: "Denominación",
-      dataIndex: "denominacion",
-      key: "denominacion",
-      ...getColumnSearchProps("denominacion"),
-    },
-  ];
-
-  const insumoColumns = [
-    ...columns,
-    {
-      title: "Cantidad",
-      key: "cantidad",
-      render: (_: any, record: { cantidad: ValueType; key: any; }) => (
-        <Input
-          type="number"
-          min={0}
-          value={record.cantidad}
-          onChange={(e) => handleQuantityChange(e.target.value, record.key)}
-        />
-      ),
-    },
-  ];
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys: SetStateAction<never[]>) => {
-      setSelectedRowKeys(selectedRowKeys);
-    },
-  };
-
-  const showMainModal = () => {
-    setIsMainModalVisible(true);
-  };
-
-  const handleMainModalOk = () => {
-    const imagenes = formValues.imagenes ? formValues.imagenes.fileList.map((file: { url: any; thumbUrl: any; }) => ({ url: file.url || file.thumbUrl })) : [];
-  
-    // Transform form data to match API structure
-    const formData = {
-      denominacion: formValues.denominacion,
-      descripcion: formValues.descripcion,
-      codigo: formValues.codigo,
-      precioVenta: parseFloat(formValues.precioVenta),
-      unidadMedida: {
-        id: formValues.unidadMedida,
-      },
-      imagenes: imagenes,
-      tiempoEstimadoMinutos: parseInt(formValues.tiempoEstimado, 10),
-      preparacion: formValues.preparacion,
-    articuloManufacturadoDetalles: selectedInsumosToAdd.map(insumo => ({
-        cantidad: insumo.cantidad,
-        articuloInsumo: {
-            id: insumo.id || 0, // Add a default value for 'id' if it is undefined or null
-        },
-    })),
+            notification.open({
+                message: (
+                    <span>
+                        <CheckCircleOutlined style={{ color: 'green' }} /> Agregado correctamente
+                    </span>
+                ),
+            });
+        } catch (error) {
+            console.error('Error: ', error);
+        }
     };
 
-    // Send POST request
-    axios.post("http://localhost:8080/api/articulos/manufacturados/", formData)
-      .then(response => {
-        console.log("Data submitted successfully:", response.data);
-        setIsMainModalVisible(false);
-        window.location.reload();
-      })
-      .catch(error => {
-        console.error("There was an error submitting the data:", error);
-        if (error.response) {
-          console.error("Error response data:", error.response.data);
+    const handleSwitchChange = (checked: boolean) => {
+        setIsSwitchOn(checked);
+    };
+
+    const normFile = (e: any) => {
+        if (Array.isArray(e)) {
+            return e;
         }
-      });
-  };
+        return e && e.fileList.map((file: any) => {
+            if (file.originFileObj) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file.originFileObj);
+                reader.onloadend = () => {
+                    file.url = reader.result as string;
+                };
+            }
+            return file;
+        });
+    };
 
-  const handleMainModalCancel = () => {
-    setIsMainModalVisible(false);
-  };
+    const getColumnSearchProps = (dataIndex: string) => ({
+        // Custom filter UI can be added here
+    });
 
-  const showNestedModal = () => {
-    setIsNestedModalVisible(true);
-  };
+    const columns = [
+        {
+            title: "Código",
+            dataIndex: "codigo",
+            key: "codigo",
+            ...getColumnSearchProps("codigo"),
+        },
+        {
+            title: "Denominación",
+            dataIndex: "denominacion",
+            key: "denominacion",
+            ...getColumnSearchProps("denominacion"),
+        },
+    ];
 
-  const handleNestedModalOk = () => {
-    setIsNestedModalVisible(false);
-  };
+    const insumoColumns = [
+        ...columns,
+        {
+            title: "Cantidad",
+            key: "cantidad",
+            render: (_: any, record: { cantidad: number; key: any; }) => (
+                <Input
+                    type="number"
+                    min={0}
+                    value={record.cantidad}
+                    onChange={(e) => handleQuantityChange(e.target.value, record.key)}
+                />
+            ),
+        },
+    ];
 
-  const handleNestedModalCancel = () => {
-    setIsNestedModalVisible(false);
-  };
+    const handleAddSelected = () => {
+        const selectedInsumos = dataSource.filter((item: any) => selectedRowKeys.includes(item.key));
+        setSelectedInsumosToAdd(selectedInsumos);
+        setIsNestedModalVisible(false);
+    };
 
-  const normFile = (e: { fileList: any; }) => {
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e && e.fileList;
-  };
+    const handleQuantityChange = (value: number, key: any) => {
+        const newData = [...selectedInsumosToAdd];
+        const index = newData.findIndex(item => key === item.key);
+        if (index !== -1) {
+            newData[index].cantidad = value;
+            setSelectedInsumosToAdd(newData);
+        }
+    };
 
-  const handleInsumosCancel = () => {
-    setIsNestedModalVisible(false);
-  };
+    const handleNestedModalOk = () => {
+        handleAddSelected();
+    };
 
-  const selectedInsumosColumns = [
-    {
-      title: "Código",
-      dataIndex: "codigo",
-      key: "codigo",
-    },
-    {
-      title: "Denominación",
-      dataIndex: "denominacion",
-      key: "denominacion",
-    },
-    {
-      title: "Cantidad",
-      dataIndex: "cantidad",
-      key: "cantidad",
-    },
-    {
-      title: "Unidad",
-      dataIndex: ["unidadMedida", "denominacion"],
-      key: "unidad",
-    },
-    {
-      title: "Acción",
-      key: "accion",
-      render: (_: any, record: any) => (
-        <Button onClick={() => handleRemove(record)}>Eliminar</Button>
-      ),
-    },
-  ];
+    const handleNestedModalCancel = () => {
+        setIsNestedModalVisible(false);
+    };
 
-  let dataSource = [...insumos];
+    const handleOpenAddInsumosModal = () => {
+        setIsNestedModalVisible(true);
+    };
 
-  if (searchText && searchedColumn) {
-    dataSource = dataSource.filter((insumo) =>
-      insumo[searchedColumn]
-        ? insumo[searchedColumn].toString().toLowerCase().includes(searchText.toLowerCase())
-        : ""
-    );
-  }
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (selectedRowKeys: any) => {
+            setSelectedRowKeys(selectedRowKeys);
+        },
+    };
 
-  const handleRemove = (record: { key: any; }) => {
-    setSelectedInsumosToAdd((prevItems) =>
-      prevItems.filter((item) => item.key !== record.key)
-    );
-  };
+    const handleInsumosCancel = () => {
+        setIsNestedModalVisible(false);
+    };
 
-  return (
-    <div>
-      <Button type="primary" onClick={showMainModal}>
-        Agregar Productos
-      </Button>
-      <Modal
-        title="Productos"
-        visible={isMainModalVisible}
-        onOk={handleMainModalOk}
-        onCancel={handleMainModalCancel}
-        width={800}
-      >
-        <Form layout="vertical">
-          <Form.Item label="Código">
-            <Input
-              placeholder="Código"
-              name="codigo"
-              value={formValues.codigo}
-              onChange={handleInputChange}
-            />
-          </Form.Item>
-
-          <Form.Item label="Denominación">
-            <Input
-              placeholder="Denominación"
-              name="denominacion"
-              value={formValues.denominacion}
-              onChange={handleInputChange}
-            />
-          </Form.Item>
-
-          <Form.Item label="Descripción">
-            <Input
-              placeholder="Descripción"
-              name="descripcion"
-              value={formValues.descripcion}
-              onChange={handleInputChange}
-            />
-          </Form.Item>
-
-          <Form.Item label="Preparación">
-            <Input
-              placeholder="Preparación"
-              name="preparacion"
-              value={formValues.preparacion}
-              onChange={handleInputChange}
-            />
-          </Form.Item>
-
-          <Form.Item label="Tiempo Estimado en Minutos">
-            <Input
-              placeholder="Tiempo Estimado en Minutos"
-              name="tiempoEstimado"
-              value={formValues.tiempoEstimado}
-              onChange={handleInputChange}
-            />
-          </Form.Item>
-
-          <Form.Item label="Precio de Venta">
-            <Input
-              placeholder="Precio de Venta"
-              name="precioVenta"
-              value={formValues.precioVenta}
-              onChange={handleInputChange}
-            />
-          </Form.Item>
-
-          <Form.Item label="Unidad de Medida">
-            <Select
-              placeholder="Unidad de Medida"
-              value={formValues.unidadMedida}
-              onChange={(value) => handleSelectChange(value, "unidadMedida")}
-              style={{ width: "100%" }}
+    return (
+        <Modal title="Agregar Producto" visible={isModalVisible} onOk={onClose} onCancel={onClose} footer={null} width={800}>
+            <Form
+                form={form}
+                layout="vertical"
+                style={{ maxWidth: 800, justifyContent: 'center' }}
+                onFinish={onFinish}
+                initialValues={{
+                    codigo: '',
+                    denominacion: '',
+                    descripcion: '',
+                    preparacion: '',
+                    tiempoEstimado: 0,
+                    precioVenta: 0,
+                    unidadMedida: '',
+                    sucursal: sucursalId,
+                }}
             >
-              <Option value={1}>kg</Option>
-    <Option value={2}>litro</Option>
-              
-            </Select>
-          </Form.Item>
+                <div>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="Sucursal" name="sucursal">
+                                <Select disabled>
+                                    {sucursales.map((sucursal) => (
+                                        <Select.Option key={sucursal.id} value={sucursal.id}>
+                                            {sucursal.nombre}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Form.Item
+                                label="Código"
+                                name="codigo"
+                                rules={[{ required: true, message: 'El código no puede estar vacío' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <Form.Item
+                                label="Denominación"
+                                name="denominacion"
+                                rules={[{ required: true, message: 'La denominación no puede estar vacía' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <Form.Item
+                                label="Precio de venta"
+                                name="precioVenta"
+                                rules={[
+                                    { required: true, message: 'Por favor, ingresa un precio de venta válido', type: 'number', min: 0 }
+                                ]}
+                            >
+                                <InputNumber style={{ width: '100%' }} min={0} />
+                            </Form.Item>
+                            <Form.Item
+                                label="Foto"
+                                name="imagenes"
+                                valuePropName="fileList"
+                                getValueFromEvent={normFile}
+                            >
+                                <Upload action="/upload.do" listType="picture-card" beforeUpload={() => false}>
+                                    <button style={{ border: 0, background: 'none' }} type="button">
+                                        <PlusOutlined />
+                                        <div style={{ marginTop: 8 }}>Foto</div>
+                                    </button>
+                                </Upload>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Unidad de Medida"
+                                name="unidadMedida"
+                                rules={[{ required: true, message: 'Por favor, selecciona una unidad de medida' }]}
+                            >
+                                <Select>
+                                    {unidadesMedida.map((unidad) => (
+                                        <Select.Option key={unidad.id} value={unidad.id}>
+                                            {unidad.denominacion}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Form.Item
+                                label="Preparacion"
+                                name="preparacion"
+                                rules={[{ required: true, message: 'La preparacion no puede estar vacía' }]}
+                            >
+                                <Input.TextArea rows={5} />
+                            </Form.Item>
+                            <Form.Item
+                                label="Tiempo estimado en minutos"
+                                name="tiempoEstimado"
+                                rules={[{ required: true, message: 'el tiempo no puede estar vacío' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Button type="primary" onClick={handleOpenAddInsumosModal} style={{ marginBottom: 20 }}>
+                        Agregar Insumos
+                    </Button>
+                    <Table
+                        dataSource={selectedInsumosToAdd}
+                        columns={insumoColumns}
+                        pagination={false}
+                    />
+                    <Form.Item style={{ textAlign: 'right' }}>
+                        <Button type="default" style={{ marginRight: '10px' }} onClick={onClose}>
+                            Cancelar
+                        </Button>
+                        <Button type="primary" htmlType="submit">
+                            Agregar
+                        </Button>
+                    </Form.Item>
+                </div>
+            </Form>
 
-          <Form.Item
-            label="Imagenes"
-            valuePropName="fileList"
-            getValueFromEvent={normFile}
-          >
-            <Upload action="/upload.do" listType="picture-card">
-              <button style={{ border: 0, background: "none" }} type="button">
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Upload</div>
-              </button>
-            </Upload>
-          </Form.Item>
-
-          <Form.Item label="Insumos Seleccionados">
-            <Table
-              dataSource={selectedInsumosToAdd}
-              columns={selectedInsumosColumns}
-              rowKey="id"
-              pagination={false}
-            />
-          </Form.Item>
-        </Form>
-
-        <Button type="primary" onClick={showNestedModal}>
-          Agregar Insumos
-        </Button>
-        <Modal
-          title="Agregar Insumos"
-          visible={isNestedModalVisible}
-          onOk={handleNestedModalOk}
-          onCancel={handleNestedModalCancel}
-          width={1000}
-          footer={[
-            <Button key="back" onClick={handleInsumosCancel}>
-              Cancel
-            </Button>,
-            <Button key="submit" type="primary" onClick={handleOpenAddInsumosModal}>
-              Agregar Insumos
-            </Button>,
-          ]}
-        >
-          <Row gutter={16}>
-            <Col span={24}>
-              <Table
-                dataSource={dataSource}
-                columns={columns}
-                rowKey="id"
-                rowSelection={rowSelection}
-              />
-              <Button
-                type="primary"
-                onClick={handleAddSelected}
-                disabled={selectedRowKeys.length === 0}
-              >
-                Agregar Seleccionados
-              </Button>
-              <Table
-                dataSource={selectedInsumosToAdd}
-                columns={insumoColumns}
-                pagination={false}
-                style={{ marginTop: 20 }}
-              />
-            </Col>
-          </Row>
+            <Modal
+                title="Agregar Insumos"
+                visible={isNestedModalVisible}
+                onOk={handleNestedModalOk}
+                onCancel={handleNestedModalCancel}
+                width={1000}
+                footer={[
+                    <Button key="back" onClick={handleInsumosCancel}>
+                        Cancel
+                    </Button>,
+                    <Button key="submit" type="primary" onClick={handleNestedModalOk}>
+                        Agregar Seleccionados
+                    </Button>,
+                ]}
+            >
+                <Row gutter={16}>
+                    <Col span={24}>
+                        <Table
+                            dataSource={dataSource}
+                            columns={columns}
+                            rowKey="id"
+                            rowSelection={rowSelection}
+                        />
+                        <Button
+                            type="primary"
+                            onClick={handleAddSelected}
+                            disabled={selectedRowKeys.length === 0}
+                        >
+                            Agregar Seleccionados
+                        </Button>
+                    </Col>
+                </Row>
+            </Modal>
         </Modal>
-      </Modal>
-    </div>
-  );
+    );
 };
 
-export default NestedModals;
+export default FormularioProducto;

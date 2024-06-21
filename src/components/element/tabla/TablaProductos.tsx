@@ -12,10 +12,10 @@ interface DataType {
   id: number;
   codigo: string;
   imagen: string;
-  nombre: string;
+  denominacion: string;
   precioVenta: number;
   descripcion: string;
-  tiempoEstimadoMinutos: string;
+  tiempoEstimadoCocina: string;
 }
 
 type DataIndex = keyof DataType;
@@ -66,7 +66,7 @@ const App: React.FC<Props> = ({ empresaId, sucursalId }) => {
     
     // If the user confirms, delete the insumo
     await deleteProductoXId(id);
-    window.location.reload();
+   
   };
 
   const getColumnSearchProps = (
@@ -176,10 +176,10 @@ const App: React.FC<Props> = ({ empresaId, sucursalId }) => {
     },
     {
       title: 'Nombre',
-      dataIndex: 'nombre',
-      key: 'nombre',
-      ...getColumnSearchProps('nombre'),
-      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
+      dataIndex: 'denominacion',
+      key: 'denominacion',
+      ...getColumnSearchProps('denominacion'),
+      sorter: (a, b) => a.denominacion.localeCompare(b.denominacion),
       sortDirections: ['descend', 'ascend'],
     },
     {
@@ -200,10 +200,10 @@ const App: React.FC<Props> = ({ empresaId, sucursalId }) => {
     },
     {
       title: 'Tiempo Estimado Minutos',
-      dataIndex: 'tiempoEstimadoMinutos',
-      key: 'tiempoEstimadoMinutos',
-      ...getColumnSearchProps('tiempoEstimadoMinutos'),
-      sorter: (a, b) => a.tiempoEstimadoMinutos.localeCompare(b.tiempoEstimadoMinutos),
+      dataIndex: 'tiempoEstimadoCocina',
+      key: 'tiempoEstimadoCocina',
+      ...getColumnSearchProps('tiempoEstimadoCocina'),
+      sorter: (a, b) => a.tiempoEstimadoCocina.localeCompare(b.tiempoEstimadoCocina),
       sortDirections: ['descend', 'ascend'],
     },
     {
