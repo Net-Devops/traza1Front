@@ -1,3 +1,4 @@
+
 import { Button, Switch, Table, Modal, Form, Input } from "antd";
 import { useEffect, useState } from "react";
 import {
@@ -119,6 +120,8 @@ const UnidadMedida: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+
     </div>
   );
 };
