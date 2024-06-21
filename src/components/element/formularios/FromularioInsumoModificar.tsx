@@ -1,4 +1,4 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Modal,
   Form,
@@ -29,6 +29,7 @@ interface ImageData {
   status: string;
   url: string;
 }
+
 interface unidadMedida {
   id: number;
   denominacion: string;
@@ -39,12 +40,12 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
   id,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formData, setFormData] = useState<any>(null);
   const [form] = Form.useForm();
   const [images, setImages] = useState<ImageData[]>([]);
   const [, setIsSwitchOn] = useState(false);
   const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -53,7 +54,7 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
         console.log("data: ", data);
 
         form.setFieldsValue(data);
-        form.setFieldsValue({ unidadMedida: data.unidadMedida.id }); // Set the unit of measure in the form
+        form.setFieldsValue({ unidadMedida: data.unidadMedida.id });
         setIsModalVisible(true);
 
         const imagesData = data.imagenes.map(
@@ -73,6 +74,7 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
 
     fetchData();
   }, [id, form]);
+
   useEffect(() => {
     const fetchUnidadesMedida = async () => {
       const data = await getUnidadMedida();
@@ -81,65 +83,56 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
 
     fetchUnidadesMedida();
   }, []);
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const onFinish = async (values: any) => {
-  try {
-    let uploadedImages = [];
-    // Si se han subido nuevas imágenes, procesarlas
-    if (values.uploadImagenes) {
-      uploadedImages = await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        values.uploadImagenes.map(async (file: any) => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              // Eliminar 'data:image/jpeg;base64,' del inicio de la cadena
-              const base64String = (reader.result as string).replace(
-                /^data:image\/\w+;base64,/,
-                ""
-              );
-              resolve({ url: base64String });
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file.originFileObj);
-          });
-        })
-      );
+
+  const onFinish = async (values: any) => {
+    try {
+      let uploadedImages = [];
+      if (values.uploadImagenes) {
+        uploadedImages = await Promise.all(
+          values.uploadImagenes.map(async (file: any) => {
+            return new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                const base64String = (reader.result as string).replace(
+                  /^data:image\/\w+;base64,/,
+                  ""
+                );
+                resolve({ url: base64String });
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(file.originFileObj);
+            });
+          })
+        );
+      }
+
+      if (images.length > 0) {
+        const existingImages = images.map((image) => ({
+          url: image.url,
+        }));
+        uploadedImages = [...uploadedImages, ...existingImages];
+      }
+
+      values.imagenes = uploadedImages;
+
+      values.unidadMedida = {
+        id: values.unidadMedida,
+        denominacion: unidadesMedida.find(
+          (unidad) => unidad.id === values.unidadMedida
+        )?.denominacion,
+      };
+
+      console.log("values:", values);
+
+      await modificarInsumoId(values, formData.id);
+      onClose();
+    } catch (error) {
+      console.error("Error al modificar insumo:", error);
     }
-
-    // Si hay imágenes existentes, agregarlas a las imágenes subidas
-    if (images.length > 0) {
-      const existingImages = images.map((image) => ({
-        url: image.url,
-      }));
-      uploadedImages = [...uploadedImages, ...existingImages];
-    }
-
-    values.uploadImagenes = uploadedImages;
-
-    // Convert the unidadMedida string to an object
-    const unidadMedidaMap: { [key: string]: string } = {
-      
-      // Add more mappings as needed
-    };
-    values.unidadMedida = {
-      id: values.unidadMedida,
-      denominacion: unidadMedidaMap[values.unidadMedida],
-    };
-
-    console.log("values:", values);
-
-    await modificarInsumoId(values, formData.id);
+    setIsModalVisible(false);
     onClose();
-  } catch (error) {
-    console.error("Error al modificar insumo:", error);
-  }
-  setIsModalVisible(false);
-  onClose();
-  window.location.reload();
+  };
 
-};
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const normFile = (e: any) => {
     if (Array.isArray(e)) {
       return e;
@@ -162,15 +155,20 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
     newImages.splice(index, 1);
     setImages(newImages);
   };
+
   const [, setUnidadMedida] = useState({
     id: "",
     denominacion: "",
   });
 
   const handleUnidadMedidaChange = (value: string) => {
-    // Update the unidadMedida state
-    setUnidadMedida({ id: value, denominacion: "kilogramo" });
+    setUnidadMedida({
+      id: value,
+      denominacion: unidadesMedida.find((unidad) => unidad.id === +value)
+        ?.denominacion || "",
+    });
   };
+
   return (
     <Modal
       title="Modificar Insumo"
@@ -178,6 +176,7 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
       onOk={handleOk}
       onCancel={handleCancel}
       footer={null}
+      width={800}
     >
       <Form form={form} layout="vertical" onFinish={onFinish}>
         <Row gutter={16}>
@@ -185,20 +184,16 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
             <Form.Item label="Codigo" name="codigo">
               <Input />
             </Form.Item>
-            <Form.Item label="Stock actual" name="stockActual">
-              <Input type="number" />
-            </Form.Item>
-            <Form.Item label="Precio de venta" name="precioVenta">
+            <Form.Item label="Stock minimo" name="stockMinimo">
               <Input type="number" />
             </Form.Item>
             <Form.Item label="Unidad de Medida" name="unidadMedida">
               <Select onChange={handleUnidadMedidaChange}>
                 {unidadesMedida.map((unidad) => (
-                  <Select.Option value={unidad.id}>
+                  <Select.Option key={unidad.id} value={unidad.id}>
                     {unidad.denominacion}
                   </Select.Option>
-                ))}{" "}
-                // Map the units of measure to create the Select options
+                ))}
               </Select>
             </Form.Item>
             <Form.Item label="Foto">
@@ -229,6 +224,21 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
                 ))}
               </Image.PreviewGroup>
             </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="Denominación" name="denominacion">
+              <Input />
+            </Form.Item>
+            <Form.Item label="Stock máximo" name="stockMaximo">
+              <Input type="number" />
+            </Form.Item>
+            <Form.Item
+              label="Es para elaborar"
+              name="esParaElaborar"
+              valuePropName="checked"
+            >
+              <Switch onChange={setIsSwitchOn} />
+            </Form.Item>
             <Form.Item
               label="Agregar Foto"
               name="uploadImagenes"
@@ -241,24 +251,6 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
                   <div style={{ marginTop: 8 }}>Upload</div>
                 </div>
               </Upload>
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="Denominación" name="denominacion">
-              <Input />
-            </Form.Item>
-            <Form.Item label="Stock máximo" name="stockMaximo">
-              <Input type="number" />
-            </Form.Item>
-            <Form.Item label="Precio de compra" name="precioCompra">
-              <Input type="number" />
-            </Form.Item>
-            <Form.Item
-              label="Es para elaborar"
-              name="esParaElaborar"
-              valuePropName="checked"
-            >
-              <Switch onChange={setIsSwitchOn} />
             </Form.Item>
           </Col>
         </Row>

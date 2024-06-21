@@ -1,26 +1,109 @@
+import { useEffect, useState } from 'react';
 
-import { useSelector, useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import TablaProductos from '../../element/tabla/TablaProductos';
+import { Empresas, getEmpresas } from '../../../service/ServiceEmpresa';
+import { Sucursal, getSucursal } from '../../../service/ServiceSucursal';
 
-const ProductosPage: React.FC = () => {
-  const { empresa } = useSelector((state: any) => state);
+import { Button, Select, Modal } from 'antd';
+import FormularioPromocion from '../../element/formularios/FormularioProducto';
+
+const { Option } = Select;
+
+export default function Productos() {
+  const [showFormularioProducto, setShowFormularioProducto] = useState(false);
+  const [empresas, setEmpresas] = useState<Empresas[]>([]);
+  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+  const [selectedEmpresa, setSelectedEmpresa] = useState('');
+  const [selectedSucursal, setSelectedSucursal] = useState('');
 
   useEffect(() => {
-    console.log("estado global: ", empresa);
-  }, [empresa]);
+    const fetchEmpresas = async () => {
+      const empresasData = await getEmpresas();
+      setEmpresas(empresasData);
+    };
+
+    fetchEmpresas();
+  }, []);
+
+  useEffect(() => {
+    const fetchSucursales = async () => {
+      if (selectedEmpresa) {
+        const sucursalesData = await getSucursal(selectedEmpresa);
+        setSucursales(sucursalesData);
+      }
+    };
+
+    fetchSucursales();
+  }, [selectedEmpresa]);
+
+  const handleOpenFormularioProducto = () => {
+    setShowFormularioProducto(true);
+  };
+
+  const closeFormularioProducto = () => {
+    setShowFormularioProducto(false);
+  };
+
+  const handleFormSubmit = (values: any) => {
+    // Implementa la lógica para manejar el envío del formulario
+    console.log(values);
+    closeFormularioProducto();
+  };
 
   return (
     <div>
-      <h1>Productos</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+        <h1>Productos</h1>
+        <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', gap: '20px', margin: '10px 0' }}>
+          <Select
+            placeholder="Seleccione una empresa"
+            style={{ width: 200 }}
+            onChange={(value) => setSelectedEmpresa(value)}
+          >
+            {empresas.map((empresa) => (
+              <Option key={empresa.id} value={empresa.id}>{empresa.nombre}</Option>
+            ))}
+          </Select>
+          <Select
+            placeholder="Seleccione una sucursal"
+            style={{ width: 200 }}
+            disabled={!selectedEmpresa}
+            onChange={(value) => setSelectedSucursal(value)}
+          >
+            {sucursales.map((sucursal) => (
+              <Option key={sucursal.id} value={sucursal.id}>{sucursal.nombre}</Option>
+            ))}
+          </Select>
+        </div>
+
+        {selectedEmpresa && selectedSucursal && (
+          <Button type="primary" onClick={handleOpenFormularioProducto}>
+            Agregar Producto
+          </Button>
+        )}
+      </div>
+      <Modal
+        visible={showFormularioProducto}
+        title="Agregar Producto"
+        onCancel={closeFormularioProducto}
+        footer={null}
+        width={800}
+      >
+        <FormularioPromocion
+          visible={showFormularioProducto}
+          onClose={closeFormularioProducto}
+          onSubmit={handleFormSubmit}
+          initialValues={null}
+          sucursalId={selectedSucursal}
+        />
+      </Modal>
       <div>
-        {/* Asegúrate de que "empresa" es un objeto y tiene las propiedades que estás tratando de acceder */}
-        <p>Empresa: {empresa.idEmpresa}</p>
-        <p>Sucursal: {empresa.idSucursal}</p>
-    
-        {/* Agrega más campos según sea necesario */}
+        {selectedSucursal ? (
+          <TablaProductos empresaId={selectedEmpresa} sucursalId={selectedSucursal} />
+        ) : (
+          <p>Por favor, seleccione la sucursal para ver los productos.</p>
+        )}
       </div>
     </div>
   );
-};
-
-export default ProductosPage;
+}

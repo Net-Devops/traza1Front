@@ -7,9 +7,12 @@ export interface ArticuloInsumo {
     precioVenta: number;
     stockActual: number;
     stockMaximo: number;
+    stockMinimo: number;
     esParaElaborar: boolean;
     imagenes: Imagen[];
     unidadMedida: unidadMedida;
+    sucursal: sucursal;
+    eliminado: boolean;
 }
 
 export interface Imagen {
@@ -19,6 +22,10 @@ export interface Imagen {
 export interface unidadMedida {
     id: number;
     denominacion: string;
+}
+export interface sucursal {
+    id: number;
+    nombre: string;
 }
 
 export const getUnidadMedida = async (): Promise<unidadMedida[]> => {
@@ -67,15 +74,17 @@ export async function crearInsumo(formData: ArticuloInsumo) {
             },
             mode: "cors",
             body: JSON.stringify({
-                codigo: formData.codigo,
+                codigo: 'I-'+formData.codigo,
                 denominacion: formData.denominacion,
                 precioCompra: formData.precioCompra,
                 precioVenta: formData.precioVenta,
                 stockActual: formData.stockActual,
                 stockMaximo: formData.stockMaximo,
+                stockMinimo: formData.stockMinimo,
                 esParaElaborar: formData.esParaElaborar,
                 imagenes: formData.imagenes,
                 unidadMedida: formData.unidadMedida,
+                sucursal: formData.sucursal,
             }),
         });
 
@@ -109,13 +118,13 @@ export async function modificarInsumoId(formData: any, id: number) {
                 id: id,
                 codigo: formData.codigo,
                 denominacion: formData.denominacion,
-                precioCompra: formData.precioCompra,
-                precioVenta: formData.precioVenta,
-                stockActual: formData.stockActual,
+                       
                 stockMaximo: formData.stockMaximo,
+                stockMinimo: formData.stockMinimo,
                 esParaElaborar: formData.esParaElaborar,
-                imagenes: formData.uploadImagenes,
+                imagenes: formData.imagenes,
                 unidadMedida: formData.unidadMedida,
+               
             }),
         });
 
@@ -156,6 +165,17 @@ export async function getInsumoXId(id: string) {
       mode: "cors",
     });
   }
+  export async function activarInsumoXId(id: string) {
+    const urlServer = "http://localhost:8080/api/articulos/insumos/reactivate/" + id;
+    await fetch(urlServer, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      mode: "cors",
+    });
+  }
 
   export async function getInsumoXSucursal(id: string) {
     const urlServer = "http://localhost:8080/api/local/articulo/insumo/sucursal/"+id;
@@ -171,3 +191,29 @@ export async function getInsumoXId(id: string) {
   
     return await response.json();
   }
+
+
+  export async function agregarStockId(formData: any, id: number) {
+    try {
+        const urlServer = `http://localhost:8080/api/local/articulo/insumo/aumentarStock/${id}?cantidad=${formData.cantidad}&nuevoPrecioVenta=${formData.nuevoPrecioVenta}&nuevoPrecioCompra=${formData.nuevoPrecioCompra}`;
+        
+        const response = await fetch(urlServer, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*", // Puedes ajustar esto según la configuración de tu servidor
+            },
+            mode: "cors",
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+
