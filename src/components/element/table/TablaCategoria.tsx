@@ -3,44 +3,62 @@ import { Button, Input, Modal, Tree, Switch } from "antd";
 import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 
 const { TreeNode } = Tree;
+
 type Category = {
   id: number;
   denominacion: string;
-
+  eliminado?: boolean;
+  subCategoriaDtos?: Category[];
+  subSubCategoriaDtos?: Category[];
+  sucursalId?: string;
 };
-const CategoryInput = () => {
-  const [categories, setCategories] = useState([]);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [editCategoryName, setEditCategoryName] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [editingSubcategory, setEditingSubcategory] = useState(null);
-  const [editSubcategoryName, setEditSubcategoryName] = useState("");
-  const [updateKey, setUpdateKey] = useState(Date.now());
-  const [addSubcategoryModalVisible, setAddSubcategoryModalVisible] =
-    useState(false);
-  const [denominacion, setDenominacion] = useState("");
 
+type CategoryInputProps = {
+  selectedEmpresa: string | null;
+};
+
+const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editCategoryName, setEditCategoryName] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
+  const [editingSubcategory, setEditingSubcategory] = useState<Category | null>(
+    null
+  );
+  const [editSubcategoryName, setEditSubcategoryName] = useState<string>("");
+  const [updateKey, setUpdateKey] = useState<number>(Date.now());
+  const [addSubcategoryModalVisible, setAddSubcategoryModalVisible] =
+    useState<boolean>(false);
+  const [denominacion, setDenominacion] = useState<string>("");
 
   const [selectedParentCategory, setSelectedParentCategory] =
     useState<Category | null>(null);
+    const [treeKey, setTreeKey] = useState<number>(Date.now());
 
   useEffect(() => {
-    fetchCategories();
-  }, [updateKey]);
+    if (selectedEmpresa) {
+      fetchCategories();
+    }
+  }, [selectedEmpresa, updateKey]);
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/categorias/traer-todo/"
-      );
-      const data = await response.json();
-      setCategories(data);
+      if (!selectedEmpresa) return;
+
+      const url = `http://localhost:8080/api/categorias/porEmpresa/${selectedEmpresa}`;
+      const response = await fetch(url);
+      const data: Category[] = await response.json();
+
+      const sortedData = data.sort((a, b) => a.id - b.id);
+      setCategories(sortedData);
     } catch (error) {
       console.error("Error al obtener las categorías:", error);
     }
   };
 
-  const handleEditCategory = (category: any) => {
+  const handleEditCategory = (category: Category) => {
     setEditingCategory(category);
     setEditCategoryName(category.denominacion);
   };
@@ -54,19 +72,18 @@ const CategoryInput = () => {
 
   const handleSaveEdit = async () => {
     try {
-      let url, body;
       if (editingCategory === null) {
         throw new Error("No se puede editar la categoría seleccionada");
       }
-      url = `http://localhost:8080/api/categorias/${editingCategory.id}`;
-      body = { denominacion: editCategoryName };
+
+      const url = `http://localhost:8080/api/categorias/${editingCategory.id}/denominacion`;
 
       const response = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(body),
+        body: editCategoryName, // Envía el string directamente sin convertir a JSON
       });
 
       if (!response.ok) {
@@ -75,7 +92,6 @@ const CategoryInput = () => {
       }
 
       setUpdateKey(Date.now());
-      fetchCategories();
       handleCancelEdit();
     } catch (error) {
       console.error("Error al editar:", error);
@@ -86,24 +102,22 @@ const CategoryInput = () => {
     }
   };
 
-  const handleSwitchChange = async (checked: any, item: any) => {
+  const handleSwitchChange = async (item: Category) => {
     try {
-      let url, method;
-      if (checked) {
-        url = `http://localhost:8080/api/categorias/reactivate/${item.id}`;
-        method = "POST";
-      } else {
-        url = `http://localhost:8080/api/categorias/${item.id}`;
-        method = "DELETE";
-      }
-      const response = await fetch(url, { method });
+      const url = `http://localhost:8080/api/categorias/${item.id}/eliminado`;
+      const response = await fetch(url, { method: "PUT" });
       if (response.ok) {
+        // Actualiza el estado categories con el valor actualizado de eliminado
+        const updatedCategories = categories.map((category) =>
+          category.id === item.id ? { ...category, eliminado: !category.eliminado } : category
+        );
+        setCategories(updatedCategories);
         setUpdateKey(Date.now());
+        console.log("Categoría actualizada:", item.eliminado);
       } else {
         Modal.error({
           title: "Error al realizar la operación",
-          content:
-            "Hubo un problema al intentar realizar la operación. Por favor, inténtalo de nuevo más tarde.",
+          content: "Hubo un problema al intentar realizar la operación. Por favor, inténtalo de nuevo más tarde.",
         });
       }
     } catch (error) {
@@ -111,7 +125,7 @@ const CategoryInput = () => {
     }
   };
 
-  const openAddSubcategoryModal = (category: any) => {
+  const openAddSubcategoryModal = (category: Category) => {
     setSelectedParentCategory(category);
     setAddSubcategoryModalVisible(true);
   };
@@ -120,7 +134,7 @@ const CategoryInput = () => {
     try {
       if (selectedParentCategory === null)
         throw new Error("No se ha seleccionado una categoría padre");
-      
+
       const response = await fetch(
         `http://localhost:8080/api/categorias/agregar/subcategoria/${selectedParentCategory.id}`,
         {
@@ -149,16 +163,18 @@ const CategoryInput = () => {
     setSelectedParentCategory(null);
   };
 
-  const renderTreeNodes = (data: any) =>
-    data.map((item: any) => (
+  const renderTreeNodes = (data: Category[]): React.ReactNode =>
+    data.map((item) => (
       <TreeNode
         title={
-          <div>
-            <span>{item.denominacion}</span>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{ textDecoration: item.eliminado ? 'line-through' : 'none' }}>
+              {item.denominacion}
+            </span>
             <Switch
               checked={!item.eliminado}
-              onChange={(checked) => handleSwitchChange(checked, item)}
-              style={{ marginLeft: 10 }}
+              onChange={() => handleSwitchChange(item)}
+              style={{ marginLeft: 10, backgroundColor: item.eliminado ? 'red' : 'green' }}
             />
             <Button
               onClick={() => handleEditCategory(item)}
@@ -177,6 +193,7 @@ const CategoryInput = () => {
           </div>
         }
         key={item.id}
+        style={{ color: item.eliminado ? 'gray' : 'inherit' }}
       >
         {item.subCategoriaDtos &&
           item.subCategoriaDtos.length > 0 &&
@@ -186,6 +203,7 @@ const CategoryInput = () => {
           renderTreeNodes(item.subSubCategoriaDtos)}
       </TreeNode>
     ));
+
   return (
     <div>
       <Tree>{renderTreeNodes(categories)}</Tree>
@@ -221,4 +239,4 @@ const CategoryInput = () => {
   );
 };
 
-export default CategoryInput;
+export default TablaCategoria;

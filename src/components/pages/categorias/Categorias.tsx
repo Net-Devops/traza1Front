@@ -1,84 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { Select, Button, Row, Modal } from 'antd';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom'; // Cambiado a useNavigate
+import { useState, useEffect } from 'react';
+import { Select, Row } from 'antd';
+
 import TablaCategoria from '../../element/table/TablaCategoria';
 import NuevaCategoria from '../../element/botones/BotonAgregarCategoria';
+import { getEmpresas } from '../../../service/ServiceEmpresa';
+import { Empresas } from '../../../service/ServiceEmpresa';
 
 const { Option } = Select;
 
 export default function Categorias() {
-  const [selectedSucursal, setSelectedSucursal] = useState<string | null>(null);
-  const [sucursales, setSucursales] = useState<any[]>([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const { empresa } = useSelector((state: any) => state);
-  const navigate = useNavigate(); // Cambiado a useNavigate
+  const [empresas, setEmpresas] = useState<Empresas[]>([]);
+  const [selectedEmpresa, setSelectedEmpresa] = useState<string>('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    console.log("estado global: ", empresa);
-    if (!empresa || !empresa.idEmpresa) {
-      setIsModalVisible(true);
-    } else {
-      setIsModalVisible(false);
-    }
-  }, [empresa]);
+    const fetchEmpresas = async () => {
+      const empresasData = await getEmpresas();
+      setEmpresas(empresasData);
+    };
 
-  useEffect(() => {
-    if (empresa && empresa.idEmpresa) {
-      fetch(`http://localhost:8080/api/sucursal/lista-sucursal/${empresa.idEmpresa}`)
-        .then(response => response.json())
-        .then(data => Array.isArray(data) ? setSucursales(data) : setSucursales([]))
-        .catch(error => {
-          console.error("Error fetching sucursales:", error);
-          setSucursales([]);
-        });
-    }
-  }, [empresa]);
+    fetchEmpresas();
+  }, []);
 
-  const handleSucursalChange = (value: string) => {
-    setSelectedSucursal(value);
-    // Aquí puedes manejar la lógica después de seleccionar una sucursal
-  };
-
-  const handleEmpresaRedirect = () => {
-    navigate('/empresas'); // Cambia '/ruta-a-empresas' por la ruta real a tu página de selección de empresa
+  const handleRefresh = () => {
+    setRefreshKey((prevKey) => prevKey + 1);
   };
 
   return (
     <div>
-      <Modal
-        title="Selecciona una Empresa"
-        visible={isModalVisible}
-        footer={null}
-        closable={false}
-      >
-        <p>Por favor, selecciona una empresa para continuar.</p>
-        <Button type="primary" onClick={handleEmpresaRedirect}>
-          Ir a Selección de Empresa
-        </Button>
-      </Modal>
-
-      {empresa && empresa.idEmpresa && (
-        <>
-          <Row style={{ display: 'flex', backgroundColor: '#a5a5a5', borderRadius: '8px', padding: '20px', width: '100%', margin: '0 auto' }}>
-            <h1>Categorias</h1>
-            <Select
-                value={empresa.idSucursal} // Add null check before accessing id property
-                onChange={handleSucursalChange}
-                placeholder="Selecciona una sucursal"
-                style={{ width: 200, marginLeft: '30%' }} // Limita el ancho del selector a 200px
-            >
-                {Array.isArray(sucursales) && sucursales.map((sucursal) => (
-                    <Option key={sucursal.id} value={sucursal.id}>
-                        {sucursal.nombre}
-                    </Option>
-                ))}
-            </Select>
-            <NuevaCategoria />
-          </Row>
-          <TablaCategoria />
-        </>
+      <Row style={{ display: 'flex', backgroundColor: '#a5a5a5', borderRadius: '8px', padding: '20px', width: '100%', margin: '0 auto' }}>
+        <h1>Categorias</h1>
+        <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', gap: '20px', margin: '10px 0' }}>
+          <Select
+            placeholder="Seleccione una empresa"
+            style={{ width: 200 }}
+            onChange={(value) => setSelectedEmpresa(value)}
+          >
+            {empresas.map((empresa) => (
+              <Option key={empresa.id} value={empresa.id}>{empresa.nombre}</Option>
+            ))}
+          </Select>
+        </div>
+        <NuevaCategoria selectedEmpresaId={selectedEmpresa} onCategoryCreated={handleRefresh} />
+      </Row>
+      <br />
+      {selectedEmpresa ? (
+        <TablaCategoria key={refreshKey} selectedEmpresa={selectedEmpresa} />
+      ) : (
+        <p>Por favor, seleccione una empresa para ver las categorías.</p>
       )}
     </div>
   );
