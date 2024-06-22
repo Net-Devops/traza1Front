@@ -14,7 +14,7 @@ const Insumos = () => {
   const [empresas, setEmpresas] = useState<Empresas[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState('');
-  const [selectedSucursal, setSelectedSucursal] = useState(''); // Nuevo estado para almacenar el id de la sucursal seleccionada
+  const [selectedSucursal, setSelectedSucursal] = useState('');
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -36,6 +36,11 @@ const Insumos = () => {
     fetchSucursales();
   }, [selectedEmpresa]);
 
+  const handleOpenFormularioInsumo = () => {
+    setShowFormularioInsumo(true);
+    // Aquí asumimos que tienes una forma de pasar estos IDs al componente FormularioInsumo
+    // Esto podría ser a través del estado global, props, o contexto, dependiendo de tu estructura
+  };
   const closeFormularioInsumo = () => {
     setShowFormularioInsumo(false);
   };
@@ -65,14 +70,20 @@ const Insumos = () => {
             ))}
           </Select>
         </div>
-        <Button type="primary" onClick={() => setShowFormularioInsumo(true)}>
-          Agregar Insumo
-        </Button>
+        {/* Button is now only shown when both empresa and sucursal are selected */}
+        {selectedEmpresa && selectedSucursal && (
+          <Button type="primary" onClick={handleOpenFormularioInsumo} id={`empresa-${selectedEmpresa}-sucursal-${selectedSucursal}`}>
+            Agregar Insumo
+          </Button>
+        )}
       </div>
-      {showFormularioInsumo && <FormularioInsumo onClose={closeFormularioInsumo} />}
+      {showFormularioInsumo && <FormularioInsumo onClose={closeFormularioInsumo} empresaId={selectedEmpresa} sucursalId={selectedSucursal}  />}
       <div>
-        {/* Render TablaInsumo only if a sucursal has been selected */}
-        {selectedSucursal && <TablaInsumo empresaId={selectedEmpresa} sucursalId={selectedSucursal} />}
+        {selectedSucursal ? (
+          <TablaInsumo empresaId={selectedEmpresa} sucursalId={selectedSucursal} />
+        ) : (
+          <p>Por favor, seleccione la sucursal para ver los insumos.</p>
+        )}
       </div>
     </div>
   );
