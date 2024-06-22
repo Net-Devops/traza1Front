@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { Button, Modal, Form, Input } from 'antd';
 import AgregarSucursalACatgoria from '../transfer/TransferCategoria'; // Suponiendo que TransferSucursales es el componente para seleccionar sucursales
 
+interface BotonAgregarCategoriaProps {
+  selectedEmpresaId: string;
+  onCategoryCreated: () => void;
+}
 
-export default function BotonAgregarCategoria() {
+export default function BotonAgregarCategoria({ selectedEmpresaId, onCategoryCreated }: BotonAgregarCategoriaProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [selectedSucursales, setSelectedSucursales] = useState<string[]>([]);
@@ -15,9 +19,9 @@ export default function BotonAgregarCategoria() {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      console.log('Success:', selectedSucursales);
-      values.sucursales = selectedSucursales;
+      values.empresaId = selectedEmpresaId;
       await createCategory(values);
+      onCategoryCreated(); // Refresh the parent component
     } catch (error) {
       console.error('Validate Failed:', error);
     }
@@ -29,15 +33,15 @@ export default function BotonAgregarCategoria() {
     setSelectedSucursales([]);
   };
 
-  const createCategory = async (values) => {
+  const createCategory = async (values: { sucursales: { id: string; }[]; }) => {
     try {
       // Convertir los IDs de sucursales en objetos con un campo "id"
-      const sucursalesObj = values.sucursales.map(id => ({ id }));
+      const sucursalesObj = selectedSucursales.map(id => ({ id }));
   
       // Asignar la lista de objetos de sucursales al valor "sucursales"
       values.sucursales = sucursalesObj;
   
-      const response = await fetch('http://localhost:8080/api/categorias/', {
+      const response = await fetch('http://localhost:8080/api/categorias/porEmpresa', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

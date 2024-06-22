@@ -9,7 +9,9 @@ import Insumo from "../components/pages/insumos/Insumos";
 import CompraCategoria from "../components/pages/compra/categoria/CompraCategoria";
 import CompraProductos from "../components/pages/compra/productos/CompraProductos";
 import UnidadMedida from "../components/pages/unidadMedida/UnidadMedida";
+import CategoriasPorSucursal from "../components/pages/categorias/CategoriasPorSucursal";
 import Promocion from "../components/pages/promocion/Promocion";
+
 
 const Rutas: React.FC = () => {
   return (
@@ -18,6 +20,7 @@ const Rutas: React.FC = () => {
       <Route path="/empresas" element={<Empresa />} />
       <Route path="/sucursal/:id" element={<Sucursal />} />
       <Route path="/categorias" element={<Categorias />} />
+      <Route path="/categorias/porSucursal" element={<CategoriasPorSucursal />} />
 
       <Route path="/productos" element={<Productos />} />
       <Route path="/insumos" element={<Insumo />} />
