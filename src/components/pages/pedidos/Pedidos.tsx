@@ -73,18 +73,17 @@ const Pedidos: React.FC = () => {
       message.success(
         `El pedido cambió su estado a: ${pedidoActualizado.estado}`
       );
-      // Aquí deberías recargar los pedidos para reflejar el cambio de estado
-      // Esto podría ser simplemente llamando de nuevo a cargarPedidos() si mueves esa función fuera de useEffect
-      setModalVisible(false);
-      setSelectedPedidoId(null);
-      setNuevoEstado(null);
-      cargarPedidos();
+      cargarPedidos(); // Recargar los pedidos para reflejar el cambio de estado
     } catch (error) {
       console.error("Error al cambiar el estado del pedido:", error);
       message.error("Error al cambiar el estado del pedido");
+    } finally {
+      // Asegurarse de restablecer el estado del modal y los valores seleccionados, independientemente del resultado de la operación
+      setModalVisible(false);
+      setSelectedPedidoId(null);
+      setNuevoEstado(null);
     }
   };
-
   const columns = [
     {
       title: "ID Pedido",
