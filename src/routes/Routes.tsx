@@ -10,6 +10,7 @@ import CompraCategoria from "../components/pages/compra/categoria/CompraCategori
 import CompraProductos from "../components/pages/compra/productos/CompraProductos";
 import UnidadMedida from "../components/pages/unidadMedida/UnidadMedida";
 import Promocion from "../components/pages/promocion/Promocion";
+import Pedidos from "../components/pages/pedidos/Pedidos";
 
 const Rutas: React.FC = () => {
   return (
@@ -28,6 +29,7 @@ const Rutas: React.FC = () => {
         element={<CompraProductos />}
       />
       <Route path="/promociones" element={<Promocion />} />
+      <Route path="/Pedidos" element={<Pedidos />} />
     </Routes>
   );
 };
