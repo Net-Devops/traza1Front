@@ -42,17 +42,6 @@ const Pedidos: React.FC = () => {
   }, [selectedEmpresa]);
 
   useEffect(() => {
-    const cargarPedidos = async () => {
-      if (selectedSucursalId > 0) {
-        try {
-          const pedidosData = await fetchPedidos(selectedSucursalId);
-          setPedidos(pedidosData);
-        } catch (error) {
-          console.error("Error al cargar los pedidos:", error);
-        }
-      }
-    };
-
     cargarPedidos();
   }, [selectedSucursalId]);
 
@@ -84,6 +73,7 @@ const Pedidos: React.FC = () => {
       setNuevoEstado(null);
     }
   };
+
   const columns = [
     {
       title: "ID Pedido",
@@ -115,7 +105,6 @@ const Pedidos: React.FC = () => {
         </ul>
       ),
     },
-
     {
       title: "Estado",
       dataIndex: "estado",
@@ -129,6 +118,7 @@ const Pedidos: React.FC = () => {
         <Button
           onClick={() => {
             setSelectedPedidoId(record.id);
+            setNuevoEstado(record.estado); // Establecer el estado actual del pedido cuando se abre el modal
             setModalVisible(true);
           }}
         >
@@ -217,6 +207,7 @@ const Pedidos: React.FC = () => {
         }}
       >
         <Select
+          value={nuevoEstado || undefined} // Establecer el valor seleccionado
           placeholder="Seleccione un nuevo estado"
           style={{ width: "100%" }}
           onChange={(value) => setNuevoEstado(value as Estado)}
