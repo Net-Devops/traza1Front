@@ -114,3 +114,19 @@ export async function deleteProductoXId(id: string) {
   
     return await response.json();
   }
+
+
+  export async function getProductoXId(id: string) {
+    const urlServer = "http://localhost:8080/api/local/articulo/manufacturado/"+id;
+    console.log(urlServer);
+    const response = await fetch(urlServer, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      mode: "cors",
+    });
+  
+    return await response.json();
+  }
