@@ -6,8 +6,12 @@ export interface Producto {
   precioVenta: number;
   categoria: any;
   sucursal: any;
-  imagenes: string[];
+  imagenes: Imagen[];
   // Agrega aquí las demás propiedades de un producto
+}
+export interface Imagen {
+  id: number;
+  url: string;
 }
 
 export interface PedidoDetalle {

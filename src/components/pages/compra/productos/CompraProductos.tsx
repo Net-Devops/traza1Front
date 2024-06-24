@@ -63,7 +63,8 @@ const CompraProductos = () => {
                   alt={producto.denominacion}
                   src={
                     producto.imagenes.length > 0
-                      ? producto.imagenes[0]
+                      ? "http://localhost:8080/images/" +
+                        producto.imagenes[0].url
                       : "http://localhost:8080/images/sin-imagen.jpg"
                   }
                 />
