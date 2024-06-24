@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card, Button } from "antd";
+import { Card, Button, Modal } from "antd"; // Paso 1: Importa Modal
 import { obtenerCategoriasPadre } from "../../../../service/Compra";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/Store";
@@ -10,12 +10,12 @@ const CompraCategoria = () => {
   const navigate = useNavigate();
   const [categorias, setCategorias] = useState([]);
   const carritoItems = useSelector((state: RootState) => state.cartReducer);
+  const [isModalVisible, setIsModalVisible] = useState(false); // Paso 2: Estado para controlar la visibilidad del modal
 
   useEffect(() => {
     const fetchData = async () => {
-      const idNumerico = Number(sucursalId); // Convertir sucursalId a número
+      const idNumerico = Number(sucursalId);
       if (!isNaN(idNumerico)) {
-        // Verificar si la conversión es exitosa
         const data = await obtenerCategoriasPadre(idNumerico);
         setCategorias(data);
       }
@@ -26,18 +26,18 @@ const CompraCategoria = () => {
   const handleCategoriaClick = async (id: number) => {
     navigate(`/compra/productos/${id}`);
   };
-  const salirDeSucursal = () => {
-    if (carritoItems.length > 0) {
-      if (
-        window.confirm(
-          "Tienes artículos en tu carrito. ¿Estás seguro de que quieres salir? Perderás todos los artículos en tu carrito."
-        )
-      ) {
-        navigate(-1);
-      }
-    } else {
-      navigate(-1);
-    }
+
+  const mostrarModalSalir = () => {
+    setIsModalVisible(true); // Muestra el modal
+  };
+
+  const confirmarSalida = () => {
+    navigate(-1);
+    setIsModalVisible(false); // Oculta el modal después de confirmar
+  };
+
+  const cancelarSalida = () => {
+    setIsModalVisible(false); // Oculta el modal si el usuario cancela
   };
 
   return (
@@ -45,10 +45,27 @@ const CompraCategoria = () => {
       <Button
         type="primary"
         style={{ marginBottom: "16px" }}
-        onClick={salirDeSucursal} // Modificado para usar la nueva función
+        onClick={() => {
+          if (carritoItems.length > 0) {
+            mostrarModalSalir(); // Paso 3: Usa el modal en lugar de window.confirm
+          } else {
+            navigate(-1);
+          }
+        }}
       >
         Salir de la sucursal
       </Button>
+      <Modal
+        title="Confirmar salida" // Aquí puedes personalizar el título
+        visible={isModalVisible}
+        onOk={confirmarSalida}
+        onCancel={cancelarSalida}
+      >
+        <p>
+          Tienes artículos en tu carrito. ¿Estás seguro de que quieres salir?
+          Perderás todos los artículos en tu carrito.
+        </p>
+      </Modal>
       <h1>Elige una categoría</h1>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
         {categorias.map((categoria: { id: number; denominacion: string }) => (
