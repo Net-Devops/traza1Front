@@ -71,14 +71,14 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
           imagen: data.imagen,
         });
         setSelectedArticulosData(
-          data.promocionDetalles.map((detalle: any) => ({
-            ...detalle.articuloManufacturado,
+          data.promocionDetallesDto.map((detalle: any) => ({
+            ...detalle.articuloManufacturadoDto,
             cantidad: detalle.cantidad,
           }))
         );
         setSelectedArticulos(
-          data.promocionDetalles.map(
-            (detalle: any) => detalle.articuloManufacturado.id
+          data.promocionDetallesDto.map(
+            (detalle: any) => detalle.articuloManufacturadoDto.id
           )
         );
       });
