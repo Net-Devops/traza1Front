@@ -1,4 +1,4 @@
-import { Card, Button, InputNumber } from "antd";
+import { Card, Button, InputNumber, Avatar } from "antd";
 import { PlusOutlined, MinusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import {
@@ -15,6 +15,7 @@ import { unwrapResult } from "@reduxjs/toolkit";
 import CheckoutMP from "../../mercadoPago/CheckoutMP";
 
 const Carrito = () => {
+  const imagenPorDefecto = "http://localhost:8080/images/sin-imagen.jpg";
   const dispatch = useAppDispatch();
   const carrito = useAppSelector((state) => state.cartReducer);
   const [preferenceId, setPreferenceId] = useState<string | null>(null);
@@ -63,10 +64,15 @@ const Carrito = () => {
       <h1 style={{ textAlign: "center" }}>Carrito</h1>
       {carrito.map((item) => {
         const subtotal = item.producto.precioVenta * item.cantidad;
+        const imagenAMostrar =
+          item.producto.imagenes.length > 0
+            ? item.producto.imagenes[0]
+            : imagenPorDefecto;
         return (
           <Card key={item.id} style={{ width: 300, marginBottom: "20px" }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <Card.Meta
+                avatar={<Avatar src={imagenAMostrar} />}
                 title={item.producto.denominacion}
                 description={
                   <>
@@ -77,14 +83,14 @@ const Carrito = () => {
                       onChange={(value) =>
                         cambiarCantidadProducto(item.id, value ?? 0)
                       }
-                      disabled={pedidoRealizado} // Deshabilita el input si el pedido ha sido realizado
+                      disabled={pedidoRealizado}
                     />
                     <br />
                     Subtotal: {subtotal}
                   </>
                 }
               />
-              <p>Precio: {item.producto.precioVenta}</p>
+              <p>Precio: ${item.producto.precioVenta}</p>
             </div>
             {!pedidoRealizado && (
               <div style={{ display: "flex", justifyContent: "space-between" }}>

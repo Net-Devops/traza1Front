@@ -1,4 +1,4 @@
-import { Modal, Button } from "antd";
+import { Modal, Button, Image } from "antd";
 
 interface DetalleProductoProps {
   producto: any;
@@ -12,6 +12,13 @@ const DetalleProducto: React.FC<DetalleProductoProps> = ({
   if (!producto) {
     return <div>Cargando...</div>;
   }
+  // URL de imagen por defecto
+  const imagenPorDefecto = "http://localhost:8080/images/sin-imagen.jpg";
+  // Determina la imagen a mostrar
+  const imagenAMostrar =
+    producto.imagenes && producto.imagenes.length > 0
+      ? producto.imagenes[0]
+      : imagenPorDefecto;
 
   return (
     <Modal
@@ -24,12 +31,16 @@ const DetalleProducto: React.FC<DetalleProductoProps> = ({
         </Button>,
       ]}
     >
+      <Image
+        src={imagenAMostrar}
+        alt="Imagen del producto"
+        style={{ marginBottom: "20px" }} // Ajusta el estilo según sea necesario
+      />
       <p>{producto.descripcion}</p>
       <p>Código: {producto.codigo}</p>
       <p>Precio de venta: {producto.precioVenta}</p>
       <p>Categoría: {producto.categoriaId}</p>
       <p>Sucursal: {producto.sucursalId}</p>
-
       {/* Aquí puedes agregar más detalles del producto según sea necesario */}
     </Modal>
   );

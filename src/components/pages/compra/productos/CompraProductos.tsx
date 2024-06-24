@@ -15,8 +15,6 @@ const CompraProductos = () => {
     null
   );
 
-  //const [pedidoRealizado] = useState(false); // Nuevo estado
-
   useEffect(() => {
     const fetchData = async () => {
       const data = await getProductosPorCategoria(Number(categoriaId));
@@ -43,8 +41,33 @@ const CompraProductos = () => {
         <h1>Productos</h1>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
           {productos.map((producto) => (
-            <Card key={producto.id} style={{ width: 300 }}>
-              <Card.Meta title={producto.denominacion} />
+            <Card
+              key={producto.id}
+              style={{ width: 300 }}
+              cover={
+                <img
+                  alt={producto.denominacion}
+                  src={
+                    producto.imagenes.length > 0
+                      ? producto.imagenes[0]
+                      : "http://localhost:8080/images/sin-imagen.jpg"
+                  }
+                />
+              }
+            >
+              <Card.Meta
+                title={producto.denominacion}
+                description={
+                  <>
+                    <p>{producto.descripcion}</p>
+                    {/* Modificación para el precioVenta en negrita y tamaño más grande */}
+                    <p
+                      style={{ fontWeight: "bold", fontSize: "larger" }}
+                    >{`Precio: $${producto.precioVenta}`}</p>
+                    <br />
+                  </>
+                }
+              />
               <Button type="primary" onClick={() => verDetalle(producto)}>
                 Ver detalles
               </Button>

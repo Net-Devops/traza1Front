@@ -6,7 +6,7 @@ export interface Producto {
   precioVenta: number;
   categoria: any;
   sucursal: any;
-  imagenes: [];
+  imagenes: string[];
   // Agrega aquí las demás propiedades de un producto
 }
 
