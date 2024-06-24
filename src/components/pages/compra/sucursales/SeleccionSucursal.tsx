@@ -5,10 +5,15 @@ import {
   Sucursal,
 } from "../../../../service/ServiceSucursal";
 import { Card } from "antd";
+// Importar useAppDispatch y limpiarCarrito
+import { useAppDispatch } from "../../../../redux/hooks";
+import { limpiarCarrito } from "../../../../redux/slice/Carrito.slice";
 
 const SeleccionSucursal = () => {
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const navigate = useNavigate();
+  // Usar el hook useAppDispatch para obtener la función dispatch
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const fetchSucursales = async () => {
@@ -16,7 +21,9 @@ const SeleccionSucursal = () => {
       setSucursales(data);
     };
     fetchSucursales();
-  }, []);
+    // Despachar la acción limpiarCarrito al montar el componente
+    dispatch(limpiarCarrito());
+  }, [dispatch]);
 
   const handleSeleccionar = (idSucursal: string) => {
     navigate(`/compra/categorias/${idSucursal}`);
@@ -37,11 +44,11 @@ const SeleccionSucursal = () => {
               src={
                 sucursal.imagen ||
                 "http://localhost:8080/images/sin-imagen-sucursal.png"
-              } // Reemplaza "ruta/a/imagen/por/defecto.jpg" con la ruta real de tu imagen por defecto
+              }
               alt={`Sucursal ${sucursal.nombre}`}
               style={{ width: "100%", height: "auto" }}
             />
-            <p> {sucursal.nombre}</p>
+            <p>{sucursal.nombre}</p>
             <p>
               Hora: {sucursal.horaApertura} a {sucursal.horaCierre}
             </p>

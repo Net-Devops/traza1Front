@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card } from "antd";
+import { Card, Button } from "antd";
 import { obtenerCategoriasPadre } from "../../../../service/Compra";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/Store";
 
 const CompraCategoria = () => {
   const { sucursalId } = useParams();
   const navigate = useNavigate();
   const [categorias, setCategorias] = useState([]);
+  const carritoItems = useSelector((state: RootState) => state.cartReducer);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,9 +26,29 @@ const CompraCategoria = () => {
   const handleCategoriaClick = async (id: number) => {
     navigate(`/compra/productos/${id}`);
   };
+  const salirDeSucursal = () => {
+    if (carritoItems.length > 0) {
+      if (
+        window.confirm(
+          "Tienes artículos en tu carrito. ¿Estás seguro de que quieres salir? Perderás todos los artículos en tu carrito."
+        )
+      ) {
+        navigate(-1);
+      }
+    } else {
+      navigate(-1);
+    }
+  };
 
   return (
     <div>
+      <Button
+        type="primary"
+        style={{ marginBottom: "16px" }}
+        onClick={salirDeSucursal} // Modificado para usar la nueva función
+      >
+        Salir de la sucursal
+      </Button>
       <h1>Elige una categoría</h1>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
         {categorias.map((categoria: { id: number; denominacion: string }) => (

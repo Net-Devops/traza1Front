@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Paso 1
 import { getProductosPorCategoria } from "../../../../service/Compra";
 import DetalleProducto from "./DetalleProducto";
 import Carrito from "../Carrito";
@@ -7,9 +7,11 @@ import { Producto } from "../../../../types/compras/interface";
 import { Card, Button } from "antd";
 import { useAppDispatch } from "../../../../redux/hooks";
 import { addToCarrito } from "../../../../redux/slice/Carrito.slice";
+
 const CompraProductos = () => {
   const dispatch = useAppDispatch();
   const { categoriaId } = useParams();
+  const navigate = useNavigate(); // Paso 2
   const [productos, setProductos] = useState<Producto[]>([]);
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(
     null
@@ -35,9 +37,21 @@ const CompraProductos = () => {
     dispatch(addToCarrito({ id: producto.id, producto, cantidad: 1 }));
   };
 
+  const volverACategorias = () => {
+    // Paso 3
+    navigate(-1);
+  };
+
   return (
     <div style={{ display: "flex", justifyContent: "space-between" }}>
       <div>
+        <Button
+          onClick={volverACategorias}
+          style={{ margin: "10px", alignSelf: "flex-start" }}
+        >
+          Volver a Categorías
+        </Button>{" "}
+        {/* Paso 4 y 5 */}
         <h1>Productos</h1>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
           {productos.map((producto) => (
@@ -60,7 +74,6 @@ const CompraProductos = () => {
                 description={
                   <>
                     <p>{producto.descripcion}</p>
-                    {/* Modificación para el precioVenta en negrita y tamaño más grande */}
                     <p
                       style={{ fontWeight: "bold", fontSize: "larger" }}
                     >{`Precio: $${producto.precioVenta}`}</p>
