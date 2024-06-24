@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "antd";
 import { obtenerCategoriasPadre } from "../../../../service/Compra";
 
 const CompraCategoria = () => {
+  const { sucursalId } = useParams();
   const navigate = useNavigate();
   const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await obtenerCategoriasPadre();
-      setCategorias(data);
+      const idNumerico = Number(sucursalId); // Convertir sucursalId a número
+      if (!isNaN(idNumerico)) {
+        // Verificar si la conversión es exitosa
+        const data = await obtenerCategoriasPadre(idNumerico);
+        setCategorias(data);
+      }
     };
     fetchData();
-  }, []);
+  }, [sucursalId]);
 
   const handleCategoriaClick = async (id: number) => {
     navigate(`/compra/productos/${id}`);

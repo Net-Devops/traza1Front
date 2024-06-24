@@ -12,7 +12,7 @@ import UnidadMedida from "../components/pages/unidadMedida/UnidadMedida";
 import CategoriasPorSucursal from "../components/pages/categorias/CategoriasPorSucursal";
 import Promocion from "../components/pages/promocion/Promocion";
 import Pedidos from "../components/pages/pedidos/Pedidos";
-
+import SeleccionSucursal from "../components/pages/compra/sucursales/SeleccionSucursal";
 
 const Rutas: React.FC = () => {
   return (
@@ -21,12 +21,20 @@ const Rutas: React.FC = () => {
       <Route path="/empresas" element={<Empresa />} />
       <Route path="/sucursal/:id" element={<Sucursal />} />
       <Route path="/categorias" element={<Categorias />} />
-      <Route path="/categorias/porSucursal" element={<CategoriasPorSucursal />} />
+      <Route
+        path="/categorias/porSucursal"
+        element={<CategoriasPorSucursal />}
+      />
 
       <Route path="/productos" element={<Productos />} />
       <Route path="/insumos" element={<Insumo />} />
       <Route path="/unidadMedida" element={<UnidadMedida />} />
-      <Route path="/compra/categorias" element={<CompraCategoria />} />
+
+      <Route path="/compra" element={<SeleccionSucursal />} />
+      <Route
+        path="/compra/categorias/:sucursalId"
+        element={<CompraCategoria />}
+      />
       <Route
         path="/compra/productos/:categoriaId"
         element={<CompraProductos />}
