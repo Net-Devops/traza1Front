@@ -68,22 +68,32 @@ const CompraCategoria = () => {
       </Modal>
       <h1>Elige una categoría</h1>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-        {categorias.map((categoria: { id: number; denominacion: string }) => (
-          <Card
-            key={categoria.id}
-            onClick={() => handleCategoriaClick(categoria.id)}
-            style={{ width: 300, height: 300 }}
-            cover={
-              <img
-                alt="example"
-                src={`/src/util/${categoria.denominacion}.jpeg`}
-                style={{ width: "100%", height: "200px", objectFit: "cover" }}
-              />
-            }
-          >
-            <Card.Meta title={categoria.denominacion} />
-          </Card>
-        ))}
+        {categorias.map(
+          (categoria: {
+            id: number;
+            denominacion: string;
+            urlIcono: string;
+          }) => (
+            <Card
+              key={categoria.id}
+              onClick={() => handleCategoriaClick(categoria.id)}
+              style={{ width: 300, height: 300 }} // Asegúrate de que el tamaño de la Card sea el deseado
+              cover={
+                <img
+                  alt="example"
+                  src={`http://localhost:8080/images/${categoria.urlIcono}`}
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      "http://localhost:8080/images/sin-imagen-categoria.jpeg"; // Ruta de la imagen por defecto
+                  }}
+                  style={{ width: "100%", height: "200px", objectFit: "cover" }} // Ajusta el height según necesites
+                />
+              }
+            >
+              <Card.Meta title={categoria.denominacion} />
+            </Card>
+          )
+        )}
       </div>
     </div>
   );
