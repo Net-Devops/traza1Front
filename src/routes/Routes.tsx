@@ -10,7 +10,7 @@ import CompraCategoria from "../components/pages/compra/categoria/CompraCategori
 import CompraProductos from "../components/pages/compra/productos/CompraProductos";
 import UnidadMedida from "../components/pages/unidadMedida/UnidadMedida";
 import Promocion from "../components/pages/promocion/Promocion";
-
+import Empleados from "../components/pages/empleado/Empleado";
 const Rutas: React.FC = () => {
   return (
     <Routes>
@@ -18,7 +18,7 @@ const Rutas: React.FC = () => {
       <Route path="/empresas" element={<Empresa />} />
       <Route path="/sucursal/:id" element={<Sucursal />} />
       <Route path="/categorias" element={<Categorias />} />
-
+      <Route path="/empleados" element={<Empleados />} />
       <Route path="/productos" element={<Productos />} />
       <Route path="/insumos" element={<Insumo />} />
       <Route path="/unidadMedida" element={<UnidadMedida />} />

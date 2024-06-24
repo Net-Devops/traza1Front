@@ -38,7 +38,7 @@ export interface ArticuloProducto {
   precioVenta: number;
   imagenes: Imagen[];
   unidadMedida: unidadMedida;
-  tiempoEstimadoCocina?: number;
+  tiempoEstimadoMinutos?: number;
   preparacion?: string;
   articuloManufacturadoDetalles: ArticuloManufacturadoDetalle[];
   sucursal: sucursal;
@@ -67,7 +67,7 @@ export async function crearManufacturado(formData: ArticuloProducto) {
         precioVenta: formData.precioVenta,
         imagenes: formData.imagenes,
         unidadMedida: formData.unidadMedida,
-        tiempoEstimadoMinutos: formData.tiempoEstimadoCocina || 0,
+        tiempoEstimadoMinutos: formData.tiempoEstimadoMinutos || 0,
         preparacion: formData.preparacion || "sin preparacion",
         sucursal: formData.sucursal,
         articuloManufacturadoDetalles: formData.articuloManufacturadoDetalles,
@@ -127,3 +127,58 @@ export const getProductoXId = async (id: string) => {
     return null;
   }
 };
+export const getProductoXIdBase = async (id: string) => {
+  try {
+    const response = await fetch(
+      " http://localhost:8080/api/articulos/manufacturados/imagenBase64/" + id
+    );
+    if (!response.ok) {
+      throw new Error("Error al obtener los detalles de la promoción");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+export async function modificarProductoId(formData: any, id: number) {
+  try {
+      console.log("estoy en el fetc");
+      console.log("data"+formData);
+      console.log("id:"+id);
+      
+      
+      
+      const urlServer = `http://localhost:8080/api/articulos/manufacturados/${id}`;
+      const response = await fetch(urlServer, {
+          method: "PUT",
+          headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+          },
+          mode: "cors",
+          body: JSON.stringify({
+            codigo:  formData.codigo,
+            denominacion: formData.denominacion,
+            descripcion: formData.descripcion || "sin descripcion",
+            precioVenta: formData.precioVenta,
+            imagenes: formData.imagenes,
+            unidadMedida: formData.unidadMedida,
+            tiempoEstimadoMinutos: formData.tiempoEstimadoMinutos || 0,
+            preparacion: formData.preparacion || "sin preparacion",
+            sucursal: formData.sucursal,
+            articuloManufacturadoDetalles: formData.articuloManufacturadoDetalles,
+             
+          }),
+      });
+
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+  } catch (error) {
+      console.log("Error: ", error);
+      throw error;
+  }
+}
