@@ -9,6 +9,7 @@ import {
   limpiarCarrito,
   enviarPedido,
   cambiarCantidad,
+  enviarPedidoDomicilio,
 } from "../../../redux/slice/Carrito.slice";
 import { toast } from "react-toastify";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -25,8 +26,8 @@ const Carrito = () => {
   const [metodoEntrega, setMetodoEntrega] = useState<TipoEnvio>(
     TipoEnvio.RETIRO_LOCAL
   );
-  const [direccionEnvio, setDireccionEnvio] = useState<DomicilioDto>(
-    {} as DomicilioDto
+  const [direccionEnvio, setDireccionEnvio] = useState<DomicilioDto | null>(
+    null
   );
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -57,7 +58,12 @@ const Carrito = () => {
       return;
     }
     try {
-      const resultAction = await dispatch(enviarPedido(direccionEnvio));
+      let resultAction;
+      if (metodoEntrega === TipoEnvio.DELIVERY) {
+        resultAction = await dispatch(enviarPedidoDomicilio(direccionEnvio));
+      } else {
+        resultAction = await dispatch(enviarPedido());
+      }
       const preferenceId = unwrapResult(resultAction);
 
       setPreferenceId(preferenceId);
