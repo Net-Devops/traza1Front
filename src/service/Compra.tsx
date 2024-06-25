@@ -90,10 +90,10 @@ export const obtenerSubCategorias = async (id: number) => {
   }
 };
 
-export const obtenerCategoriasPadre = async () => {
+export const obtenerCategoriasPadre = async (sucursalId: number) => {
   try {
     const response = await fetch(
-      "http://localhost:8080/api/categorias/categoriasPadre/"
+      `http://localhost:8080/api/categorias/categoriasPadre/${sucursalId}`
     );
     if (!response.ok) {
       throw new Error("Error al obtener las categorías padre");

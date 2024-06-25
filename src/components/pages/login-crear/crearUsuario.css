@@ -1,0 +1,34 @@
+/* CrearUsuario.css */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.formulario label {
+  margin-bottom: 10px;
+}
+
+.formulario input,
+.formulario select {
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.formulario input[type="submit"] {
+  margin-top: 20px;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+}
+
+.formulario input[type="submit"]:hover {
+  background-color: #45a049;
+}
