@@ -7,8 +7,10 @@ import { Producto } from "../../../../types/compras/interface";
 import { Card, Button } from "antd";
 import { useAppDispatch } from "../../../../redux/hooks";
 import { addToCarrito } from "../../../../redux/slice/Carrito.slice";
+import { toast } from "react-toastify";
 
 const CompraProductos = () => {
+  const [pedidoRealizado, setPedidoRealizado] = useState(false);
   const dispatch = useAppDispatch();
   const { categoriaId } = useParams();
   const navigate = useNavigate(); // Paso 2
@@ -34,6 +36,15 @@ const CompraProductos = () => {
   };
 
   const agregarAlCarrito = (producto: Producto) => {
+    // Verifica si ya se ha realizado un pedido
+    console.log("-------estoy en agregar al carrito--->" + pedidoRealizado);
+    if (pedidoRealizado) {
+      toast.warning(
+        "No puedes agregar más productos después de realizar un pedido."
+      );
+      return;
+    }
+
     dispatch(addToCarrito({ id: producto.id, producto, cantidad: 1 }));
   };
 
@@ -98,7 +109,10 @@ const CompraProductos = () => {
           />
         )}
       </div>
-      <Carrito />
+      <Carrito
+        pedidoRealizado={pedidoRealizado}
+        setPedidoRealizado={setPedidoRealizado}
+      />
     </div>
   );
 };

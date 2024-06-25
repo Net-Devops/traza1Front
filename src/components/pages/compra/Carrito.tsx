@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Button, InputNumber, Avatar, Radio, Modal } from "antd";
 import { PlusOutlined, MinusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
@@ -22,12 +22,16 @@ import {
 } from "../../../types/compras/interface";
 import DireccionForm from "./formulario/DireccionForm";
 
-const Carrito = () => {
+type CarritoProps = {
+  pedidoRealizado: boolean;
+  setPedidoRealizado: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const Carrito = ({ pedidoRealizado, setPedidoRealizado }: CarritoProps) => {
   const imagenPorDefecto = "http://localhost:8080/images/sin-imagen.jpg";
   const dispatch = useAppDispatch();
   const carrito = useAppSelector((state) => state.cartReducer);
   const [preferenceId, setPreferenceId] = useState<string | null>(null);
-  const [pedidoRealizado, setPedidoRealizado] = useState(false);
   const [metodoEntrega, setMetodoEntrega] = useState<TipoEnvio>(
     TipoEnvio.RETIRO_LOCAL
   );
@@ -93,13 +97,21 @@ const Carrito = () => {
       const preferenceId = unwrapResult(resultAction);
 
       setPreferenceId(preferenceId);
-      toast.success("Pedido realizado con éxito. Ahora realiza el pago.");
       setPedidoRealizado(true);
+      toast.success("Pedido realizado con éxito. Ahora realiza el pago.");
+      console.log("pedidoRealizado actualizado:", pedidoRealizado);
     } catch (err) {
       console.error("Error al realizar el pedido", err);
       toast.error("Error al realizar el pedido.");
     }
   };
+
+  useEffect(() => {
+    if (pedidoRealizado) {
+      console.log("pedidoRealizado actualizado:", pedidoRealizado);
+      // Aquí puedes poner cualquier otra lógica que dependa de la actualización de pedidoRealizado
+    }
+  }, [pedidoRealizado]);
 
   const cambiarCantidadProducto = (productoId: number, cantidad: number) => {
     dispatch(cambiarCantidad({ id: productoId, cantidad }));
