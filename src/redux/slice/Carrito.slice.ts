@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { Pedido, Producto } from "../../types/compras/interface";
+import { Pedido, Producto, DomicilioDto } from "../../types/compras/interface";
 import { realizarPedido, createPreferenceMP } from "../../service/Compra";
 
 interface PedidoDetalleAddState {
@@ -16,18 +16,28 @@ const initialState: PedidoDetalleAddState[] = [];
 
 export const enviarPedido = createAsyncThunk(
   "carrito/enviarPedido",
-  async (_, { getState }) => {
+  async (direccionEnvio: DomicilioDto, { getState }) => {
     const state = getState() as { cartReducer: PedidoDetalleAddState[] };
     const pedidoDetalle = state.cartReducer;
 
     const pedido: Pedido = {
-      // Aquí puedes agregar cualquier otra propiedad que necesites en tu pedido
       fechaPedido: new Date().toISOString(),
       total: pedidoDetalle.reduce(
         (sum, item) => sum + item.producto.precioVenta * item.cantidad,
         0
       ),
-
+      domicilio: {
+        calle: direccionEnvio.calle,
+        numero: direccionEnvio.numero,
+        localidad: {
+          id: direccionEnvio.localidad,
+          provincia: {
+            id: direccionEnvio.provincia,
+            pais: { id: direccionEnvio.pais },
+          },
+        },
+        cp: direccionEnvio.cp,
+      }, // Usar direccionEnvio aquí
       pedidoDetalle,
     };
 
@@ -35,8 +45,6 @@ export const enviarPedido = createAsyncThunk(
     if (data) {
       const preferenceMP = await createPreferenceMP(data);
       console.log("preferenciaMp:", preferenceMP);
-
-      // Devuelve el preferenceId
       return preferenceMP.id;
     } else {
       console.error("Error al realizar el pedido");

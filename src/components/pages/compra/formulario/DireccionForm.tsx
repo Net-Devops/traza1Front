@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Select } from "antd";
-import { Domicilio } from "../../../../types/compras/interface";
+import { DomicilioDto } from "../../../../types/compras/interface";
 import {
   getPais,
   getProvincia,
@@ -8,11 +8,11 @@ import {
   Pais,
   Provincia,
   Localidad,
-} from "../../../../service/ServiceUbicacion"; // Asegúrate de importar correctamente
+} from "../../../../service/ServiceUbicacion";
 
 interface DireccionFormProps {
-  initialValues: Domicilio;
-  onSubmit: (values: Domicilio) => void;
+  initialValues: DomicilioDto;
+  onSubmit: (values: DomicilioDto) => void;
   onCancel: () => void;
 }
 

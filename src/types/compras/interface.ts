@@ -69,3 +69,11 @@ export enum FormaPago {
   EFECTIVO = "EFECTIVO",
   MERCADOPAGO = "MERCADOPAGO",
 }
+export interface DomicilioDto {
+  calle: string;
+  numero: string;
+  localidad: number;
+  cp: number;
+  pais: number;
+  provincia: number;
+}

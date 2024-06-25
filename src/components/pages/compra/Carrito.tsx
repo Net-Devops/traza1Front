@@ -13,7 +13,7 @@ import {
 import { toast } from "react-toastify";
 import { unwrapResult } from "@reduxjs/toolkit";
 import CheckoutMP from "../../mercadoPago/CheckoutMP";
-import { TipoEnvio, Domicilio } from "../../../types/compras/interface";
+import { TipoEnvio, DomicilioDto } from "../../../types/compras/interface";
 import DireccionForm from "./formulario/DireccionForm";
 
 const Carrito = () => {
@@ -25,7 +25,9 @@ const Carrito = () => {
   const [metodoEntrega, setMetodoEntrega] = useState<TipoEnvio>(
     TipoEnvio.RETIRO_LOCAL
   );
-  const [direccionEnvio, setDireccionEnvio] = useState<Domicilio | null>(null);
+  const [direccionEnvio, setDireccionEnvio] = useState<DomicilioDto>(
+    {} as DomicilioDto
+  );
   const [modalVisible, setModalVisible] = useState(false);
 
   const quitarDelCarrito = (productoId: number) => {
@@ -55,7 +57,7 @@ const Carrito = () => {
       return;
     }
     try {
-      const resultAction = await dispatch(enviarPedido());
+      const resultAction = await dispatch(enviarPedido(direccionEnvio));
       const preferenceId = unwrapResult(resultAction);
 
       setPreferenceId(preferenceId);
@@ -86,7 +88,7 @@ const Carrito = () => {
     }
   };
 
-  const handleModalOk = (values: Domicilio) => {
+  const handleModalOk = (values: DomicilioDto) => {
     setDireccionEnvio(values);
     setModalVisible(false);
   };
@@ -204,7 +206,14 @@ const Carrito = () => {
         footer={null}
       >
         <DireccionForm
-          initialValues={{ calle: "", numero: "", cp: 0 }}
+          initialValues={{
+            calle: "",
+            numero: "",
+            localidad: 0, // Asegúrate de que este valor sea válido según los datos de tu aplicación
+            cp: 0,
+            pais: 0, // Asegúrate de que este valor sea válido según los datos de tu aplicación
+            provincia: 0, // Asegúrate de que este valor sea válido según los datos de tu aplicación
+          }}
           onSubmit={handleModalOk}
           onCancel={handleModalCancel}
         />
