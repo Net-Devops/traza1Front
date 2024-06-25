@@ -5,18 +5,23 @@ import DetalleProducto from "./DetalleProducto";
 import Carrito from "../Carrito";
 import { Producto } from "../../../../types/compras/interface";
 import { Card, Button } from "antd";
-import { useAppDispatch } from "../../../../redux/hooks";
 import { addToCarrito } from "../../../../redux/slice/Carrito.slice";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../redux/Store";
 
 const CompraProductos = () => {
-  const [pedidoRealizado, setPedidoRealizado] = useState(false);
-  const dispatch = useAppDispatch();
+  //const [pedidoRealizado, setPedidoRealizado] = useState(false);
+  //const dispatch = useAppDispatch();
   const { categoriaId } = useParams();
   const navigate = useNavigate(); // Paso 2
   const [productos, setProductos] = useState<Producto[]>([]);
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(
     null
+  );
+  const dispatch = useDispatch<AppDispatch>();
+  const pedidoRealizado = useSelector(
+    (state: RootState) => state.pedido.pedidoRealizado
   );
 
   useEffect(() => {
@@ -109,10 +114,7 @@ const CompraProductos = () => {
           />
         )}
       </div>
-      <Carrito
-        pedidoRealizado={pedidoRealizado}
-        setPedidoRealizado={setPedidoRealizado}
-      />
+      <Carrito />
     </div>
   );
 };

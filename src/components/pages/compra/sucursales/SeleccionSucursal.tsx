@@ -8,6 +8,7 @@ import { Card } from "antd";
 // Importar useAppDispatch y limpiarCarrito
 import { useAppDispatch } from "../../../../redux/hooks";
 import { limpiarCarrito } from "../../../../redux/slice/Carrito.slice";
+import { setPedidoRealizado } from "../../../../redux/slice/Pedido.silice";
 
 const SeleccionSucursal = () => {
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
@@ -23,6 +24,7 @@ const SeleccionSucursal = () => {
     fetchSucursales();
     // Despachar la acción limpiarCarrito al montar el componente
     dispatch(limpiarCarrito());
+    dispatch(setPedidoRealizado(false));
   }, [dispatch]);
 
   const handleSeleccionar = (idSucursal: string) => {

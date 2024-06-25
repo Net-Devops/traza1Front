@@ -21,17 +21,16 @@ import {
   FormaPago,
 } from "../../../types/compras/interface";
 import DireccionForm from "./formulario/DireccionForm";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/Store";
+import { setPedidoRealizado } from "../../../redux/slice/Pedido.silice";
 
-type CarritoProps = {
-  pedidoRealizado: boolean;
-  setPedidoRealizado: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
-const Carrito = ({ pedidoRealizado, setPedidoRealizado }: CarritoProps) => {
+const Carrito = () => {
   const imagenPorDefecto = "http://localhost:8080/images/sin-imagen.jpg";
   const dispatch = useAppDispatch();
   const carrito = useAppSelector((state) => state.cartReducer);
   const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  //const [pedidoRealizado, setPedidoRealizado] = useState(false);
   const [metodoEntrega, setMetodoEntrega] = useState<TipoEnvio>(
     TipoEnvio.RETIRO_LOCAL
   );
@@ -40,6 +39,9 @@ const Carrito = ({ pedidoRealizado, setPedidoRealizado }: CarritoProps) => {
   );
   const [modalVisible, setModalVisible] = useState(false);
   const [metodoPago, setMetodoPago] = useState<FormaPago | null>(null);
+  const pedidoRealizado = useSelector(
+    (state: RootState) => state.pedido.pedidoRealizado
+  );
 
   const quitarDelCarrito = (productoId: number) => {
     dispatch(removeToCarrito({ id: productoId }));
@@ -97,9 +99,8 @@ const Carrito = ({ pedidoRealizado, setPedidoRealizado }: CarritoProps) => {
       const preferenceId = unwrapResult(resultAction);
 
       setPreferenceId(preferenceId);
-      setPedidoRealizado(true);
+      dispatch(setPedidoRealizado(true));
       toast.success("Pedido realizado con éxito. Ahora realiza el pago.");
-      console.log("pedidoRealizado actualizado:", pedidoRealizado);
     } catch (err) {
       console.error("Error al realizar el pedido", err);
       toast.error("Error al realizar el pedido.");
