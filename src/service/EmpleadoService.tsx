@@ -14,3 +14,10 @@ export interface Empleado {
     nombre?: string;
     eliminado?: boolean;
   }
+  export const getEmpleados = async (sucursalId: string): Promise<Empleado[]> => {
+    const response = await fetch(`http://localhost:8080/api/empleado/sucursal/${sucursalId}`);
+    if (!response.ok) {
+        throw new Error('Error al obtener los empleados');
+    }
+    return response.json();
+};

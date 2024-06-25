@@ -1,22 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React from 'react';
 import {
     Modal,
     Form,
     Input,
-    Select,
-    Table,
-    InputNumber,
     Button,
-    Row,
-    Col,
     Upload,
     UploadFile,
     notification,
 } from "antd";
-
 import { PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
-
-
 
 
 interface Props {
@@ -25,48 +17,30 @@ interface Props {
     onSubmit: (values: any) => void;
     initialValues: any;
     sucursalId?: string;
-    productoId?: string;
-
+    empleadoId?: string;
 }
-
 
 const FormularioEmpleado: React.FC<Props> = ({
     visible,
     onClose,
-
     initialValues,
     sucursalId,
+    empleadoId,
 }) => {
-
-    const [selectedInsumos, setSelectedInsumos] = useState<string[]>([]);
-    const [selectedInsumosData, setSelectedInsumosData] = useState<any[]>([]);
+    const [form] = Form.useForm();
 
     const handleButtonClick = async (values: any) => {
-        if (selectedInsumosData.length === 0) {
-            alert("Debe haber al menos un artículo en la tabla");
-            return;
-        }
-        const allRecordsHaveQuantity = selectedInsumosData.every(
-            (record) => record.cantidad > 0
-        );
-
-        if (!allRecordsHaveQuantity) {
-            alert("Todos los artículos deben tener una cantidad");
-            return;
-        }
-
         console.log('Received values of form: ', values);
         const formattedValues = { ...values };
         let promises: Promise<{ url: string }>[] = [];
-
-
+    
         formattedValues.sucursal = {
             id: sucursalId,
             denominacion: "" // You might want to fill this with actual data if available
         };
         if (values.imagenes) {
             const files: UploadFile[] = values.imagenes;
-
+    
             promises = files.map((file) => {
                 return new Promise<{ url: string }>((resolve, reject) => {
                     const reader = new FileReader();
@@ -79,18 +53,36 @@ const FormularioEmpleado: React.FC<Props> = ({
                 });
             });
         }
-
+    
         try {
             const imagenes = await Promise.all(promises);
             formattedValues.imagenes = imagenes;
-            // const response = await crearManufacturado(formattedValues);
-            // console.log('Response: ', response);
+    
+            let url = `http://localhost:8080/api/empleado/`;
+            let method = 'POST';
+            if (empleadoId) {
+                url = `http://localhost:8080/api/empleado/${empleadoId}`;
+                method = 'PUT';
+            }
+    
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formattedValues)
+            });
+    
+            if (!response.ok) {
+                throw new Error('Error al modificar el empleado');
+            }
+    
             form.resetFields();
             onClose();
             notification.open({
                 message: (
                     <span>
-                        <CheckCircleOutlined style={{ color: 'green' }} /> Agregado correctamente
+                        <CheckCircleOutlined style={{ color: 'green' }} /> Empleado actualizado correctamente
                     </span>
                 ),
             });
@@ -98,6 +90,7 @@ const FormularioEmpleado: React.FC<Props> = ({
             console.error('Error: ', error);
         }
     };
+    
 
     const normFile = (e: any) => {
         if (Array.isArray(e)) {
@@ -115,15 +108,10 @@ const FormularioEmpleado: React.FC<Props> = ({
         });
     };
 
-    const [form] = Form.useForm();
-
-
-
-
     return (
         <Modal
             visible={visible}
-            title="Agregar Empleado"
+            title="Modificar Empleado"
             onCancel={onClose}
             footer={null}
             width={1000}
@@ -135,7 +123,6 @@ const FormularioEmpleado: React.FC<Props> = ({
                 layout="vertical"
             >
                 <div>
-
                     <Form.Item
                         label="Nombre:"
                         name="nombre"
@@ -194,10 +181,9 @@ const FormularioEmpleado: React.FC<Props> = ({
                                 message: "Por favor ingresa un rol",
                             },
                         ]}
-                        >
+                    >
                         <Input style={{ width: "100%" }} />
                     </Form.Item>
-              
                     <Form.Item
                         label="Foto"
                         name="imagenes"
@@ -211,8 +197,6 @@ const FormularioEmpleado: React.FC<Props> = ({
                             </button>
                         </Upload>
                     </Form.Item>
-
-
                 </div>
 
                 <Form.Item style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -226,5 +210,3 @@ const FormularioEmpleado: React.FC<Props> = ({
 };
 
 export default FormularioEmpleado;
-
-

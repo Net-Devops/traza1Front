@@ -1,17 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SearchOutlined, EditOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Switch, Table } from 'antd';
+import { Button, Input, Space, Switch, Table, Popconfirm } from 'antd'; // Importa Popconfirm para confirmar la acción de eliminar
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
-import { Empleado } from '../../../service/EmpleadoService';
-import { getInsumoXSucursal } from '../../../service/ServiceInsumos';
+import { Empleado, getEmpleados } from '../../../service/EmpleadoService';
 import FormularioEmpleadoModificar from '../formularios/FormularioEmpleadoModificar';
-// Asegúrate de que FormularioEmpleadoModificar esté importado correctamente si se va a utilizar
 
 type DataIndex = keyof Empleado;
 type TablaEmpleadosProps = {
-  empresaId?: string; // Asumiendo que empresaId podría no usarse
   sucursalId: string;
 };
 
@@ -22,9 +19,6 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
   const [data, setData] = useState<Empleado[]>([]);
   const [selectedEmpleado, setSelectedEmpleado] = useState<Empleado | null>(null); 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentRecord, setCurrentRecord] = useState<Empleado | null>(null);
-
-  const [showFormularioEmpleado, setShowFormularioEmpleado] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -32,10 +26,10 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
 
   const fetchData = async () => {
     try {
-      const data = await getInsumoXSucursal(sucursalId);
-      setData(data);
+      const empleadosData = await getEmpleados(sucursalId);
+      setData(empleadosData);
     } catch (error) {
-      console.error('Error al obtener los insumos:', error);
+      console.error('Error al obtener los empleados:', error);
     }
   };
 
@@ -102,7 +96,7 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
       <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      record [dataIndex]
+      record[dataIndex]
         .toString()
         .toLowerCase()
         .includes((value as string).toLowerCase()),
@@ -124,21 +118,6 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
       ),
   });
 
-//   const handleSwitchChange = async (checked: boolean, record: ArticuloInsumo) => {
-//     try {
-//       if (checked) {
-//         await activarInsumoXId(record.id.toString());
-//       } else {
-//         await deleteInsumoXId(record.id.toString());
-//       }
-//       // Actualizar los datos después de cambiar el estado
-//       const updatedData = await getInsumoXSucursal(sucursalId);
-//       setData(updatedData);
-//     } catch (error) {
-//       console.error('Error al actualizar el estado del insumo:', error);
-//     }
-//   };
-
   const handleEdit = (record: Empleado) => {
     if (record.id) {
       setSelectedEmpleado(record);
@@ -148,50 +127,47 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
     }
   };
 
-  const handleEditStock = (record: Empleado) => {
-    if (record.id) {
-      setCurrentRecord(record);
-      setIsModalVisible(true);
-    } else {
-      console.error("El ID del empleado es nulo o no está definido.");
-    }
-  };
-
-  const handleCloseStock = async () => {
-    setIsModalVisible(false);
-    setCurrentRecord(null);
-
+  const handleDelete = async (id: string) => {
     try {
-      // Actualizar los datos después de cerrar el formulario de stock
-      const updatedData = await getInsumoXSucursal(sucursalId);
+      // Aquí debes hacer la solicitud DELETE a la API
+      const response = await fetch(`http://localhost:8080/api/empleado/eliminar/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar el empleado');
+      }
+
+      // Actualizar los datos después de eliminar el empleado
+      const updatedData = await getEmpleados(sucursalId);
       setData(updatedData);
     } catch (error) {
-      console.error('Error al obtener los insumos actualizados:', error);
+      console.error('Error al eliminar el empleado:', error);
     }
   };
 
   const handleModalClose = async () => {
-    setModalVisible(false);
+    setIsModalVisible(false);
     setSelectedEmpleado(null);
 
     try {
-      // Actualizar los datos después de cerrar el formulario de edición de insumo
-      const updatedData = await getInsumoXSucursal(sucursalId);
+      // Actualizar los datos después de cerrar el formulario de edición de empleado
+      const updatedData = await getEmpleados(sucursalId);
       setData(updatedData);
     } catch (error) {
-      console.error('Error al obtener los insumos actualizados:', error);
+      console.error('Error al obtener los empleados actualizados:', error);
     }
   };
 
   const columns: TableColumnsType<Empleado> = [
     {
-        title: 'Imagen',
-        dataIndex: 'url',
-        key: 'image',
-        render: (_text, record) => (
-          <img src={`http://localhost:8080/images/${record.imagen}`} style={{ width: '50px' }} alt="Imagen" />
-        ),
-      },
+      title: 'Imagen',
+      dataIndex: 'imagen',
+      key: 'imagen',
+      render: (text) => (
+        <img src={`http://localhost:8080/images/${text}`} style={{ width: '50px' }} alt="Empleado" />
+      ),
+    },
     {
       title: 'Nombre',
       dataIndex: 'nombre',
@@ -205,23 +181,23 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
       dataIndex: 'apellido',
       key: 'apellido',
       ...getColumnSearchProps('apellido'),
-      sorter: (a, b) => a.apellido - b.apellido,
+      sorter: (a, b) => a.apellido.localeCompare(b.apellido),
       sortDirections: ['descend', 'ascend'],
     },
     {
-      title: 'email',
+      title: 'Email',
       dataIndex: 'email',
       key: 'email',
       ...getColumnSearchProps('email'),
-      sorter: (a, b) => a.email - b.email,
+      sorter: (a, b) => a.email.localeCompare(b.email),
       sortDirections: ['descend', 'ascend'],
     },
     {
-      title: 'Telefono',
+      title: 'Teléfono',
       dataIndex: 'telefono',
       key: 'telefono',
       ...getColumnSearchProps('telefono'),
-      sorter: (a, b) => a.telefono - b.telefono,
+      sorter: (a, b) => a.telefono.localeCompare(b.telefono),
       sortDirections: ['descend', 'ascend'],
     },
     {
@@ -229,21 +205,26 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
       dataIndex: 'rol',
       key: 'rol',
       ...getColumnSearchProps('rol'),
-      sorter: (a, b) => a.rol - b.rol,
+      sorter: (a, b) => a.rol.localeCompare(b.rol),
       sortDirections: ['descend', 'ascend'],
     },
- 
-   
     {
       title: 'Acción',
       key: 'action',
       render: (_text: string, record: Empleado) => (
         <Space size="middle">
           <a onClick={() => handleEdit(record)}><EditOutlined /></a>
-          <Switch
-            checked={!record.eliminado}
-            // onChange={(checked) => handleSwitchChange(checked, record)}
-          />
+          <Popconfirm
+            title="¿Está seguro de eliminar este empleado?"
+            onConfirm={() => handleDelete(record.id.toString())}
+            okText="Sí"
+            cancelText="No"
+          >
+            <Switch
+              checked={!record.eliminado}
+              // onChange={(checked) => handleSwitchChange(checked, record)}
+            />
+          </Popconfirm>
         </Space>
       ),
     },
@@ -251,26 +232,25 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
 
   return (
     <>
-     <Table
+      <Table
         columns={columns}
         dataSource={data.map(item => ({ ...item, key: item.id }))}
         pagination={{ pageSizeOptions: ['5', '10', '20', '30', '50', '100'], showSizeChanger: true }}
       />
-     {showFormularioEmpleado && selectedEmpleado && (
+      {isModalVisible && selectedEmpleado && (
         <FormularioEmpleadoModificar
-          visible={showFormularioEmpleado}
-          onClose={() => setShowFormularioEmpleado(false)}
+          visible={isModalVisible}
+          onClose={handleModalClose}
           onSubmit={(values) => {
             // Handle the submit action
             console.log('Submitted values:', values);
-            setShowFormularioEmpleado(false);
+            handleModalClose();
           }}
           initialValues={selectedEmpleado}
           sucursalId={sucursalId}
-          productoId={selectedEmpleado.id.toString()}
+          empleadoId={selectedEmpleado.id.toString()}
         />
       )}
-     
     </>
   );
 }

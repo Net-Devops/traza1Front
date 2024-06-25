@@ -1,14 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
     Modal,
     Form,
     Input,
     Select,
-    Table,
-    InputNumber,
     Button,
-    Row,
-    Col,
     Upload,
     UploadFile,
     notification,
@@ -16,53 +12,31 @@ import {
 
 import { PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
 
-
-
-
 interface Props {
     visible: boolean;
     onClose: () => void;
     onSubmit: (values: any) => void;
     initialValues: any;
     sucursalId?: string;
-
 }
-
 
 const FormularioEmpleado: React.FC<Props> = ({
     visible,
     onClose,
-
     initialValues,
     sucursalId,
 }) => {
 
-    const [selectedInsumos, setSelectedInsumos] = useState<string[]>([]);
-    const [selectedInsumosData, setSelectedInsumosData] = useState<any[]>([]);
-
     const handleButtonClick = async (values: any) => {
-        if (selectedInsumosData.length === 0) {
-            alert("Debe haber al menos un artículo en la tabla");
-            return;
-        }
-        const allRecordsHaveQuantity = selectedInsumosData.every(
-            (record) => record.cantidad > 0
-        );
-
-        if (!allRecordsHaveQuantity) {
-            alert("Todos los artículos deben tener una cantidad");
-            return;
-        }
-
         console.log('Received values of form: ', values);
         const formattedValues = { ...values };
         let promises: Promise<{ url: string }>[] = [];
-
 
         formattedValues.sucursal = {
             id: sucursalId,
             denominacion: "" // You might want to fill this with actual data if available
         };
+
         if (values.imagenes) {
             const files: UploadFile[] = values.imagenes;
 
@@ -82,19 +56,35 @@ const FormularioEmpleado: React.FC<Props> = ({
         try {
             const imagenes = await Promise.all(promises);
             formattedValues.imagenes = imagenes;
-            // const response = await crearManufacturado(formattedValues);
-            // console.log('Response: ', response);
-            form.resetFields();
-            onClose();
-            notification.open({
-                message: (
-                    <span>
-                        <CheckCircleOutlined style={{ color: 'green' }} /> Agregado correctamente
-                    </span>
-                ),
+
+            // Realizar la petición POST a la API
+            const response = await fetch('http://localhost:8080/api/empleado/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formattedValues),
             });
+
+            if (response.ok) {
+                notification.open({
+                    message: (
+                        <span>
+                            <CheckCircleOutlined style={{ color: 'green' }} /> Agregado correctamente
+                        </span>
+                    ),
+                });
+                form.resetFields();
+                onClose();
+            } else {
+                throw new Error('Error en la solicitud');
+            }
         } catch (error) {
             console.error('Error: ', error);
+            notification.error({
+                message: 'Error',
+                description: 'Hubo un problema al agregar el empleado.',
+            });
         }
     };
 
@@ -116,9 +106,6 @@ const FormularioEmpleado: React.FC<Props> = ({
 
     const [form] = Form.useForm();
 
-
-
-
     return (
         <Modal
             visible={visible}
@@ -134,7 +121,6 @@ const FormularioEmpleado: React.FC<Props> = ({
                 layout="vertical"
             >
                 <div>
-
                     <Form.Item
                         label="Nombre:"
                         name="nombre"
@@ -171,7 +157,6 @@ const FormularioEmpleado: React.FC<Props> = ({
                     >
                         <Input style={{ width: "100%" }} />
                     </Form.Item>
-
                     <Form.Item
                         label="Telefono:"
                         name="telefono"
@@ -190,13 +175,18 @@ const FormularioEmpleado: React.FC<Props> = ({
                         rules={[
                             {
                                 required: true,
-                                message: "Por favor ingresa un rol",
+                                message: "Por favor selecciona un rol",
                             },
                         ]}
-                        >
-                        <Input style={{ width: "100%" }} />
+                    >
+                        <Select style={{ width: "100%" }}>
+                            <Select.Option value="EMPLEADO_REPARTIDOR">EMPLEADO_REPARTIDOR</Select.Option>
+                            <Select.Option value="EMPLEADO_COCINA">EMPLEADO_COCINA</Select.Option>
+                            <Select.Option value="CLIENTE">CLIENTE</Select.Option>
+                            <Select.Option value="ADMINISTRADOR">ADMINISTRADOR</Select.Option>
+                            <Select.Option value="EMPLEADO_CAJA">EMPLEADO_CAJA</Select.Option>
+                        </Select>
                     </Form.Item>
-              
                     <Form.Item
                         label="Foto"
                         name="imagenes"
@@ -210,10 +200,7 @@ const FormularioEmpleado: React.FC<Props> = ({
                             </button>
                         </Upload>
                     </Form.Item>
-
-
                 </div>
-
                 <Form.Item style={{ display: "flex", justifyContent: "flex-end" }}>
                     <Button type="primary" onClick={() => form.submit()}>
                         Cargar
@@ -225,5 +212,3 @@ const FormularioEmpleado: React.FC<Props> = ({
 };
 
 export default FormularioEmpleado;
-
-
