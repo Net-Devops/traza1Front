@@ -14,7 +14,12 @@ import {
 import { toast } from "react-toastify";
 import { unwrapResult } from "@reduxjs/toolkit";
 import CheckoutMP from "../../mercadoPago/CheckoutMP";
-import { TipoEnvio, DomicilioDto } from "../../../types/compras/interface";
+import {
+  TipoEnvio,
+  DomicilioDto,
+  ClienteDto,
+  FormaPago,
+} from "../../../types/compras/interface";
 import DireccionForm from "./formulario/DireccionForm";
 
 const Carrito = () => {
@@ -30,6 +35,7 @@ const Carrito = () => {
     null
   );
   const [modalVisible, setModalVisible] = useState(false);
+  const [metodoPago, setMetodoPago] = useState<FormaPago | null>(null);
 
   const quitarDelCarrito = (productoId: number) => {
     dispatch(removeToCarrito({ id: productoId }));
@@ -53,16 +59,36 @@ const Carrito = () => {
   );
 
   const handleEnviarPedido = async () => {
+    if (!metodoPago) {
+      toast.error("Por favor, selecciona un método de pago.");
+      return;
+    }
     if (metodoEntrega === TipoEnvio.DELIVERY && !direccionEnvio) {
       toast.error("Por favor, ingresa una dirección de envío.");
       return;
     }
     try {
       let resultAction;
+      const ClienteDto: ClienteDto = {
+        id: 1,
+      };
       if (metodoEntrega === TipoEnvio.DELIVERY) {
-        resultAction = await dispatch(enviarPedidoDomicilio(direccionEnvio));
+        resultAction = await dispatch(
+          enviarPedidoDomicilio({
+            direccionEnvio,
+            tipoEnvio: metodoEntrega,
+            formaPago: metodoPago,
+            cliente: ClienteDto,
+          })
+        );
       } else {
-        resultAction = await dispatch(enviarPedido());
+        resultAction = await dispatch(
+          enviarPedido({
+            tipoEnvio: metodoEntrega,
+            cliente: ClienteDto,
+            formaPago: metodoPago,
+          })
+        );
       }
       const preferenceId = unwrapResult(resultAction);
 
@@ -89,7 +115,9 @@ const Carrito = () => {
 
     if (metodo === TipoEnvio.DELIVERY) {
       setModalVisible(true);
+      setMetodoPago(FormaPago.MERCADOPAGO); // Solo permite MercadoPago para envío a domicilio
     } else {
+      setMetodoPago(null); // Resetea el método de pago si cambia a retiro en local
       setModalVisible(false);
     }
   };
@@ -102,6 +130,10 @@ const Carrito = () => {
   const handleModalCancel = () => {
     setMetodoEntrega(TipoEnvio.RETIRO_LOCAL);
     setModalVisible(false);
+  };
+
+  const handleMetodoPagoChange = (e: any) => {
+    setMetodoPago(e.target.value);
   };
 
   return (
@@ -163,23 +195,56 @@ const Carrito = () => {
           </Card>
         );
       })}
-      <Radio.Group
-        onChange={handleMetodoEntregaChange}
-        value={metodoEntrega}
-        style={{ marginBottom: "10px" }}
-        disabled={pedidoRealizado} // Evita que se cambie el valor si el pedido está realizado
-      >
-        <Radio value={TipoEnvio.RETIRO_LOCAL}>Retiro en Local</Radio>
-        <Radio value={TipoEnvio.DELIVERY}>Envío a Domicilio</Radio>
-      </Radio.Group>
-      {direccionEnvio && metodoEntrega === TipoEnvio.DELIVERY && (
-        <div style={{ marginBottom: "20px" }}>
-          <h3>Dirección de Envío:</h3>
-          <p>
-            calle: {direccionEnvio.calle}, Numero:{direccionEnvio.numero},
-            codigo postal: {direccionEnvio.cp}
-          </p>
-        </div>
+      {carrito.length > 0 && (
+        <>
+          <div style={{ marginBottom: "20px" }}>
+            <Radio.Group
+              onChange={handleMetodoEntregaChange}
+              value={metodoEntrega}
+              style={{
+                marginBottom: "10px",
+                padding: "10px",
+                border: "1px solid #ccc",
+                borderRadius: "5px",
+              }} // Estilos agregados para mejorar el diseño
+              disabled={pedidoRealizado} // Evita que se cambie el valor si el pedido está realizado
+            >
+              <Radio value={TipoEnvio.RETIRO_LOCAL}>Retiro en Local</Radio>
+              <Radio value={TipoEnvio.DELIVERY}>Envío a Domicilio</Radio>
+            </Radio.Group>
+          </div>
+
+          {direccionEnvio && metodoEntrega === TipoEnvio.DELIVERY && (
+            <div style={{ marginBottom: "20px" }}>
+              <h3>Dirección de Envío:</h3>
+              <p>
+                calle: {direccionEnvio.calle}, Numero: {direccionEnvio.numero},
+                codigo postal: {direccionEnvio.cp}
+              </p>
+            </div>
+          )}
+
+          <div style={{ marginBottom: "20px" }}>
+            {metodoEntrega && (
+              <Radio.Group
+                onChange={handleMetodoPagoChange}
+                value={metodoPago}
+                style={{
+                  marginBottom: "10px",
+                  padding: "10px",
+                  border: "1px solid #ccc",
+                  borderRadius: "5px",
+                }} // Estilos agregados para mejorar el diseño
+                disabled={pedidoRealizado} // Evita que se cambie el valor si el pedido está realizado
+              >
+                <Radio value={FormaPago.MERCADOPAGO}>MercadoPago</Radio>
+                {metodoEntrega === TipoEnvio.RETIRO_LOCAL && (
+                  <Radio value={FormaPago.EFECTIVO}>Efectivo</Radio>
+                )}
+              </Radio.Group>
+            )}
+          </div>
+        </>
       )}
 
       <h2 style={{ textAlign: "center" }}>Total: {total}</h2>
@@ -198,13 +263,10 @@ const Carrito = () => {
         </div>
       )}
 
-      {pedidoRealizado && metodoEntrega === TipoEnvio.RETIRO_LOCAL && (
-        <div style={{ marginTop: "10px", textAlign: "center" }}>
-          <Button type="primary">Pago en Efectivo</Button>
-        </div>
+      {preferenceId && metodoPago !== FormaPago.EFECTIVO && (
+        <CheckoutMP preferenceId={preferenceId} />
       )}
 
-      {preferenceId && <CheckoutMP preferenceId={preferenceId} />}
       <Modal
         title="Ingresar dirección de envío"
         visible={modalVisible}

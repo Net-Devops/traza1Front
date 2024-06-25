@@ -26,7 +26,7 @@ export interface Pedido {
   total?: number;
   TotalCostoProduccion?: number;
   //estado: string;
-  formaPago?: FormaPago;
+  formaPago: FormaPago;
   tipoEnvio?: TipoEnvio;
   fechaPedido?: string;
   preferenceMPId?: string;
@@ -76,4 +76,11 @@ export interface DomicilioDto {
   cp: number;
   pais: number;
   provincia: number;
+}
+export interface ClienteDto {
+  id?: number;
+  nombre?: string;
+  apellido?: string;
+  telefono?: string;
+  email?: string;
 }

@@ -9,6 +9,16 @@ export interface Pedido {
   domicilio: Domicilio;
   cliente: Cliente;
   pedidoDetalle: PedidoDetalle[];
+  tipoEnvio?: TipoEnvio;
+  formaPago: FormaPago;
+}
+export enum TipoEnvio {
+  DELIVERY = "DELIVERY",
+  RETIRO_LOCAL = "RETIRO_LOCAL",
+}
+export enum FormaPago {
+  EFECTIVO = "EFECTIVO",
+  TARJETA = "MERCADEOPAGO",
 }
 export enum Estado {
   PENDIENTE = "PENDIENTE",

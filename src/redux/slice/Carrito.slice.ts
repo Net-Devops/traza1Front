@@ -1,6 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { DomicilioDto, Pedido, Producto } from "../../types/compras/interface";
+import {
+  ClienteDto,
+  DomicilioDto,
+  Pedido,
+  Producto,
+  TipoEnvio,
+  FormaPago,
+} from "../../types/compras/interface";
 import { realizarPedido, createPreferenceMP } from "../../service/Compra";
 
 interface PedidoDetalleAddState {
@@ -16,7 +23,20 @@ const initialState: PedidoDetalleAddState[] = [];
 
 export const enviarPedidoDomicilio = createAsyncThunk(
   "carrito/enviarPedido",
-  async (direccionEnvio: DomicilioDto | null, { getState }) => {
+  async (
+    {
+      direccionEnvio,
+      tipoEnvio,
+      cliente,
+      formaPago,
+    }: {
+      direccionEnvio: DomicilioDto | null;
+      tipoEnvio: TipoEnvio;
+      formaPago: FormaPago;
+      cliente: ClienteDto | null;
+    },
+    { getState }
+  ) => {
     const state = getState() as { cartReducer: PedidoDetalleAddState[] };
     const pedidoDetalle = state.cartReducer;
 
@@ -26,6 +46,9 @@ export const enviarPedidoDomicilio = createAsyncThunk(
       // Por ejemplo, podrías lanzar un error o manejarlo de otra manera
       throw new Error("La dirección de envío es requerida.");
     }
+    if (!cliente) {
+      throw new Error("La información del cliente es requerida.");
+    }
 
     const pedido: Pedido = {
       fechaPedido: new Date().toISOString(),
@@ -33,6 +56,11 @@ export const enviarPedidoDomicilio = createAsyncThunk(
         (sum, item) => sum + item.producto.precioVenta * item.cantidad,
         0
       ),
+      tipoEnvio: tipoEnvio,
+      formaPago: formaPago,
+      cliente: {
+        id: cliente.id,
+      },
       domicilio: {
         calle: direccionEnvio.calle,
         numero: direccionEnvio.numero,
@@ -63,9 +91,20 @@ export const enviarPedidoDomicilio = createAsyncThunk(
 
 export const enviarPedido = createAsyncThunk(
   "carrito/enviarPedido",
-  async (_, { getState }) => {
+  async (
+    {
+      tipoEnvio,
+      cliente,
+      formaPago,
+    }: { tipoEnvio: TipoEnvio; cliente: ClienteDto; formaPago: FormaPago },
+    { getState }
+  ) => {
     const state = getState() as { cartReducer: PedidoDetalleAddState[] };
     const pedidoDetalle = state.cartReducer;
+
+    if (!formaPago) {
+      throw new Error("La información del cliente es requerida.");
+    }
 
     const pedido: Pedido = {
       // Aquí puedes agregar cualquier otra propiedad que necesites en tu pedido
@@ -74,19 +113,25 @@ export const enviarPedido = createAsyncThunk(
         (sum, item) => sum + item.producto.precioVenta * item.cantidad,
         0
       ),
-
+      tipoEnvio: tipoEnvio,
+      cliente: {
+        id: cliente.id,
+      },
+      formaPago: formaPago,
       pedidoDetalle,
     };
 
     const data = await realizarPedido(pedido);
     if (data) {
-      const preferenceMP = await createPreferenceMP(data);
-      console.log("preferenciaMp:", preferenceMP);
+      if (formaPago === FormaPago.MERCADOPAGO) {
+        const preferenceMP = await createPreferenceMP(data);
 
-      // Devuelve el preferenceId
-      return preferenceMP.id;
+        // Devuelve el preferenceId
+        return preferenceMP.id;
+      } else {
+        return data;
+      }
     } else {
-      console.error("Error al realizar el pedido");
       throw new Error("Error al realizar el pedido");
     }
   }
