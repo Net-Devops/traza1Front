@@ -1,6 +1,5 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-
 import Empresa from "../components/pages/empresa/Empresa";
 import Sucursal from "../components/pages/sucursal/Sucursal";
 import Categorias from "../components/pages/categorias/Categorias";
@@ -27,11 +26,9 @@ const Rutas: React.FC = () => {
         path="/categorias/porSucursal"
         element={<CategoriasPorSucursal />}
       />
-
       <Route path="/productos" element={<Productos />} />
       <Route path="/insumos" element={<Insumo />} />
       <Route path="/unidadMedida" element={<UnidadMedida />} />
-
       <Route path="/compra" element={<SeleccionSucursal />} />
       <Route
         path="/compra/categorias/:sucursalId"

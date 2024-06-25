@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Usuario } from "../../../types/usuario/Usuario";
+import { Rol, Usuario } from "../../../types/usuario/Usuario";
 import * as CryptoJS from "crypto-js";
 import "./login.css";
 
@@ -15,34 +15,36 @@ function Login() {
   };
 
   useEffect(() => {
-    if (usuario?.rol) {
+    localStorage.clear();
+    if (usuario.rol != Rol.DEFAULT) {
       const usuarioParaAlmacenar = {
         username: usuario.username,
         rol: usuario.rol,
       };
 
+      console.log("Storing user to localStorage:", usuarioParaAlmacenar);
+
       localStorage.setItem("usuario", JSON.stringify(usuarioParaAlmacenar));
-      navigate("/menu", {
+      navigate("/login", {
         replace: true,
         state: {
           logged: true,
-          username: usuarioParaAlmacenar,
+          usuario: usuarioParaAlmacenar,
         },
       });
     }
-  }, [usuario]);
+  }, [usuario, navigate]);
 
   const login = async () => {
-    if (usuario?.username == undefined || usuario?.username === "") {
+    if (usuario?.username === undefined || usuario?.username === "") {
       setTxtValidacion("Ingrese el nombre de usuario");
       return;
     }
-    if (usuario?.password == undefined || usuario?.password === "") {
+    if (usuario?.password === undefined || usuario?.password === "") {
       setTxtValidacion("Ingrese la clave");
       return;
     }
 
-    // Llamada al backend
     const encryptedPassword = CryptoJS.SHA256(usuario.password).toString();
 
     const response = await fetch("http://localhost:8080/api/usuario/login", {
@@ -98,7 +100,7 @@ function Login() {
               onChange={(e) =>
                 setUsuario((prevUsuario) => ({
                   ...prevUsuario,
-                  usuario: String(e.target.value),
+                  username: String(e.target.value),
                 }))
               }
               onKeyDown={(e) => {
@@ -119,7 +121,7 @@ function Login() {
               onChange={(e) =>
                 setUsuario((prevUsuario) => ({
                   ...prevUsuario,
-                  clave: String(e.target.value),
+                  password: String(e.target.value),
                 }))
               }
               onKeyDown={(e) => {
