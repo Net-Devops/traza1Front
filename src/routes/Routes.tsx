@@ -13,6 +13,8 @@ import CategoriasPorSucursal from "../components/pages/categorias/CategoriasPorS
 import Promocion from "../components/pages/promocion/Promocion";
 import Pedidos from "../components/pages/pedidos/Pedidos";
 import SeleccionSucursal from "../components/pages/compra/sucursales/SeleccionSucursal";
+import Login from "../components/pages/login-crear/login";
+import RegistroCliente from "../components/pages/login-crear/CrearUsuarioCliente";
 
 const Rutas: React.FC = () => {
   return (
@@ -41,6 +43,8 @@ const Rutas: React.FC = () => {
       />
       <Route path="/promociones" element={<Promocion />} />
       <Route path="/Pedidos" element={<Pedidos />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/registro-cliente" element={<RegistroCliente />} />
     </Routes>
   );
 };
