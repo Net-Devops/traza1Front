@@ -12,9 +12,10 @@ type DataIndex = keyof ArticuloInsumo;
 type TablaInsumoProps = {
   empresaId: string;
   sucursalId: string;
+  updateTabla: boolean;
 };
 
-const TablaInsumo: React.FC<TablaInsumoProps> = ({  sucursalId }) => {
+const TablaInsumo: React.FC<TablaInsumoProps> = ({  sucursalId, updateTabla }) => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef<InputRef>(null);
@@ -26,7 +27,7 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({  sucursalId }) => {
 
   useEffect(() => {
     fetchData();
-  }, [sucursalId]);
+  }, [sucursalId, updateTabla]);
 
   const fetchData = async () => {
     console.log('Obteniendo insumos de la sucursal:', sucursalId);
