@@ -21,7 +21,7 @@ import {
 } from "../../../service/ServiceInsumos";
 import TextArea from "antd/es/input/TextArea";
 import {
-    crearManufacturado,
+   
     getProductoXIdBase,
     modificarProductoId,
 } from "../../../service/ServiceProducto";
@@ -32,7 +32,7 @@ interface Props {
     onSubmit: (values: any) => void;
     initialValues: any;
     sucursalId?: string;
-    productoId?: string;
+    productoId: string;
 }
 interface ImageData {
     id: string;
@@ -48,7 +48,7 @@ const FormularioActualizarProducto: React.FC<Props> = ({
     initialValues,
     sucursalId,
 }) => {
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [, setIsModalVisible] = useState(false);
     const [searchArticulos, setSearchArticulos] = useState("");
     const [searchSelectedArticulos, setSearchSelectedArticulos] = useState("");
     const [selectedInsumos, setSelectedInsumos] = useState<string[]>([]);
@@ -185,8 +185,8 @@ const FormularioActualizarProducto: React.FC<Props> = ({
             formattedValues.imagenes = [...uploadedImages, ...existingImages];
 
             console.log("Formatted values for submission:", formattedValues);
-
-            await modificarProductoId(formattedValues, productoId);
+            
+            await modificarProductoId(formattedValues,parseInt(productoId, 10));
             notification.success({
                 message: "Producto actualizado correctamente",
                 icon: <CheckCircleOutlined style={{ color: "#108ee9" }} />,
@@ -256,6 +256,7 @@ const FormularioActualizarProducto: React.FC<Props> = ({
             prevKeys.filter((key) => key !== articulo.id)
         );
     };
+
 
     return (
         <Modal

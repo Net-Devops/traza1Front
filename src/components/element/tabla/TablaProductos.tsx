@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { SearchOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table } from 'antd';
+import { Button, Input, Space, Switch, Table } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 
-import { deleteProductoXId } from '../../../service/ServiceProducto';
+import { activarProductoXId, deleteProductoXId } from '../../../service/ServiceProducto';
 import { getProductoXSucursal } from '../../../service/ServiceProducto';
 import FormularioActualizarProducto from '../formularios/FormularioProductoActualizar';
 
@@ -17,6 +17,7 @@ interface DataType {
   precioVenta: number;
   descripcion: string;
   tiempoEstimadoCocina: string;
+  eliminado: boolean;
 }
 
 type DataIndex = keyof DataType;
@@ -62,13 +63,19 @@ const App: React.FC<Props> = ({ sucursalId }) => {
     clearFilters();
     setSearchText('');
   };
-
-  const showDeleteConfirm = async (id: string) => {
-    // Show a confirmation dialog...
-    console.log(id);
-    
-    // If the user confirms, delete the insumo
-    await deleteProductoXId(id);
+  const handleSwitchChange = async (checked: boolean, record: DataType) => {
+    try {
+      if (checked) {
+        await activarProductoXId(record.id.toString());
+      } else {
+        await deleteProductoXId(record.id.toString());
+      }
+      // Actualizar los datos después de cambiar el estado
+      const updatedData = await getProductoXSucursal(sucursalId);
+      setData(updatedData);
+    } catch (error) {
+      console.error('Error al actualizar el estado del insumo:', error);
+    }
   };
 
   const handleEdit = (record: DataType) => {
@@ -185,7 +192,7 @@ const App: React.FC<Props> = ({ sucursalId }) => {
       dataIndex: 'url',
       key: 'image',
       render: (_text, record) => (
-        <img src={`http://localhost:8080/images/${record.imagen}`} style={{ width: '50px' }} alt="Imagen" />
+        <img src={record.imagen ? `http://localhost:8080/images/${record.imagen}` : `http://localhost:8080/images/sin-imagen.jpg`} style={{ width: '50px' }} alt="Imagen" />
       ),
     },
     {
@@ -226,7 +233,10 @@ const App: React.FC<Props> = ({ sucursalId }) => {
       render: (_text: string, record: DataType) => (
         <Space size="middle">
           <a onClick={() => handleEdit(record)}><EditOutlined /></a>
-          <a onClick={() => showDeleteConfirm(record.id.toString())}><DeleteOutlined /></a>
+          <Switch
+            checked={!record.eliminado}
+            onChange={(checked) => handleSwitchChange(checked, record)}
+          />
         </Space>
       ),
     },

@@ -275,7 +275,7 @@ const FormularioProducto: React.FC<Props> = ({
                                 <Col span={12}>
                                     <Form.Item
                                         label="Tiempo estimado en minutos:"
-                                        name="tiempoEstimadoCocina"
+                                        name="tiempoEstimadoMinutos"
                                         rules={[
                                             {
                                                 required: true,

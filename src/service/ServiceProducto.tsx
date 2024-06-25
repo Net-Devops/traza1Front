@@ -84,17 +84,7 @@ export async function crearManufacturado(formData: ArticuloProducto) {
   }
 }
 
-export async function deleteProductoXId(id: string) {
-  const urlServer = "http://localhost:8080/api/articulos/manufacturados/" + id;
-  await fetch(urlServer, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-    mode: "cors",
-  });
-}
+
 
 export async function getProductoXSucursal(id: string) {
   const urlServer =
@@ -159,6 +149,7 @@ export async function modificarProductoId(formData: any, id: number) {
           },
           mode: "cors",
           body: JSON.stringify({
+            id:id,
             codigo:  formData.codigo,
             denominacion: formData.denominacion,
             descripcion: formData.descripcion || "sin descripcion",
@@ -181,4 +172,26 @@ export async function modificarProductoId(formData: any, id: number) {
       console.log("Error: ", error);
       throw error;
   }
+}
+export async function deleteProductoXId(id: string) {
+  const urlServer = "http://localhost:8080/api/articulos/manufacturados/" + id;
+  await fetch(urlServer, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    mode: "cors",
+  });
+}
+export async function activarProductoXId(id: string) {
+  const urlServer = "http://localhost:8080/api/articulos/manufacturados/reactivate/" + id;
+  await fetch(urlServer, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    mode: "cors",
+  });
 }
