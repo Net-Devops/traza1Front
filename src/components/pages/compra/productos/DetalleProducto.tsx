@@ -17,7 +17,7 @@ const DetalleProducto: React.FC<DetalleProductoProps> = ({
   // Determina la imagen a mostrar
   const imagenAMostrar =
     producto.imagenes && producto.imagenes.length > 0
-      ? producto.imagenes[0]
+      ? "http://localhost:8080/images/" + producto.imagenes[0].url
       : imagenPorDefecto;
 
   return (

@@ -112,7 +112,13 @@ const DireccionForm: React.FC<DireccionFormProps> = ({
       <Form.Item
         name="numero"
         label="Número"
-        rules={[{ required: true, message: "Por favor, ingresa el número" }]}
+        rules={[
+          { required: true, message: "Por favor, ingresa el número" },
+          {
+            pattern: /^[0-9]+$/,
+            message: "Solo se permiten números positivos",
+          },
+        ]}
       >
         <Input />
       </Form.Item>
@@ -122,6 +128,10 @@ const DireccionForm: React.FC<DireccionFormProps> = ({
         label="Código Postal"
         rules={[
           { required: true, message: "Por favor, ingresa el código postal" },
+          {
+            pattern: /^[0-9]+$/,
+            message: "Solo se permiten números positivos",
+          },
         ]}
       >
         <Input />
