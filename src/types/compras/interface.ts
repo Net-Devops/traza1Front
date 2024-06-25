@@ -26,12 +26,12 @@ export interface Pedido {
   total?: number;
   TotalCostoProduccion?: number;
   //estado: string;
-  //formaPago: string;
-  //TipoEnvio: string;
+  formaPago?: FormaPago;
+  tipoEnvio?: TipoEnvio;
   fechaPedido?: string;
   preferenceMPId?: string;
   sucursal?: Sucursal;
-  domicilio?: any;
+  domicilio?: Domicilio;
   cliente?: any;
   pedidoDetalle?: PedidoDetalle[];
   factura?: any;
@@ -39,4 +39,33 @@ export interface Pedido {
 export interface Sucursal {
   id: number;
   nombre?: string;
+}
+export interface Domicilio {
+  id?: number;
+  calle?: string;
+  numero?: string;
+  localidad?: Localidad;
+  cp?: number;
+}
+export interface Localidad {
+  id?: number;
+  nombre?: string;
+  provincia?: Provincia;
+}
+export interface Provincia {
+  id?: number;
+  nombre?: string;
+  pais?: Pais;
+}
+export interface Pais {
+  id?: number;
+  nombre?: string;
+}
+export enum TipoEnvio {
+  DELIVERY = "DELIVERY",
+  RETIRO_LOCAL = "RETIRO_LOCAL",
+}
+export enum FormaPago {
+  EFECTIVO = "EFECTIVO",
+  MERCADOPAGO = "MERCADOPAGO",
 }

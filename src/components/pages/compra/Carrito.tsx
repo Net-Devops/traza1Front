@@ -1,4 +1,5 @@
-import { Card, Button, InputNumber, Avatar } from "antd";
+import { useState } from "react";
+import { Card, Button, InputNumber, Avatar, Radio, Modal } from "antd";
 import { PlusOutlined, MinusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import {
@@ -9,10 +10,11 @@ import {
   enviarPedido,
   cambiarCantidad,
 } from "../../../redux/slice/Carrito.slice";
-import { useState } from "react";
 import { toast } from "react-toastify";
 import { unwrapResult } from "@reduxjs/toolkit";
 import CheckoutMP from "../../mercadoPago/CheckoutMP";
+import { TipoEnvio, Domicilio } from "../../../types/compras/interface";
+import DireccionForm from "./formulario/DireccionForm";
 
 const Carrito = () => {
   const imagenPorDefecto = "http://localhost:8080/images/sin-imagen.jpg";
@@ -20,6 +22,11 @@ const Carrito = () => {
   const carrito = useAppSelector((state) => state.cartReducer);
   const [preferenceId, setPreferenceId] = useState<string | null>(null);
   const [pedidoRealizado, setPedidoRealizado] = useState(false);
+  const [metodoEntrega, setMetodoEntrega] = useState<TipoEnvio>(
+    TipoEnvio.RETIRO_LOCAL
+  );
+  const [direccionEnvio, setDireccionEnvio] = useState<Domicilio | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const quitarDelCarrito = (productoId: number) => {
     dispatch(removeToCarrito({ id: productoId }));
@@ -41,7 +48,12 @@ const Carrito = () => {
     (sum, item) => sum + item.producto.precioVenta * item.cantidad,
     0
   );
+
   const handleEnviarPedido = async () => {
+    if (metodoEntrega === TipoEnvio.DELIVERY && !direccionEnvio) {
+      toast.error("Por favor, ingresa una dirección de envío.");
+      return;
+    }
     try {
       const resultAction = await dispatch(enviarPedido());
       const preferenceId = unwrapResult(resultAction);
@@ -57,6 +69,31 @@ const Carrito = () => {
 
   const cambiarCantidadProducto = (productoId: number, cantidad: number) => {
     dispatch(cambiarCantidad({ id: productoId, cantidad }));
+  };
+
+  const handleMetodoEntregaChange = (e: any) => {
+    if (pedidoRealizado) {
+      return; // Evita cambiar el método de entrega si ya se realizó el pedido
+    }
+
+    const metodo = e.target.value;
+    setMetodoEntrega(metodo);
+
+    if (metodo === TipoEnvio.DELIVERY) {
+      setModalVisible(true);
+    } else {
+      setModalVisible(false);
+    }
+  };
+
+  const handleModalOk = (values: Domicilio) => {
+    setDireccionEnvio(values);
+    setModalVisible(false);
+  };
+
+  const handleModalCancel = () => {
+    setMetodoEntrega(TipoEnvio.RETIRO_LOCAL);
+    setModalVisible(false);
   };
 
   return (
@@ -118,6 +155,25 @@ const Carrito = () => {
           </Card>
         );
       })}
+      <Radio.Group
+        onChange={handleMetodoEntregaChange}
+        value={metodoEntrega}
+        style={{ marginBottom: "10px" }}
+        disabled={pedidoRealizado} // Evita que se cambie el valor si el pedido está realizado
+      >
+        <Radio value={TipoEnvio.RETIRO_LOCAL}>Retiro en Local</Radio>
+        <Radio value={TipoEnvio.DELIVERY}>Envío a Domicilio</Radio>
+      </Radio.Group>
+      {direccionEnvio && metodoEntrega === TipoEnvio.DELIVERY && (
+        <div style={{ marginBottom: "20px" }}>
+          <h3>Dirección de Envío:</h3>
+          <p>
+            calle: {direccionEnvio.calle}, Numero:{direccionEnvio.numero},
+            codigo postal: {direccionEnvio.cp}
+          </p>
+        </div>
+      )}
+
       <h2 style={{ textAlign: "center" }}>Total: {total}</h2>
       {!pedidoRealizado && (
         <div style={{ display: "flex", justifyContent: "center" }}>
@@ -133,7 +189,26 @@ const Carrito = () => {
           </Button>
         </div>
       )}
+
+      {pedidoRealizado && metodoEntrega === TipoEnvio.RETIRO_LOCAL && (
+        <div style={{ marginTop: "10px", textAlign: "center" }}>
+          <Button type="primary">Pago en Efectivo</Button>
+        </div>
+      )}
+
       {preferenceId && <CheckoutMP preferenceId={preferenceId} />}
+      <Modal
+        title="Ingresar dirección de envío"
+        visible={modalVisible}
+        onCancel={handleModalCancel}
+        footer={null}
+      >
+        <DireccionForm
+          initialValues={{ calle: "", numero: "", cp: 0 }}
+          onSubmit={handleModalOk}
+          onCancel={handleModalCancel}
+        />
+      </Modal>
     </div>
   );
 };
