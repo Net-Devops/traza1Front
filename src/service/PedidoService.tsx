@@ -1,3 +1,5 @@
+import { message } from "antd";
+
 const API_BASE_URL = "http://localhost:8080/api/pedidos";
 
 export interface Pedido {
@@ -70,15 +72,21 @@ export const cambiarEstadoPedido = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: nuevoEstado, // Enviar solo el valor del estado
+      body: nuevoEstado, // Enviar el valor del estado en formato JSON
     });
+
     if (!response.ok) {
-      throw new Error("Error al cambiar el estado del pedido");
+      // Si el servidor envía un mensaje de error en el cuerpo de la respuesta
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "Error al cambiar el estado del pedido"
+      );
     }
+
     const data: Pedido = await response.json();
     return data;
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error("Error al cambiar el estado del pedido:", error.message);
     throw error; // Re-lanzar el error para manejarlo en otra parte de tu aplicación
   }
 };

@@ -66,7 +66,7 @@ const Carrito = () => {
         const subtotal = item.producto.precioVenta * item.cantidad;
         const imagenAMostrar =
           item.producto.imagenes.length > 0
-            ? item.producto.imagenes[0]
+            ? "http://localhost:8080/images/" + item.producto.imagenes[0].url
             : imagenPorDefecto;
         return (
           <Card key={item.id} style={{ width: 300, marginBottom: "20px" }}>

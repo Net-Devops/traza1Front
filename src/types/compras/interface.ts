@@ -30,9 +30,13 @@ export interface Pedido {
   //TipoEnvio: string;
   fechaPedido?: string;
   preferenceMPId?: string;
-  sucursal?: any;
+  sucursal?: Sucursal;
   domicilio?: any;
   cliente?: any;
   pedidoDetalle?: PedidoDetalle[];
   factura?: any;
+}
+export interface Sucursal {
+  id: number;
+  nombre?: string;
 }
