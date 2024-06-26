@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./redux/Store";
