@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Rol, Usuario } from "../../../types/usuario/Usuario";
 import * as CryptoJS from "crypto-js";
-import "./login.css";
+import { Form, Input, Button, Checkbox, Card } from "antd";
+import { EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons"; // Import EyeTwoTone from @ant-design/icons
 
 function Login() {
   const navigate = useNavigate();
@@ -10,19 +11,13 @@ function Login() {
   const [txtValidacion, setTxtValidacion] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   useEffect(() => {
     localStorage.clear();
-    if (usuario.rol != Rol.DEFAULT) {
+    if (usuario.rol !== Rol.DEFAULT) {
       const usuarioParaAlmacenar = {
         username: usuario.username,
         rol: usuario.rol,
       };
-
-      console.log("Storing user to localStorage:", usuarioParaAlmacenar);
 
       localStorage.setItem("usuario", JSON.stringify(usuarioParaAlmacenar));
       navigate("/login", {
@@ -36,11 +31,11 @@ function Login() {
   }, [usuario, navigate]);
 
   const login = async () => {
-    if (usuario?.username === undefined || usuario?.username === "") {
+    if (!usuario?.username) {
       setTxtValidacion("Ingrese el nombre de usuario");
       return;
     }
-    if (usuario?.password === undefined || usuario?.password === "") {
+    if (!usuario?.password) {
       setTxtValidacion("Ingrese la clave");
       return;
     }
@@ -64,7 +59,6 @@ function Login() {
         usuario: data.username,
         rol: data.role,
       };
-      // Crear un nuevo objeto Usuario y asignarle las propiedades de newUsuario
       const usuarioActualizado = new Usuario();
       usuarioActualizado.username = newUsuario.usuario;
       usuarioActualizado.rol = newUsuario.rol;
@@ -79,76 +73,76 @@ function Login() {
       });
     } else {
       setTxtValidacion("Usuario y/o clave incorrectas");
-      return;
     }
   };
 
   return (
-    <>
-      <div className="login-form__center">
-        <form className="login-form">
-          <div className="mb-3">
-            <label htmlFor="txtUsuario" className="form-label">
-              Usuario
-            </label>
-            <input
-              type="text"
-              id="txtUsuario"
-              className="form-control"
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        backgroundColor: "#f0f2f5",
+      }}
+    >
+      <Card style={{ width: 300 }}>
+        <Form>
+          <Form.Item label="Usuario">
+            <Input
               placeholder="Ingrese el nombre"
               defaultValue={usuario?.username}
               onChange={(e) =>
                 setUsuario((prevUsuario) => ({
                   ...prevUsuario,
-                  username: String(e.target.value),
+                  username: e.target.value,
                 }))
               }
               onKeyDown={(e) => {
                 if (e.key === "Enter") login();
               }}
             />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="txtClave" className="form-label">
-              Clave
-            </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              id="txtClave"
-              className="form-control"
+          </Form.Item>
+          <Form.Item label="Clave">
+            <Input.Password
               placeholder="Ingrese la clave"
               defaultValue={usuario?.password}
               onChange={(e) =>
                 setUsuario((prevUsuario) => ({
                   ...prevUsuario,
-                  password: String(e.target.value),
+                  password: e.target.value,
                 }))
               }
               onKeyDown={(e) => {
                 if (e.key === "Enter") login();
               }}
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
             />
-            <input
-              type="checkbox"
-              id="showPassword"
+          </Form.Item>
+          <Form.Item>
+            <Checkbox
               checked={showPassword}
-              onChange={togglePasswordVisibility}
-            />
-            <label htmlFor="showPassword">Mostrar contraseña</label>
-          </div>
-          <div className="col">
-            <button onClick={login} className="btn btn-success" type="button">
+              onChange={() => setShowPassword(!showPassword)}
+            >
+              Mostrar contraseña
+            </Checkbox>
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" onClick={login}>
               Ingresar
-            </button>
-          </div>
-          <div>
+            </Button>
+          </Form.Item>
+          {txtValidacion && (
             <p style={{ color: "red", lineHeight: 5, padding: 5 }}>
               {txtValidacion}
             </p>
-          </div>
-        </form>
-      </div>
-    </>
+          )}
+        </Form>
+      </Card>
+    </div>
   );
 }
+
 export default Login;

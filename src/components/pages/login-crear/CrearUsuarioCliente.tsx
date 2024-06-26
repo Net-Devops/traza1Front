@@ -1,39 +1,14 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { Form, Input, Button, DatePicker, Select, Card, Row, Col } from "antd";
 import { useNavigate } from "react-router-dom";
 import * as CryptoJS from "crypto-js";
-import "./crearUsuario.css";
 import { Rol } from "../../../types/usuario/Usuario";
 
 const RegistroCliente = () => {
-  const [usuario, setUsuario] = useState({
-    username: "",
-    password: "",
-    rol: Rol.DEFAULT,
-    nombre: "",
-    apellido: "",
-    telefono: "",
-    email: "",
-    fechaNacimiento: "",
-    imagen: "",
-  });
-  const [roles] = useState(Object.keys(Rol));
+  const [form] = Form.useForm();
   const navigate = useNavigate();
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setUsuario({
-      ...usuario,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    const encryptedPassword = CryptoJS.SHA256(usuario.password).toString();
-
+  const handleSubmit = async (values: any) => {
+    const encryptedPassword = CryptoJS.SHA256(values.password).toString();
     const response = await fetch(
       "http://localhost:8080/api/usuario/registro/usuario-cliente",
       {
@@ -42,16 +17,16 @@ const RegistroCliente = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: usuario.username,
+          username: values.username,
           password: encryptedPassword,
-          rol: usuario.rol,
+          rol: values.rol,
           cliente: {
-            nombre: usuario.nombre,
-            apellido: usuario.apellido,
-            telefono: usuario.telefono,
-            email: usuario.email,
-            fechaNacimiento: usuario.fechaNacimiento,
-            imagen: usuario.imagen,
+            nombre: values.nombre,
+            apellido: values.apellido,
+            telefono: values.telefono,
+            email: values.email,
+            fechaNacimiento: values.fechaNacimiento.format("YYYY-MM-DD"),
+            imagen: values.imagen,
           },
         }),
       }
@@ -63,55 +38,78 @@ const RegistroCliente = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="formulario">
-      {/* Campos de usuario */}
-      <label>
-        Nombre de usuario:
-        <input type="text" name="username" onChange={handleChange} />
-      </label>
-      <label>
-        Contraseña:
-        <input type="password" name="password" onChange={handleChange} />
-      </label>
-      <label>
-        Rol:
-        <select name="rol" onChange={handleChange} value={usuario.rol}>
-          {roles.map((role) => (
-            <option key={role} value={role}>
-              {role}
-            </option>
-          ))}
-        </select>
-      </label>
+    <Row justify="center" align="middle" style={{ minHeight: "100vh" }}>
+      <Col xs={24} sm={16} md={12} lg={8} xl={6}>
+        <Card title="Registro de Cliente" bordered={false}>
+          <Form form={form} onFinish={handleSubmit} layout="vertical">
+            <Form.Item
+              name="username"
+              label="Nombre de usuario"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              label="Contraseña"
+              rules={[{ required: true }]}
+            >
+              <Input.Password />
+            </Form.Item>
+            <Form.Item name="rol" label="Rol" rules={[{ required: true }]}>
+              <Select>
+                {Object.keys(Rol).map((rol) => (
+                  <Select.Option key={rol} value={rol}>
+                    {rol}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="nombre"
+              label="Nombre"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="apellido"
+              label="Apellido"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="telefono"
+              label="Teléfono"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[{ required: true, type: "email" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="fechaNacimiento"
+              label="Fecha de Nacimiento"
+              rules={[{ required: true }]}
+            >
+              <DatePicker />
+            </Form.Item>
 
-      {/* Campos de cliente */}
-      <label>
-        Nombre:
-        <input type="text" name="nombre" onChange={handleChange} />
-      </label>
-      <label>
-        Apellido:
-        <input type="text" name="apellido" onChange={handleChange} />
-      </label>
-      <label>
-        Teléfono:
-        <input type="text" name="telefono" onChange={handleChange} />
-      </label>
-      <label>
-        Email:
-        <input type="email" name="email" onChange={handleChange} />
-      </label>
-      <label>
-        Fecha de Nacimiento:
-        <input type="date" name="fechaNacimiento" onChange={handleChange} />
-      </label>
-      <label>
-        Imagen:
-        <input type="text" name="imagen" onChange={handleChange} />
-      </label>
-
-      <input type="submit" value="Registrar" />
-    </form>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Registrar
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </Col>
+    </Row>
   );
 };
 
