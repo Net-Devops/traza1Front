@@ -45,25 +45,17 @@ const items: MenuItem[] = [
     getItem("/categorias", "CATEGORIAS", "5"),
   ]),
   getItem("/promociones", "PROMOCIONES", "6", <DollarCircleOutlined />),
-  getItem("/empleados", "EMPLEADOS", "sub2", <ShoppingCartOutlined />, [
-    getItem("/empleados", "LISTA DE EMPLEADOS", "7"),
-    getItem("/roles", "ROLES", "8"),
-  ]),
+
 
   getItem("/insumos", "INSUMOS", "9", <FileOutlined />),
-  getItem("/compra/", "COMPRA", "10", <ShoppingCartOutlined />),
+
   getItem(
     "/unidadMedida",
     "Unidad de Medida",
     "11",
     <FundProjectionScreenOutlined />
   ),
-  getItem(
-    "/estadistica",
-    "ESTADISTICA",
-    "12",
-    <FundProjectionScreenOutlined />
-  ),
+
 ];
 
 const App: React.FC = () => {
