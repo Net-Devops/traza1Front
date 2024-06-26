@@ -8,7 +8,8 @@ import { store } from "./redux/Store";
 import Sider from "./components/element/menuLateral/Sider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Rutas from "./routes/Routes.tsx";
+
+import RutasSinSidebar from "./routes/RutasSinSidebar.tsx";
 
 const AppContent = () => {
   const location = useLocation();
@@ -17,7 +18,7 @@ const AppContent = () => {
   return (
     <>
       {!noSiderRoutes.includes(location.pathname) && <Sider />}
-      <Rutas />
+      <RutasSinSidebar />
       <ToastContainer />
     </>
   );
