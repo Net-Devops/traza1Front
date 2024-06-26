@@ -58,6 +58,12 @@ const items: MenuItem[] = [
     "11",
     <FundProjectionScreenOutlined />
   ),
+  getItem(
+    "/estadistica",
+    "ESTADISTICA",
+    "12",
+    <FundProjectionScreenOutlined />
+  ),
 ];
 
 const App: React.FC = () => {

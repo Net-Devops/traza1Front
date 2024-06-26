@@ -17,6 +17,7 @@ import Pedidos from "../components/pages/pedidos/Pedidos";
 import SeleccionSucursal from "../components/pages/compra/sucursales/SeleccionSucursal";
 import Login from "../components/pages/login-crear/login";
 import RegistroCliente from "../components/pages/login-crear/CrearUsuarioCliente";
+import Estadistica from "../components/pages/estadistica/Estadistica";
 
 const Rutas: React.FC = () => {
   return (
@@ -45,6 +46,7 @@ const Rutas: React.FC = () => {
         path="/compra/productos/:categoriaId"
         element={<CompraProductos />}
       />
+      <Route path="/estadistica" element={<Estadistica />} />
       <Route path="/promociones" element={<Promocion />} />
       <Route path="/Pedidos" element={<Pedidos />} />
       <Route path="/login" element={<Login />} />
