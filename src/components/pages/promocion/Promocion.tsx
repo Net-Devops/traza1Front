@@ -259,7 +259,7 @@ const Promociones = () => {
               {promocion.denominacion}
             </h2>
             <img
-              src={promocion.imagen}
+              src={"http://localhost:8080/images/" + promocion.imagen}
               alt={"sin imagen"}
               style={{
                 width: "100%", // Esto asegura que la imagen no sea más ancha que la tarjeta

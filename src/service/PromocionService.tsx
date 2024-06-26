@@ -134,7 +134,7 @@ export const togglePromocion = async (id: number) => {
 export const fetchPromocionById = async (promocionId: number) => {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/promociones/${promocionId}`
+      `http://localhost:8080/api/promociones/base64/${promocionId}`
     );
     if (!response.ok) {
       throw new Error("Error al obtener los detalles de la promoción");

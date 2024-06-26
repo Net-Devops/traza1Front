@@ -43,6 +43,9 @@ const FormularioPromocion: React.FC<Props> = ({
   const [selectedArticulos, setSelectedArticulos] = useState<string[]>([]);
   const [selectedArticulosData, setSelectedArticulosData] = useState<any[]>([]);
   const [articulos, setArticulos] = useState<any[]>([]);
+  const [imagenBase64, setImagenBase64] = useState<string | undefined>(
+    undefined
+  );
 
   const setFieldValue = (_arg0: string, value: string | Dayjs): void => {
     if (typeof value === "string") {
@@ -55,6 +58,23 @@ const FormularioPromocion: React.FC<Props> = ({
     setSelectedArticulosData((prevState) =>
       prevState.map((item) => (item.id === id ? { ...item, cantidad } : item))
     );
+  };
+
+  const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          const base64String = (reader.result as string).replace(
+            /^data:image\/\w+;base64,/,
+            ""
+          );
+          setImagenBase64(base64String);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   useEffect(() => {
@@ -81,7 +101,7 @@ const FormularioPromocion: React.FC<Props> = ({
         return;
       }
       const promocionData: Promocion = {
-        id: 0, // Ensure this is correctly set based on your backend logic
+        id: 0,
         denominacion: formValues.denominacion,
         fechaDesde: formValues.fechaDesde.format("YYYY-MM-DD"),
         fechaHasta: formValues.fechaHasta.format("YYYY-MM-DD"),
@@ -89,15 +109,17 @@ const FormularioPromocion: React.FC<Props> = ({
         horaHasta: formValues.horaHasta.format("HH:mm"),
         descripcionDescuento: formValues.descripcionDescuento,
         precioPromocional: formValues.precioPromocional,
-        imagen: formValues.imagen,
+        imagen: imagenBase64, // Aquí se envía la imagen en base64
         sucursales: [{ id: selectedSucursalId }],
         promocionDetalles: selectedArticulosData.map((articulo) => ({
           cantidad: articulo.cantidad,
           articuloManufacturado: { id: articulo.id },
         })),
       };
+
       await savePromocion(promocionData);
       form.resetFields(); // Limpia los campos del formulario
+      setImagenBase64(undefined);
       onCancel();
     } catch (error) {
       console.error("Error al guardar la promoción:", error);
@@ -299,8 +321,22 @@ const FormularioPromocion: React.FC<Props> = ({
               </Form.Item>
 
               <Form.Item label="Imagen:" name="imagen">
-                <Input style={{ width: "100%" }} />
+                <Input
+                  type="file"
+                  onChange={handleImagenChange}
+                  accept="image/*"
+                />
               </Form.Item>
+
+              {imagenBase64 && (
+                <div style={{ marginTop: 20 }}>
+                  <img
+                    src={imagenBase64}
+                    alt="Preview"
+                    style={{ maxWidth: 200 }}
+                  />
+                </div>
+              )}
             </Col>
           </Row>
         </div>
