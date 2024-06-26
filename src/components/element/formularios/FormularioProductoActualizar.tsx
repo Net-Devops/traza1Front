@@ -148,6 +148,7 @@ const FormularioActualizarProducto: React.FC<Props> = ({
             id: sucursalId,
             denominacion: "", // Consider filling this with actual data if available
         };
+        
         formattedValues.articuloManufacturadoDetalles = selectedInsumosData.map(
             (insumo) => ({
                 cantidad: insumo.cantidad,

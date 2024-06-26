@@ -18,6 +18,7 @@ import SeleccionSucursal from "../components/pages/compra/sucursales/SeleccionSu
 import Login from "../components/pages/login-crear/login";
 import RegistroCliente from "../components/pages/login-crear/CrearUsuarioCliente";
 import Estadistica from "../components/pages/estadistica/Estadistica";
+import RegistroEmpleado from "../components/pages/login-crear/CrearUsuarioEmpleado";
 
 const Rutas: React.FC = () => {
   return (
@@ -51,6 +52,7 @@ const Rutas: React.FC = () => {
       <Route path="/Pedidos" element={<Pedidos />} />
       <Route path="/login" element={<Login />} />
       <Route path="/registro-cliente" element={<RegistroCliente />} />
+      <Route path="/registro/empleado" element={<RegistroEmpleado />} />
     </Routes>
   );
 };

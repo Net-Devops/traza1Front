@@ -26,6 +26,21 @@ const UnidadMedida: React.FC = () => {
     traerTodoUnidadMedida().then(setUnidades);
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    
+    try {
+      const data = await traerTodoUnidadMedida();
+      console.log('Datos recibidos:', data);
+      setUnidades(data);
+    } catch (error) {
+      console.error('Error al obtener los insumos:', error);
+    }
+  };
+
   const abrirModal = (unidad?: UnidadMedida) => {
     setUnidadSeleccionada(unidad || null);
     form.setFieldsValue(unidad || { denominacion: "", eliminado: false });
@@ -54,11 +69,14 @@ const UnidadMedida: React.FC = () => {
 
   const handleToggleActive = async (id: number, checked: boolean) => {
     await toggleActiveUnidadMedida(id);
+  
     // Actualizar unidades después de cambiar el estado
     const updatedUnidades = unidades.map((unidad) =>
       unidad.id === id ? { ...unidad, eliminado: !checked } : unidad
     );
     setUnidades(updatedUnidades);
+    
+    
   };
 
   const columns = [

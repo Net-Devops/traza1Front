@@ -1,7 +1,7 @@
 import { Form, Input, Button, DatePicker, Select, Card, Row, Col } from "antd";
 import { useNavigate } from "react-router-dom";
 import * as CryptoJS from "crypto-js";
-import { Rol } from "../../../types/usuario/Usuario";
+import { Rol} from "../../../types/usuario/Usuario";
 
 const RegistroCliente = () => {
   const [form] = Form.useForm();
@@ -19,7 +19,7 @@ const RegistroCliente = () => {
         body: JSON.stringify({
           username: values.username,
           password: encryptedPassword,
-          rol: values.rol,
+          rol: Rol.CLIENTE,
           cliente: {
             nombre: values.nombre,
             apellido: values.apellido,
@@ -56,15 +56,7 @@ const RegistroCliente = () => {
             >
               <Input.Password />
             </Form.Item>
-            <Form.Item name="rol" label="Rol" rules={[{ required: true }]}>
-              <Select>
-                {Object.keys(Rol).map((rol) => (
-                  <Select.Option key={rol} value={rol}>
-                    {rol}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
+           
             <Form.Item
               name="nombre"
               label="Nombre"

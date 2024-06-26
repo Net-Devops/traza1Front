@@ -1,3 +1,5 @@
+import Categorias from "../components/pages/categorias/Categorias";
+
 export interface Imagen {
   id: number;
   url: string;
@@ -42,6 +44,11 @@ export interface ArticuloProducto {
   preparacion?: string;
   articuloManufacturadoDetalles: ArticuloManufacturadoDetalle[];
   sucursal: sucursal;
+  categoria: Categoria;
+}
+interface Categoria{
+  id: number;
+  denominacion: string;
 }
 
 export async function crearManufacturado(formData: ArticuloProducto) {
@@ -62,6 +69,7 @@ export async function crearManufacturado(formData: ArticuloProducto) {
       mode: "cors",
       body: JSON.stringify({
         codigo: "M-" + formData.codigo,
+        categoria: formData.categoria,
         denominacion: formData.denominacion,
         descripcion: formData.descripcion || "sin descripcion",
         precioVenta: formData.precioVenta,
@@ -194,4 +202,20 @@ export async function activarProductoXId(id: string) {
     },
     mode: "cors",
   });
+}
+
+export async function getCategoria(id:number) {
+  const urlServer =
+    "http://localhost:8080/api/local/traerTodo/"+id;
+  console.log(urlServer);
+  const response = await fetch(urlServer, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    mode: "cors",
+  });
+
+  return await response.json();
 }

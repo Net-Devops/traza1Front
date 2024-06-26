@@ -17,7 +17,7 @@ import {
 import { PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { getInsumoXSucursal, getUnidadMedida, unidadMedida } from "../../../service/ServiceInsumos";
 import TextArea from "antd/es/input/TextArea";
-import { crearManufacturado } from "../../../service/ServiceProducto";
+import { crearManufacturado, getCategoria } from "../../../service/ServiceProducto";
 
 
 
@@ -43,7 +43,7 @@ const FormularioProducto: React.FC<Props> = ({
     const [selectedInsumosData, setSelectedInsumosData] = useState<any[]>([]);
     const [insumos, setInsumos] = useState<any[]>([]);
 
-   
+    const [categoria, setCategoria] = useState<any[]>([]);
     const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
     useEffect(() => {
         const fetchUnidadesMedida = async () => {
@@ -57,6 +57,18 @@ const FormularioProducto: React.FC<Props> = ({
         fetchUnidadesMedida();
     }, []);
 
+
+ useEffect(() => {
+        const fetchCategoriaSucursal = async () => {
+            try {
+                const data = await getCategoria(Number(sucursalId));
+                setCategoria(data);
+            } catch (error) {
+                console.error('Error al obtener las categorias:', error);
+            }
+        };
+        fetchCategoriaSucursal();
+    }, []);
    
 
     const handleCantidadChange = (id: string, cantidad: number) => {
@@ -97,6 +109,10 @@ const FormularioProducto: React.FC<Props> = ({
         };
         formattedValues.sucursal = {
             id: sucursalId,
+            denominacion: "" // You might want to fill this with actual data if available
+        };
+        formattedValues.categoria = {
+            id: values.categoria,
             denominacion: "" // You might want to fill this with actual data if available
         };
         formattedValues.articuloManufacturadoDetalles = selectedInsumosData.map(insumo => ({
@@ -314,6 +330,19 @@ const FormularioProducto: React.FC<Props> = ({
                             >
                                 <Input style={{ width: "100%" }} />
                             </Form.Item>
+                            <Form.Item
+                                        label="Categoria"
+                                        name="categoria"
+                                        rules={[{ required: true, message: 'Por favor, selecciona una categoria' }]}
+                                    >
+                                        <Select>
+                                            {categoria.map((categoria) => (
+                                                <Select.Option key={categoria.id} value={categoria.id}>
+                                                    {categoria.denominacion}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
                             <Form.Item
                                 label="Foto"
                                 name="imagenes"
