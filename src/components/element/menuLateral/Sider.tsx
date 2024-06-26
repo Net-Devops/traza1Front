@@ -39,31 +39,23 @@ function getItem(
 const items: MenuItem[] = [
   getItem("/", "HOME", "1", <HomeOutlined />),
   getItem("/empresas", "EMPRESA", "2", <BankOutlined />),
-  getItem("/pedidos", "PEDIDOS", "3", <FundProjectionScreenOutlined />),
+
   getItem("/productos", "PRODUCTOS", "sub1", <ShoppingCartOutlined />, [
     getItem("/productos", "LISTA DE PRODUCTOS", "4"),
     getItem("/categorias", "CATEGORIAS", "5"),
   ]),
-  getItem("/promociones", "PROMOCIONES", "6", <DollarCircleOutlined />),
-  getItem("/empleados", "EMPLEADOS", "sub2", <ShoppingCartOutlined />, [
-    getItem("/empleados", "LISTA DE EMPLEADOS", "7"),
-    getItem("/roles", "ROLES", "8"),
-  ]),
+
+
 
   getItem("/insumos", "INSUMOS", "9", <FileOutlined />),
-  getItem("/compra/", "COMPRA", "10", <ShoppingCartOutlined />),
+ 
   getItem(
     "/unidadMedida",
     "Unidad de Medida",
     "11",
     <FundProjectionScreenOutlined />
   ),
-  getItem(
-    "/estadistica",
-    "ESTADISTICA",
-    "12",
-    <FundProjectionScreenOutlined />
-  ),
+
 ];
 
 const App: React.FC = () => {
