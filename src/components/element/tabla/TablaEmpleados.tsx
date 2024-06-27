@@ -10,6 +10,7 @@ import FormularioEmpleadoModificar from '../formularios/FormularioEmpleadoModifi
 type DataIndex = keyof Empleado;
 type TablaEmpleadosProps = {
   sucursalId: string;
+  
 };
 
 const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { SearchOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { SearchOutlined,  EditOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
 import { Button, Input, Space, Switch, Table } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';

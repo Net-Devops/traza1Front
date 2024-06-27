@@ -1,4 +1,4 @@
-import { Form, Input, Button, DatePicker, Select, Card, Row, Col } from "antd";
+import { Form, Input, Button, DatePicker,  Card, Row, Col } from "antd";
 import { useNavigate } from "react-router-dom";
 import * as CryptoJS from "crypto-js";
 import { Rol} from "../../../types/usuario/Usuario";

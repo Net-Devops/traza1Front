@@ -94,7 +94,7 @@ const Empleados
         />
                 <div>
                     {selectedSucursal ? (
-                        <TablaEmpleado empresaId={selectedEmpresa} sucursalId={selectedSucursal} />
+                        <TablaEmpleado  sucursalId={selectedSucursal} />
                     ) : (
                         <p>Por favor, seleccione la sucursal para ver los empleados.</p>
                     )}

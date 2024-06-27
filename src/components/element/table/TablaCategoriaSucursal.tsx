@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Tree, FloatButton, Modal, Button, message } from "antd";
 import { CheckOutlined, DeleteOutlined } from '@ant-design/icons';
 import AsociarCategoriaTree from "../../tree/AsociarCategoriaTree";
