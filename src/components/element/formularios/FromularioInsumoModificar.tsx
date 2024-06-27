@@ -164,8 +164,9 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
   const handleUnidadMedidaChange = (value: string) => {
     setUnidadMedida({
       id: value,
-      denominacion: unidadesMedida.find((unidad) => unidad.id === +value)
-        ?.denominacion || "",
+      denominacion:
+        unidadesMedida.find((unidad) => unidad.id === +value)?.denominacion ||
+        "",
     });
   };
 

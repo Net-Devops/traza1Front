@@ -130,11 +130,30 @@ export const togglePromocion = async (id: number) => {
     return null;
   }
 };
+export const eliminacionLogica = async (id: number) => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/promociones/${id}`, {
+      method: "DELETE",
+    });
+
+    // Verificar si la operación fue exitosa basado en el código de estado HTTP 204
+    if (response.status === 204) {
+      return true; // La operación de eliminación fue exitosa
+    } else {
+      // Si el código de estado no es 204, manejar como error o devolver false
+      console.error("Respuesta inesperada del servidor:", response.status);
+      return false; // O manejar de otra manera según tu lógica de negocio
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    return false; // Indicar que la operación no fue exitosa
+  }
+};
 
 export const fetchPromocionById = async (promocionId: number) => {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/promociones/${promocionId}`
+      `http://localhost:8080/api/promociones/base64/${promocionId}`
     );
     if (!response.ok) {
       throw new Error("Error al obtener los detalles de la promoción");

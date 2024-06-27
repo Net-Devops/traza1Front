@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import {
   Modal,
   Form,
@@ -46,6 +46,27 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
   const [selectedArticulosData, setSelectedArticulosData] = useState<any[]>([]);
   const [articulos, setArticulos] = useState<any[]>([]);
   const [searchArticulos, setSearchArticulos] = useState("");
+  const [nuevaImagenBase64, setNuevaImagenBase64] = useState<string | null>(
+    null
+  );
+
+  const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          const base64String = (reader.result as string).replace(
+            /^data:image\/\w+;base64,/,
+            ""
+          );
+          setNuevaImagenBase64(base64String);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const [searchSelectedArticulos, setSearchSelectedArticulos] = useState("");
 
   useEffect(() => {
@@ -58,6 +79,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
 
   useEffect(() => {
     if (promocionId) {
+      setNuevaImagenBase64(null); // Reinicia la imagen nueva al cargar una nueva promoción
       fetchPromocionById(promocionId).then((data) => {
         form.setFieldsValue({
           denominacion: data.denominacion,
@@ -68,17 +90,17 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
           descripcionDescuento: data.descripcionDescuento,
           precioPromocional: data.precioPromocional,
           tipoPromocion: data.tipoPromocion,
-          imagen: data.imagen,
+          imagen: data.imagen, // Asegura que el campo imagen se actualice con la imagen actual
         });
         setSelectedArticulosData(
-          data.promocionDetalles.map((detalle: any) => ({
-            ...detalle.articuloManufacturado,
+          data.promocionDetallesDto.map((detalle: any) => ({
+            ...detalle.articuloManufacturadoDto,
             cantidad: detalle.cantidad,
           }))
         );
         setSelectedArticulos(
-          data.promocionDetalles.map(
-            (detalle: any) => detalle.articuloManufacturado.id
+          data.promocionDetallesDto.map(
+            (detalle: any) => detalle.articuloManufacturadoDto.id
           )
         );
       });
@@ -115,7 +137,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
         horaHasta: formValues.horaHasta.format("HH:mm"),
         descripcionDescuento: formValues.descripcionDescuento,
         precioPromocional: formValues.precioPromocional,
-        imagen: formValues.imagen,
+        imagen: nuevaImagenBase64 || undefined, // Usar la nueva imagen si se cargó, de lo contrario la actual
         sucursales: [{ id: selectedSucursalId }],
         promocionDetalles: selectedArticulosData.map((articulo) => ({
           cantidad: articulo.cantidad,
@@ -302,8 +324,29 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item label="Imagen:" name="imagen">
-              <Input style={{ width: "100%" }} />
+            <Form.Item label="Imagen:">
+              {nuevaImagenBase64 && (
+                <img
+                  src={nuevaImagenBase64}
+                  alt="Nueva imagen de la promoción"
+                  style={{ maxWidth: "100%", marginBottom: 10 }}
+                />
+              )}
+              {!nuevaImagenBase64 && form.getFieldValue("imagen") && (
+                <img
+                  src={`data:image/jpeg;base64,${form.getFieldValue("imagen")}`}
+                  alt="Imagen de la promoción"
+                  style={{ maxWidth: "100%", marginBottom: 10 }}
+                />
+              )}
+            </Form.Item>
+            <Form.Item label="Cargar Nueva Imagen:">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImagenChange(e)}
+                style={{ marginBottom: 10 }}
+              />
             </Form.Item>
           </Col>
         </Row>

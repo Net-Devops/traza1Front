@@ -14,7 +14,7 @@ import FormularioPromocion from "./FormularioPromocion";
 import FormularioActualizacionPromocion from "./FormularioActualizacion"; // Importar el formulario de actualización
 import {
   savePromocion,
-  togglePromocion,
+  eliminacionLogica,
 } from "../../../service/PromocionService";
 
 const { Option } = Select;
@@ -101,14 +101,16 @@ const Promociones = () => {
     checked: boolean
   ) => {
     try {
-      const response = await togglePromocion(promocionId);
+      
+      const response = await eliminacionLogica(promocionId);
       if (response) {
         console.log(
           `Promoción ID: ${promocionId}, Estado: ${
             checked ? "Habilitado" : "Deshabilitado"
           }`
         );
-        // Aquí puedes actualizar el estado de las promociones si es necesario
+        const promocionesData = await promocionesPorSucursal(selectedSucursalId);
+        setPromociones(promocionesData);
       }
     } catch (error) {
       console.error("Error al cambiar el estado de la promoción:", error);
@@ -259,7 +261,7 @@ const Promociones = () => {
               {promocion.denominacion}
             </h2>
             <img
-              src={promocion.imagen}
+              src={"http://localhost:8080/images/" + promocion.imagen}
               alt={"sin imagen"}
               style={{
                 width: "100%", // Esto asegura que la imagen no sea más ancha que la tarjeta

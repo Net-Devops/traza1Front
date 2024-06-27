@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { SearchOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined,  EditOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Table } from 'antd';
+import { Button, Input, Space, Switch, Table } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 
-import { deleteProductoXId } from '../../../service/ServiceProducto';
+import { activarProductoXId, deleteProductoXId } from '../../../service/ServiceProducto';
 import { getProductoXSucursal } from '../../../service/ServiceProducto';
+import FormularioActualizarProducto from '../formularios/FormularioProductoActualizar';
 
 interface DataType {
   id: number;
@@ -16,20 +17,23 @@ interface DataType {
   precioVenta: number;
   descripcion: string;
   tiempoEstimadoCocina: string;
+  eliminado: boolean;
 }
 
 type DataIndex = keyof DataType;
 
 interface Props {
-  empresaId: string; // Assuming empresaId is a string, adjust the type as necessary
+  empresaId: string;
   sucursalId: string;
 }
 
-const App: React.FC<Props> = ({  sucursalId }) => {
+const App: React.FC<Props> = ({ sucursalId }) => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef<InputRef>(null);
   const [data, setData] = useState<DataType[]>([]);
+  const [selectedProducto, setSelectedProducto] = useState<DataType | null>(null);
+  const [showFormularioProducto, setShowFormularioProducto] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,14 +63,28 @@ const App: React.FC<Props> = ({  sucursalId }) => {
     clearFilters();
     setSearchText('');
   };
+  const handleSwitchChange = async (checked: boolean, record: DataType) => {
+    try {
+      if (checked) {
+        await activarProductoXId(record.id.toString());
+      } else {
+        await deleteProductoXId(record.id.toString());
+      }
+      // Actualizar los datos después de cambiar el estado
+      const updatedData = await getProductoXSucursal(sucursalId);
+      setData(updatedData);
+    } catch (error) {
+      console.error('Error al actualizar el estado del insumo:', error);
+    }
+  };
 
-  const showDeleteConfirm = async (id: string) => {
-    // Show a confirmation dialog...
-    console.log(id);
-    
-    // If the user confirms, delete the insumo
-    await deleteProductoXId(id);
-   
+  const handleEdit = (record: DataType) => {
+    if (record.id) {
+      setSelectedProducto(record);
+      setShowFormularioProducto(true);
+    } else {
+      console.error("El ID del insumo es nulo o no está definido.");
+    }
   };
 
   const getColumnSearchProps = (
@@ -172,9 +190,9 @@ const App: React.FC<Props> = ({  sucursalId }) => {
     {
       title: 'Imagen',
       dataIndex: 'url',
-      key: 'image', // Identificador único para la columna
+      key: 'image',
       render: (_text, record) => (
-        <img src={`http://localhost:8080/images/${record.imagen}`} style={{ width: '50px' }} alt="Imagen" />
+        <img src={record.imagen ? `http://localhost:8080/images/${record.imagen}` : `http://localhost:8080/images/sin-imagen.jpg`} style={{ width: '50px' }} alt="Imagen" />
       ),
     },
     {
@@ -214,19 +232,38 @@ const App: React.FC<Props> = ({  sucursalId }) => {
       key: 'action',
       render: (_text: string, record: DataType) => (
         <Space size="middle">
-          {/* <a onClick={() => handleEdit(record)}><EditOutlined /></a> */}
-          <a onClick={() => showDeleteConfirm(record.id.toString())}><DeleteOutlined /></a>
+          <a onClick={() => handleEdit(record)}><EditOutlined /></a>
+          <Switch
+            checked={!record.eliminado}
+            onChange={(checked) => handleSwitchChange(checked, record)}
+          />
         </Space>
       ),
     },
   ];
 
   return (
-    <Table 
-      columns={columns} 
-      dataSource={data} 
-      pagination={{ pageSizeOptions: ['5', '10', '20', '30', '50', '100'], showSizeChanger: true }} 
-    />
+    <>
+      <Table 
+        columns={columns} 
+        dataSource={data} 
+        pagination={{ pageSizeOptions: ['5', '10', '20', '30', '50', '100'], showSizeChanger: true }} 
+      />
+      {showFormularioProducto && selectedProducto && (
+        <FormularioActualizarProducto
+          visible={showFormularioProducto}
+          onClose={() => setShowFormularioProducto(false)}
+          onSubmit={(values) => {
+            // Handle the submit action
+            console.log('Submitted values:', values);
+            setShowFormularioProducto(false);
+          }}
+          initialValues={selectedProducto}
+          sucursalId={sucursalId}
+          productoId={selectedProducto.id.toString()}
+        />
+      )}
+    </>
   );
 };
 

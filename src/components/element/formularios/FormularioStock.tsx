@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { Modal, Input, Form } from 'antd';
 import { agregarStockId } from '../../../service/ServiceInsumos';
 
