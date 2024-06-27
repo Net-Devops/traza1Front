@@ -11,7 +11,7 @@ const { Option } = Select;
 
 export default function Categorias() {
   const [empresas, setEmpresas] = useState<Empresas[]>([]);
-  const [selectedEmpresa, setSelectedEmpresa] = useState<string>('');
+  const [selectedEmpresa, setSelectedEmpresa] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function Categorias() {
   
     const navigate = useNavigate();
   
-    const irACategoriasPorSucursal = (selectedEmpresa) => {
+    const irACategoriasPorSucursal = () => {
   navigate(`/categorias/porSucursal`); // Asume que quieres usar el ID en la URL
 };
 
@@ -49,7 +49,7 @@ export default function Categorias() {
           </Select>
         </div>
         <NuevaCategoria selectedEmpresaId={selectedEmpresa} onCategoryCreated={handleRefresh} />
-        <Button onClick={() => irACategoriasPorSucursal(selectedEmpresa)}>Categorías Por Sucursal</Button>
+        <Button onClick={() => irACategoriasPorSucursal()}>Categorías Por Sucursal</Button>
       </Row>
       <br />
       {selectedEmpresa ? (
