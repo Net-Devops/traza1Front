@@ -1,5 +1,3 @@
-import Categorias from "../components/pages/categorias/Categorias";
-
 export interface Imagen {
   id: number;
   url: string;
@@ -46,7 +44,7 @@ export interface ArticuloProducto {
   sucursal: sucursal;
   categoria: Categoria;
 }
-interface Categoria{
+interface Categoria {
   id: number;
   denominacion: string;
 }
@@ -91,8 +89,6 @@ export async function crearManufacturado(formData: ArticuloProducto) {
     throw error;
   }
 }
-
-
 
 export async function getProductoXSucursal(id: string) {
   const urlServer =
@@ -142,43 +138,40 @@ export const getProductoXIdBase = async (id: string) => {
 };
 export async function modificarProductoId(formData: any, id: number) {
   try {
-      console.log("estoy en el fetc");
-      console.log("data"+formData);
-      console.log("id:"+id);
-      
-      
-      
-      const urlServer = `http://localhost:8080/api/articulos/manufacturados/${id}`;
-      const response = await fetch(urlServer, {
-          method: "PUT",
-          headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-          },
-          mode: "cors",
-          body: JSON.stringify({
-            id:id,
-            codigo:  formData.codigo,
-            denominacion: formData.denominacion,
-            descripcion: formData.descripcion || "sin descripcion",
-            precioVenta: formData.precioVenta,
-            imagenes: formData.imagenes,
-            unidadMedida: formData.unidadMedida,
-            tiempoEstimadoMinutos: formData.tiempoEstimadoMinutos || 0,
-            preparacion: formData.preparacion || "sin preparacion",
-            sucursal: formData.sucursal,
-            articuloManufacturadoDetalles: formData.articuloManufacturadoDetalles,
-             
-          }),
-      });
+    console.log("estoy en el fetc");
+    console.log("data" + formData);
+    console.log("id:" + id);
 
-      if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
+    const urlServer = `http://localhost:8080/api/articulos/manufacturados/${id}`;
+    const response = await fetch(urlServer, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      mode: "cors",
+      body: JSON.stringify({
+        id: id,
+        codigo: formData.codigo,
+        denominacion: formData.denominacion,
+        descripcion: formData.descripcion || "sin descripcion",
+        precioVenta: formData.precioVenta,
+        imagenes: formData.imagenes,
+        unidadMedida: formData.unidadMedida,
+        tiempoEstimadoMinutos: formData.tiempoEstimadoMinutos || 0,
+        preparacion: formData.preparacion || "sin preparacion",
+        sucursal: formData.sucursal,
+        articuloManufacturadoDetalles: formData.articuloManufacturadoDetalles,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
   } catch (error) {
-      console.log("Error: ", error);
-      throw error;
+    console.log("Error: ", error);
+    throw error;
   }
 }
 export async function deleteProductoXId(id: string) {
@@ -193,7 +186,8 @@ export async function deleteProductoXId(id: string) {
   });
 }
 export async function activarProductoXId(id: string) {
-  const urlServer = "http://localhost:8080/api/articulos/manufacturados/reactivate/" + id;
+  const urlServer =
+    "http://localhost:8080/api/articulos/manufacturados/reactivate/" + id;
   await fetch(urlServer, {
     method: "POST",
     headers: {
@@ -204,9 +198,8 @@ export async function activarProductoXId(id: string) {
   });
 }
 
-export async function getCategoria(id:number) {
-  const urlServer =
-    "http://localhost:8080/api/local/traerTodo/"+id;
+export async function getCategoria(id: number) {
+  const urlServer = "http://localhost:8080/api/local/traerTodo/" + id;
   console.log(urlServer);
   const response = await fetch(urlServer, {
     method: "GET",

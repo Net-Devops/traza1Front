@@ -8,10 +8,10 @@ import {
   getSucursalId,
   Sucursal as sucursalInterface,
 } from "../../../service/ServiceSucursal";
-import imagenSucursal from "../../../util/empresa.jpeg";
+import imagenSucursal from "../../../util/sucursal.jpeg";
 import { useSelector, useDispatch } from "react-redux";
 import { EmpresaSlice } from "../../../redux/slice/EmpresaRedux";
-import FormularioEditarSucursal from '../../element/formularios/FormularioEditarSucursal'; // Import your modal component
+import FormularioEditarSucursal from "../../element/formularios/FormularioEditarSucursal"; // Import your modal component
 
 const { Meta } = Card;
 const { info } = Modal;
@@ -21,35 +21,32 @@ const Sucursal = () => {
   const dispatch = useDispatch();
   console.log(empresa);
 
-
   const [sucursales, setSucursales] = useState<sucursalInterface[]>([]);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentSucursal, setCurrentSucursal] = useState<sucursalInterface | null>(null);
+  const [currentSucursal, setCurrentSucursal] =
+    useState<sucursalInterface | null>(null);
 
   const handleSwitchChange = async (
     checked: boolean,
     sucursalId: string | number | undefined
   ) => {
-
- 
-
     if (checked) {
       await eliminarSucursal(sucursalId as string);
       info({
-        title: 'Sucursal habilitada',
-        content: 'La sucursal ha sido habilitada.',
-        okText: 'Aceptar',
-        onOk() { },
+        title: "Sucursal habilitada",
+        content: "La sucursal ha sido habilitada.",
+        okText: "Aceptar",
+        onOk() {},
       });
     } else {
       await eliminarSucursal(sucursalId as string);
       info({
-        title: 'Sucursal deshabilitada',
-        content: 'La sucursal ha sido deshabilitada.',
-        okText: 'Aceptar',
-        onOk() { },
+        title: "Sucursal deshabilitada",
+        content: "La sucursal ha sido deshabilitada.",
+        okText: "Aceptar",
+        onOk() {},
       });
     }
     setSucursales((prevSucursales) =>
@@ -66,7 +63,6 @@ const Sucursal = () => {
       .then((response) => {
         console.log(response);
         setSucursales(response);
-        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
@@ -92,7 +88,10 @@ const Sucursal = () => {
     }
   };
 
-  const handleEditClick = (e: React.MouseEvent, sucursal: sucursalInterface) => {
+  const handleEditClick = (
+    e: React.MouseEvent,
+    sucursal: sucursalInterface
+  ) => {
     e.stopPropagation();
     if (!sucursal.eliminado) {
       setCurrentSucursal(sucursal);
@@ -111,7 +110,6 @@ const Sucursal = () => {
       <Row gutter={16}>
         {Array.isArray(sucursales) &&
           sucursales.map((sucursal) => (
-            
             <Col key={sucursal.id} span={5}>
               <Card
                 style={{
@@ -141,21 +139,24 @@ const Sucursal = () => {
               >
                 <Meta
                   title={sucursal.nombre}
-                  description={`Hora: ${sucursal?.horaApertura || 'No disponible'} a ${sucursal?.horaCierre || 'No disponible'}, Domicilio: ${sucursal?.domicilio?.calle || 'No disponible'} n°: ${sucursal?.domicilio?.numero || ''}`}
+                  description={`Hora: ${
+                    sucursal?.horaApertura || "No disponible"
+                  } a ${sucursal?.horaCierre || "No disponible"}, Domicilio: ${
+                    sucursal?.domicilio?.calle || "No disponible"
+                  } n°: ${sucursal?.domicilio?.numero || ""}`}
                 />
               </Card>
             </Col>
           ))}
       </Row>
       <TarjetaAgregar />
-       
 
       {isModalVisible && currentSucursal && (
-    <FormularioEditarSucursal
-        visible={isModalVisible}
-        sucursalId={currentSucursal.id}
-        onClose={handleModalClose}
-    />
+        <FormularioEditarSucursal
+          visible={isModalVisible}
+          sucursalId={currentSucursal.id}
+          onClose={handleModalClose}
+        />
       )}
     </div>
   );
