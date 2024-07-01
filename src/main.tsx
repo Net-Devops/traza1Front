@@ -10,10 +10,11 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import RutasSinSidebar from "./routes/RutasSinSidebar.tsx";
+import { Auth0ProviderWithNavigate } from "./components/auth0/Auth0ProviderWithNavigate.tsx";
 
 const AppContent = () => {
   const location = useLocation();
-  const noSiderRoutes = ["/login", "/registro-cliente"];
+  const noSiderRoutes = ["/login", "/registro-cliente", "/callback", "*"];
 
   return (
     <>
@@ -28,7 +29,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Provider store={store}>
       <Router>
-        <AppContent />
+        <Auth0ProviderWithNavigate>
+          <AppContent />
+        </Auth0ProviderWithNavigate>
       </Router>
     </Provider>
   </React.StrictMode>

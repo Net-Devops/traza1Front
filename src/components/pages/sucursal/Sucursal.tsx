@@ -8,7 +8,7 @@ import {
   getSucursalId,
   Sucursal as sucursalInterface,
 } from "../../../service/ServiceSucursal";
-import imagenSucursal from "../../../util/sucursal.jpeg";
+import imagenSucursal from "../../../util/sucursal.jpg";
 import { useSelector, useDispatch } from "react-redux";
 import { EmpresaSlice } from "../../../redux/slice/EmpresaRedux";
 import FormularioEditarSucursal from "../../element/formularios/FormularioEditarSucursal"; // Import your modal component

@@ -19,38 +19,76 @@ import Login from "../components/pages/login-crear/login";
 import RegistroCliente from "../components/pages/login-crear/CrearUsuarioCliente";
 import Estadistica from "../components/pages/estadistica/Estadistica";
 import RegistroEmpleado from "../components/pages/login-crear/CrearUsuarioEmpleado";
+import { AuthenticationGuard } from "../components/auth0/AuthenticationGuard";
+import ErrorPage from "../components/User/ErrorPage";
+import CallbackPage from "../components/auth0/CallbackPage";
 
 const Rutas: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<Empresa />} />
-      <Route path="/empresas" element={<Empresa />} />
-      <Route path="/sucursal/:id" element={<Sucursal />} />
-      <Route path="/categorias" element={<Categorias />} />
+      <Route path="/" element={<AuthenticationGuard component={Empresa} />} />
+      <Route
+        path="/empresas"
+        element={<AuthenticationGuard component={Empresa} />}
+      />
+      <Route
+        path="/sucursal/:id"
+        element={<AuthenticationGuard component={Sucursal} />}
+      />
+      <Route
+        path="/categorias"
+        element={<AuthenticationGuard component={Categorias} />}
+      />
 
-      <Route path="/empleados" element={<Empleados />} />
+      <Route
+        path="/empleados"
+        element={<AuthenticationGuard component={Empleados} />}
+      />
 
       <Route
         path="/categorias/porSucursal"
-        element={<CategoriasPorSucursal />}
+        element={<AuthenticationGuard component={CategoriasPorSucursal} />}
       />
 
-      <Route path="/productos" element={<Productos />} />
-      <Route path="/insumos" element={<Insumo />} />
-      <Route path="/unidadMedida" element={<UnidadMedida />} />
-      <Route path="/compra" element={<SeleccionSucursal />} />
+      <Route
+        path="/productos"
+        element={<AuthenticationGuard component={Productos} />}
+      />
+      <Route
+        path="/insumos"
+        element={<AuthenticationGuard component={Insumo} />}
+      />
+      <Route
+        path="/unidadMedida"
+        element={<AuthenticationGuard component={UnidadMedida} />}
+      />
+      <Route
+        path="/compra"
+        element={<AuthenticationGuard component={SeleccionSucursal} />}
+      />
       <Route
         path="/compra/categorias/:sucursalId"
-        element={<CompraCategoria />}
+        element={<AuthenticationGuard component={CompraCategoria} />}
       />
       <Route
         path="/compra/productos/:categoriaId"
-        element={<CompraProductos />}
+        element={<AuthenticationGuard component={CompraProductos} />}
       />
-      <Route path="/estadistica" element={<Estadistica />} />
-      <Route path="/promociones" element={<Promocion />} />
-      <Route path="/Pedidos" element={<Pedidos />} />
+      <Route
+        path="/estadistica"
+        element={<AuthenticationGuard component={Estadistica} />}
+      />
+      <Route
+        path="/promociones"
+        element={<AuthenticationGuard component={Promocion} />}
+      />
+      <Route
+        path="/Pedidos"
+        element={<AuthenticationGuard component={Pedidos} />}
+      />
+      <Route path="*" element={<ErrorPage />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/callback" element={<CallbackPage />} />
       <Route path="/registro-cliente" element={<RegistroCliente />} />
       <Route path="/registro/empleado" element={<RegistroEmpleado />} />
     </Routes>
