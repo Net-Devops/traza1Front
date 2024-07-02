@@ -22,7 +22,7 @@ const { Option } = Select;
 const Promociones = () => {
   const [empresas, setEmpresas] = useState<Empresas[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
-  const [selectedEmpresa, setSelectedEmpresa] = useState("");
+  const [selectedEmpresa, setSelectedEmpresa] = useState<string | null>(null);
   const [promociones, setPromociones] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promocionDetail, setPromocionDetail] = useState<
@@ -34,6 +34,7 @@ const Promociones = () => {
   const [selectedPromocionId, setSelectedPromocionId] = useState<number | null>(
     null
   ); // Estado para el ID de la promoción seleccionada
+  const [isDisabled, setIsDisabled] = useState(false);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -55,10 +56,24 @@ const Promociones = () => {
     fetchSucursales();
   }, [selectedEmpresa]);
 
+  useEffect(() => {
+    const empresaId = localStorage.getItem("empresa_id");
+    const sucursalId = localStorage.getItem("sucursal_id");
+    if (empresaId && sucursalId) {
+      setSelectedEmpresa(empresaId);
+      setSelectedSucursalId(Number(sucursalId));
+      setIsDisabled(true);
+      handleSucursalChange(sucursalId);
+    }
+  }, []);
+
   const handleSucursalChange = async (value: string) => {
-    setSelectedSucursalId(Number(value));
-    const promocionesData = await promocionesPorSucursal(Number(value));
-    setPromociones(promocionesData);
+    const selectedId = Number(value);
+    setSelectedSucursalId(selectedId);
+    if (selectedId !== null) {
+      const promocionesData = await promocionesPorSucursal(selectedId);
+      setPromociones(promocionesData);
+    }
   };
 
   const handleShowDetail = async (promocionId: number) => {
@@ -101,7 +116,6 @@ const Promociones = () => {
     checked: boolean
   ) => {
     try {
-      
       const response = await eliminacionLogica(promocionId);
       if (response) {
         console.log(
@@ -109,7 +123,9 @@ const Promociones = () => {
             checked ? "Habilitado" : "Deshabilitado"
           }`
         );
-        const promocionesData = await promocionesPorSucursal(selectedSucursalId);
+        const promocionesData = await promocionesPorSucursal(
+          selectedSucursalId
+        );
         setPromociones(promocionesData);
       }
     } catch (error) {
@@ -193,6 +209,8 @@ const Promociones = () => {
             placeholder="Seleccione una empresa"
             style={{ width: 200 }}
             onChange={(value) => setSelectedEmpresa(value)}
+            value={selectedEmpresa}
+            disabled={isDisabled}
           >
             {empresas.map((empresa) => (
               <Option key={empresa.id} value={empresa.id}>
@@ -203,8 +221,9 @@ const Promociones = () => {
           <Select
             placeholder="Seleccione una sucursal"
             style={{ width: 200 }}
-            disabled={!selectedEmpresa}
+            disabled={!selectedEmpresa || isDisabled}
             onChange={handleSucursalChange}
+            value={selectedSucursalId?.toString()}
           >
             {sucursales.map((sucursal) => (
               <Option key={sucursal.id} value={sucursal.id}>

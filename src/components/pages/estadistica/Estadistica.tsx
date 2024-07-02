@@ -41,8 +41,11 @@ const Estadistica = () => {
   const [ingresosMeses, setIngresosMeses] = useState<IngresoMes[]>([]);
   const [empresas, setEmpresas] = useState<Empresas[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
-  const [selectedEmpresa, setSelectedEmpresa] = useState("");
-  const [selectedSucursalId, setSelectedSucursalId] = useState<number>(0);
+  const [selectedEmpresa, setSelectedEmpresa] = useState<string | null>(null);
+  const [selectedSucursalId, setSelectedSucursalId] = useState<number | null>(
+    null
+  );
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const months = [
     "01",
@@ -80,32 +83,52 @@ const Estadistica = () => {
     fetchSucursales();
   }, [selectedEmpresa]);
 
+  useEffect(() => {
+    const empresaId = localStorage.getItem("empresa_id");
+    const sucursalId = localStorage.getItem("sucursal_id");
+    if (empresaId && sucursalId) {
+      setSelectedEmpresa(empresaId);
+      setSelectedSucursalId(Number(sucursalId));
+      setIsDisabled(true);
+    }
+  }, []);
+
   const handleSucursalChange = async (value: string) => {
     setSelectedSucursalId(Number(value));
   };
 
   const handleFetchDias = async () => {
-    const data = await fetchIngresosPorRangoDeDias(
-      startDateDias,
-      endDateDias,
-      selectedSucursalId
-    );
-    setIngresosDias(
-      Object.entries(data).map(([fecha, ingreso]) => ({ fecha, ingreso }))
-    );
+    if (selectedSucursalId) {
+      const data = await fetchIngresosPorRangoDeDias(
+        startDateDias,
+        endDateDias,
+        selectedSucursalId
+      );
+      setIngresosDias(
+        Object.entries(data).map(([fecha, ingreso]) => ({ fecha, ingreso }))
+      );
+    }
   };
 
   const handleFetchMeses = async () => {
-    const startDateMes = `${selectedStartYear}-${selectedStartMonth}`;
-    const endDateMes = `${selectedEndYear}-${selectedEndMonth}`;
-    const data = await fetchIngresosPorRangoDeMeses(
-      startDateMes,
-      endDateMes,
-      selectedSucursalId
-    );
-    setIngresosMeses(
-      Object.entries(data).map(([fecha, ingreso]) => ({ fecha, ingreso }))
-    );
+    if (
+      selectedSucursalId &&
+      selectedStartYear &&
+      selectedStartMonth &&
+      selectedEndYear &&
+      selectedEndMonth
+    ) {
+      const startDateMes = `${selectedStartYear}-${selectedStartMonth}`;
+      const endDateMes = `${selectedEndYear}-${selectedEndMonth}`;
+      const data = await fetchIngresosPorRangoDeMeses(
+        startDateMes,
+        endDateMes,
+        selectedSucursalId
+      );
+      setIngresosMeses(
+        Object.entries(data).map(([fecha, ingreso]) => ({ fecha, ingreso }))
+      );
+    }
   };
 
   const columnsDias = [
@@ -147,7 +170,11 @@ const Estadistica = () => {
           <Select
             placeholder="Seleccione una empresa"
             style={{ width: 200 }}
-            onChange={(value) => setSelectedEmpresa(value)}
+            onChange={(value) =>
+              setSelectedEmpresa(value ? value.toString() : null)
+            }
+            value={selectedEmpresa ? selectedEmpresa.toString() : undefined}
+            disabled={isDisabled}
           >
             {empresas.map((empresa) => (
               <Option key={empresa.id} value={empresa.id}>
@@ -158,8 +185,11 @@ const Estadistica = () => {
           <Select
             placeholder="Seleccione una sucursal"
             style={{ width: 200 }}
-            disabled={!selectedEmpresa}
+            disabled={!selectedEmpresa || isDisabled}
             onChange={handleSucursalChange}
+            value={
+              selectedSucursalId ? selectedSucursalId.toString() : undefined
+            }
           >
             {sucursales.map((sucursal) => (
               <Option key={sucursal.id} value={sucursal.id}>

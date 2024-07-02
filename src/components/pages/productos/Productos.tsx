@@ -1,12 +1,9 @@
-import { useEffect, useState } from 'react';
-
-import TablaProductos from '../../element/tabla/TablaProductos';
-import { Empresas, getEmpresas } from '../../../service/ServiceEmpresa';
-import { Sucursal, getSucursal } from '../../../service/ServiceSucursal';
-
-import { Button, Select } from 'antd';
-
-import FormularioProducto from '../../element/formularios/FormularioProducto';
+import { useEffect, useState } from "react";
+import TablaProductos from "../../element/tabla/TablaProductos";
+import { Empresas, getEmpresas } from "../../../service/ServiceEmpresa";
+import { Sucursal, getSucursal } from "../../../service/ServiceSucursal";
+import { Button, Select } from "antd";
+import FormularioProducto from "../../element/formularios/FormularioProducto";
 
 const { Option } = Select;
 
@@ -14,8 +11,9 @@ export default function Productos() {
   const [showFormularioProducto, setShowFormularioProducto] = useState(false);
   const [empresas, setEmpresas] = useState<Empresas[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
-  const [selectedEmpresa, setSelectedEmpresa] = useState('');
-  const [selectedSucursal, setSelectedSucursal] = useState('');
+  const [selectedEmpresa, setSelectedEmpresa] = useState("");
+  const [selectedSucursal, setSelectedSucursal] = useState("");
+  const [disableSelection, setDisableSelection] = useState(false);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -37,6 +35,16 @@ export default function Productos() {
     fetchSucursales();
   }, [selectedEmpresa]);
 
+  useEffect(() => {
+    const empresaId = localStorage.getItem("empresa_id");
+    const sucursalId = localStorage.getItem("sucursal_id");
+    if (empresaId && sucursalId) {
+      setSelectedEmpresa(empresaId);
+      setSelectedSucursal(sucursalId);
+      setDisableSelection(true);
+    }
+  }, []);
+
   const handleOpenFormularioProducto = () => {
     setShowFormularioProducto(true);
   };
@@ -53,26 +61,48 @@ export default function Productos() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
         <h1>Productos</h1>
-        <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', gap: '20px', margin: '10px 0' }}>
+        <div
+          style={{
+            flexGrow: 1,
+            display: "flex",
+            justifyContent: "center",
+            gap: "20px",
+            margin: "10px 0",
+          }}
+        >
           <Select
             placeholder="Seleccione una empresa"
             style={{ width: 200 }}
+            value={selectedEmpresa}
             onChange={(value) => setSelectedEmpresa(value)}
+            disabled={disableSelection}
           >
             {empresas.map((empresa) => (
-              <Option key={empresa.id} value={empresa.id}>{empresa.nombre}</Option>
+              <Option key={empresa.id} value={empresa.id}>
+                {empresa.nombre}
+              </Option>
             ))}
           </Select>
           <Select
             placeholder="Seleccione una sucursal"
             style={{ width: 200 }}
-            disabled={!selectedEmpresa}
+            value={selectedSucursal}
+            disabled={!selectedEmpresa || disableSelection}
             onChange={(value) => setSelectedSucursal(value)}
           >
             {sucursales.map((sucursal) => (
-              <Option key={sucursal.id} value={sucursal.id}>{sucursal.nombre}</Option>
+              <Option key={sucursal.id} value={sucursal.id}>
+                {sucursal.nombre}
+              </Option>
             ))}
           </Select>
         </div>
@@ -83,18 +113,21 @@ export default function Productos() {
           </Button>
         )}
       </div>
-     
-        <FormularioProducto
-          visible={showFormularioProducto}
-          onClose={closeFormularioProducto}
-          onSubmit={handleFormSubmit}
-          initialValues={null}
-          sucursalId={selectedSucursal}
-        />
- 
+
+      <FormularioProducto
+        visible={showFormularioProducto}
+        onClose={closeFormularioProducto}
+        onSubmit={handleFormSubmit}
+        initialValues={null}
+        sucursalId={selectedSucursal}
+      />
+
       <div>
         {selectedSucursal ? (
-          <TablaProductos empresaId={selectedEmpresa} sucursalId={selectedSucursal} />
+          <TablaProductos
+            empresaId={selectedEmpresa}
+            sucursalId={selectedSucursal}
+          />
         ) : (
           <p>Por favor, seleccione la sucursal para ver los productos.</p>
         )}

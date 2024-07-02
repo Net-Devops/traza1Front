@@ -1,22 +1,25 @@
 import { Select, Table, message, Button, Modal } from "antd";
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Empresas, getEmpresas } from "../../../service/ServiceEmpresa";
 import { getSucursal, Sucursal } from "../../../service/ServiceSucursal";
 import {
   Estado,
   fetchPedidos,
   cambiarEstadoPedido,
-} from "../../../service/PedidoService"; // Asegúrate de importar correctamente tu función fetchPedidos
+} from "../../../service/PedidoService";
 
 const { Option } = Select;
 
 const Pedidos: React.FC = () => {
   const [empresas, setEmpresas] = useState<Empresas[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
-  const [selectedEmpresa, setSelectedEmpresa] = useState("");
-  const [selectedSucursalId, setSelectedSucursalId] = useState<number>(0);
+  const [selectedEmpresa, setSelectedEmpresa] = useState<string | null>(null);
+  const [selectedSucursalId, setSelectedSucursalId] = useState<number | null>(
+    null
+  );
+  const [isDisabled, setIsDisabled] = useState(false);
   const [pedidos, setPedidos] = useState<any[]>([]);
-  const [filtroEstado, setFiltroEstado] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<string>("");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPedidoId, setSelectedPedidoId] = useState<number | null>(null);
   const [nuevoEstado, setNuevoEstado] = useState<Estado | null>(null);
@@ -45,8 +48,18 @@ const Pedidos: React.FC = () => {
     cargarPedidos();
   }, [selectedSucursalId]);
 
+  useEffect(() => {
+    const empresaId = localStorage.getItem("empresa_id");
+    const sucursalId = localStorage.getItem("sucursal_id");
+    if (empresaId && sucursalId) {
+      setSelectedEmpresa(empresaId);
+      setSelectedSucursalId(Number(sucursalId));
+      setIsDisabled(true);
+    }
+  }, []);
+
   const cargarPedidos = async () => {
-    if (selectedSucursalId > 0) {
+    if (selectedSucursalId && selectedSucursalId > 0) {
       try {
         const pedidosData = await fetchPedidos(selectedSucursalId);
         setPedidos(pedidosData);
@@ -156,6 +169,8 @@ const Pedidos: React.FC = () => {
             placeholder="Seleccione una empresa"
             style={{ width: 200 }}
             onChange={(value) => setSelectedEmpresa(value)}
+            value={selectedEmpresa || undefined}
+            disabled={isDisabled}
           >
             {empresas.map((empresa) => (
               <Option key={empresa.id} value={empresa.id}>
@@ -166,8 +181,9 @@ const Pedidos: React.FC = () => {
           <Select
             placeholder="Seleccione una sucursal"
             style={{ width: 200 }}
-            disabled={!selectedEmpresa}
+            disabled={!selectedEmpresa || isDisabled}
             onChange={(value) => setSelectedSucursalId(Number(value))}
+            value={selectedSucursalId || undefined}
           >
             {sucursales.map((sucursal) => (
               <Option key={sucursal.id} value={sucursal.id}>

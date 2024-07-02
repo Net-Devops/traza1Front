@@ -3,7 +3,6 @@ import {
   LogoutOutlined,
   BankOutlined,
   FileOutlined,
-  HomeOutlined,
   DollarCircleOutlined,
   ShoppingCartOutlined,
   FundProjectionScreenOutlined,
@@ -16,10 +15,13 @@ import { Link } from "react-router-dom";
 import { MenuInfo } from "rc-menu/lib/interface";
 import Rutas from "../../../routes/Routes";
 import { useAuth0 } from "@auth0/auth0-react";
+import { RolEmpleado } from "../../../types/usuario/Usuario";
 
 const { Header, Content, Sider } = Layout;
 
-type MenuItem = Required<MenuProps>["items"][number];
+type MenuItem = Required<MenuProps>["items"][number] & {
+  children?: MenuItem[];
+};
 
 function getItem(
   route: string,
@@ -36,8 +38,7 @@ function getItem(
   } as MenuItem;
 }
 
-const items: MenuItem[] = [
-  //getItem("/", "HOME", "1", <HomeOutlined />),
+const allItems: MenuItem[] = [
   getItem("/empresas", "EMPRESA", "2", <BankOutlined />),
   getItem("/pedidos", "PEDIDOS", "3", <FundProjectionScreenOutlined />),
   getItem("/productos", "PRODUCTOS", "sub1", <ShoppingCartOutlined />, [
@@ -49,7 +50,6 @@ const items: MenuItem[] = [
     getItem("/empleados", "LISTA DE EMPLEADOS", "7"),
     getItem("/roles", "ROLES", "8"),
   ]),
-
   getItem("/insumos", "INSUMOS", "9", <FileOutlined />),
   getItem("/compra/", "COMPRA", "10", <ShoppingCartOutlined />),
   getItem(
@@ -67,7 +67,7 @@ const items: MenuItem[] = [
 ];
 
 const App: React.FC = () => {
-  const { logout } = useAuth0(); // Utiliza el hook useAuth0 para obtener la función logout
+  const { logout } = useAuth0();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -75,10 +75,46 @@ const App: React.FC = () => {
   function handleMenuClick(info: MenuInfo): void {
     console.log("Menu item clicked:", info.key);
     if (info.key === "3") {
-      // Asume que el ítem de menú de cierre de sesión tiene la clave "3"
-      logout({}); // Llama a la función logout sin parámetros
+      logout({});
     }
   }
+
+  let rol = localStorage.getItem("rol");
+  if (!rol) {
+    rol = RolEmpleado.EMPLEADO_COCINA;
+    localStorage.setItem("rol", rol);
+  }
+  const isAdmin = rol === RolEmpleado.ADMINISTRADOR;
+  const isCocinero = rol === RolEmpleado.EMPLEADO_COCINA;
+  const isVisor = rol === RolEmpleado.EMPLEADO_REPARTIDOR;
+
+  const visibleItems = allItems
+    .map((item) => {
+      if (isAdmin) return item;
+      if (isCocinero) {
+        if (
+          item?.key === "2" ||
+          item?.key === "10" ||
+          item?.key === "sub2" ||
+          item?.key === "8"
+        ) {
+          return null;
+        }
+        if (item?.key === "sub1") {
+          const filteredChildren = (item?.children as MenuItem[])?.filter(
+            (child: any) => child.key !== "5"
+          );
+          return { ...item, children: filteredChildren };
+        }
+      }
+      if (isVisor) {
+        if (item?.key === "7" || item?.key === "8") {
+          return null;
+        }
+      }
+      return item;
+    })
+    .filter(Boolean);
 
   const menu = (
     <Menu onClick={handleMenuClick}>
@@ -125,7 +161,7 @@ const App: React.FC = () => {
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
             style={{ height: "100%", borderRight: 0 }}
-            items={items}
+            items={visibleItems}
           />
         </Sider>
         <Layout
@@ -138,7 +174,7 @@ const App: React.FC = () => {
               minHeight: 280,
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
-              overflow: "auto", // Add this line
+              overflow: "auto",
             }}
           >
             <Rutas />

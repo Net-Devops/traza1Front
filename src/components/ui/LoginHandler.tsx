@@ -31,6 +31,7 @@ const LoginHandler: React.FC = () => {
             localStorage.setItem("rol", empleado.rol);
             localStorage.removeItem("sucursal_id");
             localStorage.removeItem("selectedSucursalNombre");
+            localStorage.removeItem("empresa_id");
             navigate("/unidadMedida");
           } else if (
             empleado.rol === RolEmpleado.EMPLEADO_COCINA ||
@@ -38,11 +39,16 @@ const LoginHandler: React.FC = () => {
           ) {
             localStorage.removeItem("sucursal_id");
             localStorage.removeItem("selectedSucursalNombre");
+            localStorage.removeItem("empresa_id");
             localStorage.setItem(
               "sucursal_id",
               empleado.sucursal.id.toString()
             );
             localStorage.setItem("rol", empleado.rol);
+            localStorage.setItem(
+              "empresa_id",
+              empleado.sucursal.empresa.id.toString()
+            );
             const sucursal = await sucursalService.getById(
               `${import.meta.env.VITE_API_URL}`,
               empleado.sucursal.id,
