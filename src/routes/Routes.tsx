@@ -23,6 +23,7 @@ import { AuthenticationGuard } from "../components/auth0/AuthenticationGuard";
 import ErrorPage from "../components/User/ErrorPage";
 import CallbackPage from "../components/auth0/CallbackPage";
 import LoginHandler from "../components/ui/LoginHandler";
+import EmpleadoProfileCard from "../components/pages/perfil/EmpleadoProfileCard";
 
 const Rutas: React.FC = () => {
   return (
@@ -95,6 +96,7 @@ const Rutas: React.FC = () => {
         path="/"
         element={<AuthenticationGuard component={LoginHandler} />}
       />
+      <Route path="/perfil" element={<EmpleadoProfileCard />} />
     </Routes>
   );
 };

@@ -6,6 +6,7 @@ import {
   fetchIngresosPorRangoDeDias,
   fetchIngresosPorRangoDeMeses,
 } from "../../../service/EstadisticaService";
+import { Chart } from "react-google-charts";
 
 const { Option } = Select;
 
@@ -216,6 +217,7 @@ const Estadistica = () => {
               type="date"
               value={endDateDias}
               onChange={(e) => setEndDateDias(e.target.value)}
+              min={startDateDias}
               required
             />
           </Form.Item>
@@ -226,6 +228,25 @@ const Estadistica = () => {
           </Form.Item>
         </Form>
         <Table dataSource={ingresosDias} columns={columnsDias} rowKey="fecha" />
+        <Chart
+          width={"100%"}
+          height={"400px"}
+          chartType="ColumnChart"
+          loader={<div>Loading Chart</div>}
+          data={[
+            ["Fecha", "Ingreso"],
+            ...ingresosDias.map((ingreso) => [ingreso.fecha, ingreso.ingreso]),
+          ]}
+          options={{
+            hAxis: {
+              title: "Fecha",
+            },
+            vAxis: {
+              title: "Ingreso",
+            },
+            legend: { position: "none" },
+          }}
+        />
       </div>
 
       <div>
@@ -262,9 +283,14 @@ const Estadistica = () => {
               value={selectedEndYear}
               onChange={setSelectedEndYear}
               style={{ width: 120 }}
+              disabled={!selectedStartYear}
             >
               {years.map((year) => (
-                <Option key={year} value={year}>
+                <Option
+                  key={year}
+                  value={year}
+                  disabled={year < selectedStartYear!}
+                >
                   {year}
                 </Option>
               ))}
@@ -275,9 +301,17 @@ const Estadistica = () => {
               value={selectedEndMonth}
               onChange={setSelectedEndMonth}
               style={{ width: 120 }}
+              disabled={!selectedStartMonth}
             >
               {months.map((month) => (
-                <Option key={month} value={month}>
+                <Option
+                  key={month}
+                  value={month}
+                  disabled={
+                    selectedEndYear === selectedStartYear &&
+                    month < selectedStartMonth!
+                  }
+                >
                   {month}
                 </Option>
               ))}
@@ -297,6 +331,25 @@ const Estadistica = () => {
           dataSource={ingresosMeses}
           columns={columnsMeses}
           rowKey="fecha"
+        />
+        <Chart
+          width={"100%"}
+          height={"400px"}
+          chartType="ColumnChart"
+          loader={<div>Loading Chart</div>}
+          data={[
+            ["Mes", "Ingreso"],
+            ...ingresosMeses.map((ingreso) => [ingreso.fecha, ingreso.ingreso]),
+          ]}
+          options={{
+            hAxis: {
+              title: "Mes",
+            },
+            vAxis: {
+              title: "Ingreso",
+            },
+            legend: { position: "none" },
+          }}
         />
       </div>
     </div>

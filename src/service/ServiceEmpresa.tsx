@@ -1,8 +1,11 @@
+import { Empresa } from "./ServiceSucursal";
+
 export interface Empresas {
   id?: number;
   nombre: string;
   razonSocial: string;
   cuil: number;
+  eliminado?: boolean;
 }
 
 export const getEmpresas = async (): Promise<Empresas[]> => {
@@ -51,3 +54,35 @@ export async function crearEmpresa(formData: Empresas, token: string) {
     console.log("Error: ", error);
   }
 }
+
+export const actualizarEmpresa = async (
+  id: number,
+  empresa: Empresa,
+  token: string
+): Promise<Response> => {
+  const endpoint = `http://localhost:8080/api/empresa/${id}`;
+  const response = await fetch(endpoint, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify(empresa),
+  });
+
+  return response;
+};
+export const eliminarEmpresa = async (id: number): Promise<Response> => {
+  const endpoint = `http://localhost:8080/api/empresa/${id}`;
+  const response = await fetch(endpoint, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
+
+  return response;
+};

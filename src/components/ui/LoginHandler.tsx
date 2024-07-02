@@ -6,9 +6,7 @@ import SucursalService from "../../service/auth0Service/SucursalService";
 import { RolEmpleado } from "../../types/usuario/Usuario";
 
 const LoginHandler: React.FC = () => {
-  console.log("-----prueba1---->");
   const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
-  console.log("-----prueba2---->");
   const navigate = useNavigate();
   const empleadoService = new EmpleadoService();
   const url = import.meta.env.VITE_API_URL;
@@ -16,22 +14,22 @@ const LoginHandler: React.FC = () => {
     const fetchEmpleado = async () => {
       if (isAuthenticated && user?.email) {
         try {
+          localStorage.removeItem("auth_token");
           const sucursalService = new SucursalService();
           const token = await getAccessTokenSilently();
-          console.log(token);
-          console.log("url:  " + url + user.email);
+          localStorage.setItem("auth_token", token);
           const empleado = await empleadoService.getEmpleadoByEmail(
             `${url}`,
             user.email,
             token
           );
-
-          console.log("--------->" + empleado.sucursal.id + " " + empleado.rol);
           if (empleado.rol === RolEmpleado.ADMINISTRADOR) {
             localStorage.setItem("rol", empleado.rol);
             localStorage.removeItem("sucursal_id");
             localStorage.removeItem("selectedSucursalNombre");
             localStorage.removeItem("empresa_id");
+            localStorage.removeItem("email");
+            localStorage.setItem("email", empleado.email);
             navigate("/unidadMedida");
           } else if (
             empleado.rol === RolEmpleado.EMPLEADO_COCINA ||
@@ -40,6 +38,8 @@ const LoginHandler: React.FC = () => {
             localStorage.removeItem("sucursal_id");
             localStorage.removeItem("selectedSucursalNombre");
             localStorage.removeItem("empresa_id");
+            localStorage.removeItem("email");
+            localStorage.setItem("email", empleado.email);
             localStorage.setItem(
               "sucursal_id",
               empleado.sucursal.id.toString()

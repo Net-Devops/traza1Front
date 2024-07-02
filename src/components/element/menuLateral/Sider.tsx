@@ -6,12 +6,12 @@ import {
   DollarCircleOutlined,
   ShoppingCartOutlined,
   FundProjectionScreenOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Layout, Menu, theme } from "antd";
 import { Dropdown, Button } from "antd";
-import { UserOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MenuInfo } from "rc-menu/lib/interface";
 import Rutas from "../../../routes/Routes";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -40,7 +40,7 @@ function getItem(
 
 const allItems: MenuItem[] = [
   getItem("/empresas", "EMPRESA", "2", <BankOutlined />),
-  getItem("/pedidos", "PEDIDOS", "3", <FundProjectionScreenOutlined />),
+  // getItem("/pedidos", "PEDIDOS", "3", <FundProjectionScreenOutlined />),
   getItem("/productos", "PRODUCTOS", "sub1", <ShoppingCartOutlined />, [
     getItem("/productos", "LISTA DE PRODUCTOS", "4"),
     getItem("/categorias", "CATEGORIAS", "5"),
@@ -68,14 +68,17 @@ const allItems: MenuItem[] = [
 
 const App: React.FC = () => {
   const { logout } = useAuth0();
+  const navigate = useNavigate();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
   function handleMenuClick(info: MenuInfo): void {
     console.log("Menu item clicked:", info.key);
-    if (info.key === "3") {
+    if (info.key === "logout") {
       logout({});
+    } else if (info.key === "perfil") {
+      navigate("/perfil");
     }
   }
 
@@ -108,9 +111,6 @@ const App: React.FC = () => {
         }
       }
       if (isVisor) {
-        if (item?.key === "7" || item?.key === "8") {
-          return null;
-        }
       }
       return item;
     })
@@ -118,13 +118,13 @@ const App: React.FC = () => {
 
   const menu = (
     <Menu onClick={handleMenuClick}>
-      <Menu.Item key="1" icon={<UserOutlined />}>
+      <Menu.Item key="perfil" icon={<UserOutlined />}>
         Perfil
       </Menu.Item>
-      <Menu.Item key="2" icon={<SettingOutlined />}>
+      <Menu.Item key="settings" icon={<SettingOutlined />}>
         Ajustes
       </Menu.Item>
-      <Menu.Item key="3" icon={<LogoutOutlined />}>
+      <Menu.Item key="logout" icon={<LogoutOutlined />}>
         Cerrar Sesión
       </Menu.Item>
     </Menu>
