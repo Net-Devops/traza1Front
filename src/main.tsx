@@ -14,7 +14,7 @@ import { Auth0ProviderWithNavigate } from "./components/auth0/Auth0ProviderWithN
 
 const AppContent = () => {
   const location = useLocation();
-  const noSiderRoutes = ["/login", "/registro-cliente", "/callback", "*"];
+  const noSiderRoutes = ["/login", "/registro-cliente", "/callback", "/"];
 
   return (
     <>

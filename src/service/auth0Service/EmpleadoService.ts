@@ -1,4 +1,4 @@
-import IEmpleado from "../types/Empleado";
+import IEmpleado from "./typeAuth0/Empleado";
 import BackendClient from "./BackendClient";
 
 export default class EmpleadoService extends BackendClient<IEmpleado> {
@@ -31,7 +31,7 @@ export default class EmpleadoService extends BackendClient<IEmpleado> {
     data: FormData,
     token: string
   ): Promise<IEmpleado> {
-    const path = url;
+    const path = url + "/";
     const options: RequestInit = {
       method: "POST",
       headers: {
@@ -49,7 +49,7 @@ export default class EmpleadoService extends BackendClient<IEmpleado> {
     data: FormData,
     token: string
   ): Promise<IEmpleado> {
-    const path = `${url}/update/${id}`;
+    const path = `${url}/${id}`;
     const options: RequestInit = {
       method: "PUT",
       headers: {

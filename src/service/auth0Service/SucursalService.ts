@@ -1,5 +1,5 @@
 import axios from "axios";
-import ISucursal from "../types/ISucursal";
+import ISucursal from "./typeAuth0/ISucursal";
 import BackendClient from "./BackendClient";
 
 export default class SucursalService extends BackendClient<ISucursal> {

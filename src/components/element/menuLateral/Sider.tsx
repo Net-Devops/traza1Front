@@ -1,4 +1,3 @@
-
 import {
   SettingOutlined,
   LogoutOutlined,
@@ -16,6 +15,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { MenuInfo } from "rc-menu/lib/interface";
 import Rutas from "../../../routes/Routes";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const { Header, Content, Sider } = Layout;
 
@@ -37,7 +37,7 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem("/", "HOME", "1", <HomeOutlined />),
+  //getItem("/", "HOME", "1", <HomeOutlined />),
   getItem("/empresas", "EMPRESA", "2", <BankOutlined />),
   getItem("/pedidos", "PEDIDOS", "3", <FundProjectionScreenOutlined />),
   getItem("/productos", "PRODUCTOS", "sub1", <ShoppingCartOutlined />, [
@@ -67,9 +67,18 @@ const items: MenuItem[] = [
 ];
 
 const App: React.FC = () => {
+  const { logout } = useAuth0(); // Utiliza el hook useAuth0 para obtener la función logout
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  function handleMenuClick(info: MenuInfo): void {
+    console.log("Menu item clicked:", info.key);
+    if (info.key === "3") {
+      // Asume que el ítem de menú de cierre de sesión tiene la clave "3"
+      logout({}); // Llama a la función logout sin parámetros
+    }
+  }
 
   const menu = (
     <Menu onClick={handleMenuClick}>
@@ -141,7 +150,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-function handleMenuClick(info: MenuInfo): void {
-  console.log("Menu item clicked:", info.key);
-}

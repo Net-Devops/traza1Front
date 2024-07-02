@@ -22,11 +22,11 @@ import RegistroEmpleado from "../components/pages/login-crear/CrearUsuarioEmplea
 import { AuthenticationGuard } from "../components/auth0/AuthenticationGuard";
 import ErrorPage from "../components/User/ErrorPage";
 import CallbackPage from "../components/auth0/CallbackPage";
+import LoginHandler from "../components/ui/LoginHandler";
 
 const Rutas: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<AuthenticationGuard component={Empresa} />} />
       <Route
         path="/empresas"
         element={<AuthenticationGuard component={Empresa} />}
@@ -91,6 +91,10 @@ const Rutas: React.FC = () => {
       <Route path="/callback" element={<CallbackPage />} />
       <Route path="/registro-cliente" element={<RegistroCliente />} />
       <Route path="/registro/empleado" element={<RegistroEmpleado />} />
+      <Route
+        path="/"
+        element={<AuthenticationGuard component={LoginHandler} />}
+      />
     </Routes>
   );
 };
