@@ -5,11 +5,15 @@ export interface UnidadMedida {
   eliminado: boolean; // Asumiendo que tienes un campo 'eliminado' en tus datos
 }
 
-export const cargarUnidadMedida = async (unidadMedida: UnidadMedida) => {
+export const cargarUnidadMedida = async (
+  unidadMedida: UnidadMedida,
+  token: string
+) => {
   const response = await fetch("http://localhost:8080/api/unidad-medida/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(unidadMedida),
   });
@@ -46,13 +50,18 @@ export const actualizarUnidadMedida = async (
 };
 
 // Para cambiar el estado de una unidad de medida
-export const toggleActiveUnidadMedida = async (id: number) => {
-  const response = await fetch(
-    `http://localhost:8080/api/unidad-medida/toggle-active/${id}`,
-    {
-      method: "PUT",
-    }
-  );
+// En tu servicio de unidad de medida
+
+export const toggleActiveUnidadMedida = async (id: number, token: string) => {
+  const url = `http://localhost:8080/api/unidad-medida/toggle-active/${id}`;
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // Añade el token de autenticación
+    },
+  });
 
   if (!response.ok) {
     throw new Error("Error al cambiar el estado de la unidad de medida");

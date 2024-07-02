@@ -49,7 +49,10 @@ interface Categoria {
   denominacion: string;
 }
 
-export async function crearManufacturado(formData: ArticuloProducto) {
+export async function crearManufacturado(
+  formData: ArticuloProducto,
+  token: string
+) {
   console.log("estoy en el crearManufacturado");
 
   try {
@@ -62,6 +65,7 @@ export async function crearManufacturado(formData: ArticuloProducto) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
         "Access-Control-Allow-Origin": "*",
       },
       mode: "cors",
@@ -136,7 +140,11 @@ export const getProductoXIdBase = async (id: string) => {
     return null;
   }
 };
-export async function modificarProductoId(formData: any, id: number) {
+export async function modificarProductoId(
+  formData: any,
+  id: number,
+  token: string
+) {
   try {
     console.log("estoy en el fetc");
     console.log("data" + formData);
@@ -147,6 +155,7 @@ export async function modificarProductoId(formData: any, id: number) {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
         "Access-Control-Allow-Origin": "*",
       },
       mode: "cors",
@@ -174,24 +183,26 @@ export async function modificarProductoId(formData: any, id: number) {
     throw error;
   }
 }
-export async function deleteProductoXId(id: string) {
+export async function deleteProductoXId(id: string, token: string) {
   const urlServer = "http://localhost:8080/api/articulos/manufacturados/" + id;
   await fetch(urlServer, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
       "Access-Control-Allow-Origin": "*",
     },
     mode: "cors",
   });
 }
-export async function activarProductoXId(id: string) {
+export async function activarProductoXId(id: string, token: string) {
   const urlServer =
     "http://localhost:8080/api/articulos/manufacturados/reactivate/" + id;
   await fetch(urlServer, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
       "Access-Control-Allow-Origin": "*",
     },
     mode: "cors",

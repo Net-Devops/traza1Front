@@ -16,10 +16,12 @@ import {
   savePromocion,
   eliminacionLogica,
 } from "../../../service/PromocionService";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const { Option } = Select;
 
 const Promociones = () => {
+  const { getAccessTokenSilently } = useAuth0();
   const [empresas, setEmpresas] = useState<Empresas[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState<string | null>(null);
@@ -100,7 +102,8 @@ const Promociones = () => {
 
   const handleSubmitPromocion = async (values: any) => {
     try {
-      const response = await savePromocion(values);
+      const token = await getAccessTokenSilently();
+      const response = await savePromocion(values, token);
       if (response) {
         console.log("Promoción guardada con éxito:", response);
         setIsFormVisible(false); // Cierra el formulario si se guarda con éxito
@@ -116,7 +119,8 @@ const Promociones = () => {
     checked: boolean
   ) => {
     try {
-      const response = await eliminacionLogica(promocionId);
+      const token = await getAccessTokenSilently();
+      const response = await eliminacionLogica(promocionId, token);
       if (response) {
         console.log(
           `Promoción ID: ${promocionId}, Estado: ${
@@ -140,10 +144,14 @@ const Promociones = () => {
 
   const handleUpdatePromotion = async (values: any) => {
     try {
-      const response = await savePromocion({
-        ...values,
-        id: selectedPromocionId,
-      });
+      const token = await getAccessTokenSilently();
+      const response = await savePromocion(
+        {
+          ...values,
+          id: selectedPromocionId,
+        },
+        token
+      );
       if (response) {
         console.log("Promoción actualizada con éxito:", response);
         setIsUpdateFormVisible(false); // Cierra el formulario si se actualiza con éxito

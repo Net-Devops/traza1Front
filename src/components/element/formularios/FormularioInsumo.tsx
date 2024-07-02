@@ -1,4 +1,4 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { PlusOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -22,6 +22,7 @@ import {
 } from "../../../service/ServiceInsumos";
 import { getSucursal, Sucursal } from "../../../service/ServiceSucursal";
 import { crearManufacturado } from "../../../service/ServiceProducto";
+import { useAuth0 } from "@auth0/auth0-react";
 interface FormularioInsumoProps {
   onClose: () => void;
   empresaId: string;
@@ -38,6 +39,7 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
   const [, setIsSwitchOn] = useState(false);
   const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+  const { getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
     const fetchSucursales = async () => {
@@ -98,13 +100,15 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
     }
 
     try {
+      const token = await getAccessTokenSilently();
       const imagenes = await Promise.all(promises);
       formattedValues.imagenes = imagenes;
+
       let response; // Declaración de la variable fuera del bloque condicional
       if (values.esParaElaborar) {
-        response = await crearInsumo(formattedValues);
+        response = await crearInsumo(formattedValues, token);
       } else {
-        response = await crearInsumo(formattedValues);
+        response = await crearInsumo(formattedValues, token);
         formattedValues.articuloManufacturadoDetalles = [
           {
             cantidad: 1,
@@ -113,8 +117,7 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
             },
           },
         ];
-
-        response = await crearManufacturado(formattedValues);
+        response = await crearManufacturado(formattedValues, token);
       }
       console.log("Response: ", response);
       form.resetFields();

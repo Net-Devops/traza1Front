@@ -1,7 +1,7 @@
-import  { useState } from 'react';
-import { Modal, Input, Form } from 'antd';
-import { agregarStockId } from '../../../service/ServiceInsumos';
-
+import { useState } from "react";
+import { Modal, Input, Form } from "antd";
+import { agregarStockId } from "../../../service/ServiceInsumos";
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface FormularioInsumoProps {
   onClose: () => void;
@@ -9,23 +9,27 @@ interface FormularioInsumoProps {
   visible: boolean;
 }
 
-const FormularioStock: React.FC<FormularioInsumoProps> = ({ onClose, id, visible }) => {
+const FormularioStock: React.FC<FormularioInsumoProps> = ({
+  onClose,
+  id,
+  visible,
+}) => {
   const [cantidad, setCantidad] = useState<number>(0);
   const [nuevoPrecioVenta, setNuevoPrecioVenta] = useState<number>(0);
   const [nuevoPrecioCompra, setNuevoPrecioCompra] = useState<number>(0);
-
+  const { getAccessTokenSilently } = useAuth0();
   const handleOk = async () => {
     try {
       const formData = {
         cantidad,
         nuevoPrecioVenta,
-        nuevoPrecioCompra
+        nuevoPrecioCompra,
       };
-
-      await agregarStockId(formData, id);
+      const token = await getAccessTokenSilently();
+      await agregarStockId(formData, id, token);
       onClose();
     } catch (error) {
-      console.error('Error al agregar stock:', error);
+      console.error("Error al agregar stock:", error);
     }
   };
 

@@ -1,26 +1,28 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { SearchOutlined, EditOutlined } from '@ant-design/icons';
-import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Switch, Table, Popconfirm } from 'antd'; // Importa Popconfirm para confirmar la acción de eliminar
-import type { FilterDropdownProps } from 'antd/es/table/interface';
-import Highlighter from 'react-highlight-words';
-import { Empleado, getEmpleados } from '../../../service/EmpleadoService';
-import FormularioEmpleadoModificar from '../formularios/FormularioEmpleadoModificar';
+import React, { useEffect, useRef, useState } from "react";
+import { SearchOutlined, EditOutlined } from "@ant-design/icons";
+import type { InputRef, TableColumnsType, TableColumnType } from "antd";
+import { Button, Input, Space, Switch, Table, Popconfirm } from "antd"; // Importa Popconfirm para confirmar la acción de eliminar
+import type { FilterDropdownProps } from "antd/es/table/interface";
+import Highlighter from "react-highlight-words";
+import { Empleado, getEmpleados } from "../../../service/EmpleadoService";
+import FormularioEmpleadoModificar from "../formularios/FormularioEmpleadoModificar";
+import { useAuth0 } from "@auth0/auth0-react";
 
 type DataIndex = keyof Empleado;
 type TablaEmpleadosProps = {
   sucursalId: string;
-  
 };
 
 const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
-  const [searchText, setSearchText] = useState('');
-  const [searchedColumn, setSearchedColumn] = useState('');
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
   const [data, setData] = useState<Empleado[]>([]);
-  const [selectedEmpleado, setSelectedEmpleado] = useState<Empleado | null>(null); 
+  const [selectedEmpleado, setSelectedEmpleado] = useState<Empleado | null>(
+    null
+  );
   const [isModalVisible, setIsModalVisible] = useState(false);
-
+  const { getAccessTokenSilently } = useAuth0();
   useEffect(() => {
     fetchData();
   }, [sucursalId]);
@@ -30,13 +32,13 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
       const empleadosData = await getEmpleados(sucursalId);
       setData(empleadosData);
     } catch (error) {
-      console.error('Error al obtener los empleados:', error);
+      console.error("Error al obtener los empleados:", error);
     }
   };
 
   const handleSearch = (
     selectedKeys: string[],
-    confirm: FilterDropdownProps['confirm'],
+    confirm: FilterDropdownProps["confirm"],
     dataIndex: DataIndex
   ) => {
     confirm();
@@ -46,7 +48,7 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
 
   const handleReset = (clearFilters: () => void) => {
     clearFilters();
-    setSearchText('');
+    setSearchText("");
   };
 
   const getColumnSearchProps = (
@@ -69,7 +71,7 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
           onPressEnter={() =>
             handleSearch(selectedKeys as string[], confirm, dataIndex)
           }
-          style={{ marginBottom: 8, display: 'block' }}
+          style={{ marginBottom: 8, display: "block" }}
         />
         <Space>
           <Button
@@ -84,7 +86,7 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
             Buscar
           </Button>
           <Button
-            onClick={() => handleReset(clearFilters || (() => { }))}
+            onClick={() => handleReset(clearFilters || (() => {}))}
             size="small"
             style={{ width: 90 }}
           >
@@ -94,7 +96,7 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
       </div>
     ),
     filterIcon: (filtered: boolean) => (
-      <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
@@ -109,10 +111,10 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
-          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ''}
+          textToHighlight={text ? text.toString() : ""}
         />
       ) : (
         text
@@ -130,20 +132,28 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
 
   const handleDelete = async (id: string) => {
     try {
+      const token = await getAccessTokenSilently();
       // Aquí debes hacer la solicitud DELETE a la API
-      const response = await fetch(`http://localhost:8080/api/empleado/eliminar/${id}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/empleado/eliminar/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Error al eliminar el empleado');
+        throw new Error("Error al eliminar el empleado");
       }
 
       // Actualizar los datos después de eliminar el empleado
       const updatedData = await getEmpleados(sucursalId);
       setData(updatedData);
     } catch (error) {
-      console.error('Error al eliminar el empleado:', error);
+      console.error("Error al eliminar el empleado:", error);
     }
   };
 
@@ -156,65 +166,71 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
       const updatedData = await getEmpleados(sucursalId);
       setData(updatedData);
     } catch (error) {
-      console.error('Error al obtener los empleados actualizados:', error);
+      console.error("Error al obtener los empleados actualizados:", error);
     }
   };
 
   const columns: TableColumnsType<Empleado> = [
     {
-      title: 'Imagen',
-      dataIndex: 'imagen',
-      key: 'imagen',
+      title: "Imagen",
+      dataIndex: "imagen",
+      key: "imagen",
       render: (text) => (
-        <img src={`http://localhost:8080/images/${text}`} style={{ width: '50px' }} alt="Empleado" />
+        <img
+          src={`http://localhost:8080/images/${text}`}
+          style={{ width: "50px" }}
+          alt="Empleado"
+        />
       ),
     },
     {
-      title: 'Nombre',
-      dataIndex: 'nombre',
-      key: 'nombre',
-      ...getColumnSearchProps('nombre'),
+      title: "Nombre",
+      dataIndex: "nombre",
+      key: "nombre",
+      ...getColumnSearchProps("nombre"),
       sorter: (a, b) => a.nombre.localeCompare(b.nombre),
-      sortDirections: ['descend', 'ascend'],
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Apellido',
-      dataIndex: 'apellido',
-      key: 'apellido',
-      ...getColumnSearchProps('apellido'),
+      title: "Apellido",
+      dataIndex: "apellido",
+      key: "apellido",
+      ...getColumnSearchProps("apellido"),
       sorter: (a, b) => a.apellido.localeCompare(b.apellido),
-      sortDirections: ['descend', 'ascend'],
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-      ...getColumnSearchProps('email'),
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      ...getColumnSearchProps("email"),
       sorter: (a, b) => a.email.localeCompare(b.email),
-      sortDirections: ['descend', 'ascend'],
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Teléfono',
-      dataIndex: 'telefono',
-      key: 'telefono',
-      ...getColumnSearchProps('telefono'),
+      title: "Teléfono",
+      dataIndex: "telefono",
+      key: "telefono",
+      ...getColumnSearchProps("telefono"),
       sorter: (a, b) => a.telefono.localeCompare(b.telefono),
-      sortDirections: ['descend', 'ascend'],
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Rol',
-      dataIndex: 'rol',
-      key: 'rol',
-      ...getColumnSearchProps('rol'),
+      title: "Rol",
+      dataIndex: "rol",
+      key: "rol",
+      ...getColumnSearchProps("rol"),
       sorter: (a, b) => a.rol.localeCompare(b.rol),
-      sortDirections: ['descend', 'ascend'],
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Acción',
-      key: 'action',
+      title: "Acción",
+      key: "action",
       render: (_text: string, record: Empleado) => (
         <Space size="middle">
-          <a onClick={() => handleEdit(record)}><EditOutlined /></a>
+          <a onClick={() => handleEdit(record)}>
+            <EditOutlined />
+          </a>
           <Popconfirm
             title="¿Está seguro de eliminar este empleado?"
             onConfirm={() => handleDelete(record.id.toString())}
@@ -235,8 +251,11 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
     <>
       <Table
         columns={columns}
-        dataSource={data.map(item => ({ ...item, key: item.id }))}
-        pagination={{ pageSizeOptions: ['5', '10', '20', '30', '50', '100'], showSizeChanger: true }}
+        dataSource={data.map((item) => ({ ...item, key: item.id }))}
+        pagination={{
+          pageSizeOptions: ["5", "10", "20", "30", "50", "100"],
+          showSizeChanger: true,
+        }}
       />
       {isModalVisible && selectedEmpleado && (
         <FormularioEmpleadoModificar
@@ -244,7 +263,7 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
           onClose={handleModalClose}
           onSubmit={(values) => {
             // Handle the submit action
-            console.log('Submitted values:', values);
+            console.log("Submitted values:", values);
             handleModalClose();
           }}
           initialValues={selectedEmpleado}
@@ -254,6 +273,6 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
       )}
     </>
   );
-}
+};
 
 export default TablaEmpleados;

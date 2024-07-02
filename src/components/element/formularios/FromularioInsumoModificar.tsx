@@ -17,6 +17,7 @@ import {
   getInsumoXId,
   getUnidadMedida,
 } from "../../../service/ServiceInsumos";
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface FormularioInsumoProps {
   onClose: () => void;
@@ -45,7 +46,7 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
   const [images, setImages] = useState<ImageData[]>([]);
   const [, setIsSwitchOn] = useState(false);
   const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
-
+  const { getAccessTokenSilently } = useAuth0();
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -123,8 +124,8 @@ const FormularioInsumoModificar: React.FC<FormularioInsumoProps> = ({
       };
 
       console.log("values:", values);
-
-      await modificarInsumoId(values, formData.id);
+      const token = await getAccessTokenSilently();
+      await modificarInsumoId(values, formData.id, token);
       onClose();
     } catch (error) {
       console.error("Error al modificar insumo:", error);

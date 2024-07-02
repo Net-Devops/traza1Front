@@ -1,11 +1,11 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Modal,
   Form,
   Input,
   DatePicker,
   TimePicker,
-  Select,
+  // Select,
   Table,
   InputNumber,
   Button,
@@ -21,8 +21,9 @@ import {
   Promocion,
   eliminarDetallesPromocion,
 } from "../../../service/PromocionService";
+import { useAuth0 } from "@auth0/auth0-react";
 
-const { Option } = Select;
+//const { Option } = Select;
 
 interface Props {
   visible: boolean;
@@ -38,7 +39,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
   onCancel,
   onSubmit,
   promocionId,
-  tiposPromocion,
+  //tiposPromocion,
   selectedSucursalId,
 }) => {
   const [form] = Form.useForm();
@@ -49,6 +50,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
   const [nuevaImagenBase64, setNuevaImagenBase64] = useState<string | null>(
     null
   );
+  const { getAccessTokenSilently } = useAuth0();
 
   const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
@@ -144,8 +146,9 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
           articuloManufacturado: { id: articulo.id },
         })),
       };
-      await eliminarDetallesPromocion(promocionId!);
-      await actualizarPromocion(promocionId!, promocionData);
+      const token = await getAccessTokenSilently();
+      await eliminarDetallesPromocion(promocionId!, token);
+      await actualizarPromocion(promocionId!, promocionData, token);
       form.resetFields(); // Limpia los campos del formulario
       onCancel();
       onSubmit(promocionData); // Asegúrate de llamar a onSubmit aquí
@@ -315,7 +318,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
               <InputNumber style={{ width: "100%" }} min={1} />
             </Form.Item>
 
-            <Form.Item label="Tipo Promoción:" name="tipoPromocion">
+            {/* <Form.Item label="Tipo Promoción:" name="tipoPromocion">
               <Select style={{ width: "100%" }}>
                 {tiposPromocion.map((tipo) => (
                   <Option key={tipo.value} value={tipo.value}>
@@ -323,7 +326,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
                   </Option>
                 ))}
               </Select>
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item label="Imagen:">
               {nuevaImagenBase64 && (
                 <img

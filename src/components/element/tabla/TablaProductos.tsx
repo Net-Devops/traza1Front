@@ -1,13 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
-import { SearchOutlined,  EditOutlined } from '@ant-design/icons';
-import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
-import { Button, Input, Space, Switch, Table } from 'antd';
-import type { FilterDropdownProps } from 'antd/es/table/interface';
-import Highlighter from 'react-highlight-words';
+import { useEffect, useRef, useState } from "react";
+import { SearchOutlined, EditOutlined } from "@ant-design/icons";
+import type { InputRef, TableColumnsType, TableColumnType } from "antd";
+import { Button, Input, Space, Switch, Table } from "antd";
+import type { FilterDropdownProps } from "antd/es/table/interface";
+import Highlighter from "react-highlight-words";
 
-import { activarProductoXId, deleteProductoXId } from '../../../service/ServiceProducto';
-import { getProductoXSucursal } from '../../../service/ServiceProducto';
-import FormularioActualizarProducto from '../formularios/FormularioProductoActualizar';
+import {
+  activarProductoXId,
+  deleteProductoXId,
+} from "../../../service/ServiceProducto";
+import { getProductoXSucursal } from "../../../service/ServiceProducto";
+import FormularioActualizarProducto from "../formularios/FormularioProductoActualizar";
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface DataType {
   id: number;
@@ -28,12 +32,15 @@ interface Props {
 }
 
 const App: React.FC<Props> = ({ sucursalId }) => {
-  const [searchText, setSearchText] = useState('');
-  const [searchedColumn, setSearchedColumn] = useState('');
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
   const [data, setData] = useState<DataType[]>([]);
-  const [selectedProducto, setSelectedProducto] = useState<DataType | null>(null);
+  const [selectedProducto, setSelectedProducto] = useState<DataType | null>(
+    null
+  );
   const [showFormularioProducto, setShowFormularioProducto] = useState(false);
+  const { getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +58,7 @@ const App: React.FC<Props> = ({ sucursalId }) => {
 
   const handleSearch = (
     selectedKeys: string[],
-    confirm: FilterDropdownProps['confirm'],
+    confirm: FilterDropdownProps["confirm"],
     dataIndex: DataIndex
   ) => {
     confirm();
@@ -61,20 +68,21 @@ const App: React.FC<Props> = ({ sucursalId }) => {
 
   const handleReset = (clearFilters: () => void) => {
     clearFilters();
-    setSearchText('');
+    setSearchText("");
   };
   const handleSwitchChange = async (checked: boolean, record: DataType) => {
     try {
+      const token = await getAccessTokenSilently();
       if (checked) {
-        await activarProductoXId(record.id.toString());
+        await activarProductoXId(record.id.toString(), token);
       } else {
-        await deleteProductoXId(record.id.toString());
+        await deleteProductoXId(record.id.toString(), token);
       }
       // Actualizar los datos después de cambiar el estado
       const updatedData = await getProductoXSucursal(sucursalId);
       setData(updatedData);
     } catch (error) {
-      console.error('Error al actualizar el estado del insumo:', error);
+      console.error("Error al actualizar el estado del insumo:", error);
     }
   };
 
@@ -108,7 +116,7 @@ const App: React.FC<Props> = ({ sucursalId }) => {
           onPressEnter={() =>
             handleSearch(selectedKeys as string[], confirm, dataIndex)
           }
-          style={{ marginBottom: 8, display: 'block' }}
+          style={{ marginBottom: 8, display: "block" }}
         />
         <Space>
           <Button
@@ -153,7 +161,7 @@ const App: React.FC<Props> = ({ sucursalId }) => {
       </div>
     ),
     filterIcon: (filtered: boolean) => (
-      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
@@ -168,10 +176,10 @@ const App: React.FC<Props> = ({ sucursalId }) => {
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
-          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ''}
+          textToHighlight={text ? text.toString() : ""}
         />
       ) : (
         text
@@ -180,59 +188,70 @@ const App: React.FC<Props> = ({ sucursalId }) => {
 
   const columns: TableColumnsType<DataType> = [
     {
-      title: 'Codigo',
-      dataIndex: 'codigo',
-      key: 'codigo',
-      ...getColumnSearchProps('codigo'),
+      title: "Codigo",
+      dataIndex: "codigo",
+      key: "codigo",
+      ...getColumnSearchProps("codigo"),
       sorter: (a, b) => a.codigo.localeCompare(b.codigo),
-      sortDirections: ['descend', 'ascend'],
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Imagen',
-      dataIndex: 'url',
-      key: 'image',
+      title: "Imagen",
+      dataIndex: "url",
+      key: "image",
       render: (_text, record) => (
-        <img src={record.imagen ? `http://localhost:8080/images/${record.imagen}` : `http://localhost:8080/images/sin-imagen.jpg`} style={{ width: '50px' }} alt="Imagen" />
+        <img
+          src={
+            record.imagen
+              ? `http://localhost:8080/images/${record.imagen}`
+              : `http://localhost:8080/images/sin-imagen.jpg`
+          }
+          style={{ width: "50px" }}
+          alt="Imagen"
+        />
       ),
     },
     {
-      title: 'Nombre',
-      dataIndex: 'denominacion',
-      key: 'denominacion',
-      ...getColumnSearchProps('denominacion'),
+      title: "Nombre",
+      dataIndex: "denominacion",
+      key: "denominacion",
+      ...getColumnSearchProps("denominacion"),
       sorter: (a, b) => a.denominacion.localeCompare(b.denominacion),
-      sortDirections: ['descend', 'ascend'],
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Precio',
-      dataIndex: 'precioVenta',
-      key: 'precioVenta',
-      ...getColumnSearchProps('precioVenta'),
+      title: "Precio",
+      dataIndex: "precioVenta",
+      key: "precioVenta",
+      ...getColumnSearchProps("precioVenta"),
       sorter: (a, b) => a.precioVenta - b.precioVenta,
-      sortDirections: ['descend', 'ascend'],
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Descripcion',
-      dataIndex: 'descripcion',
-      key: 'descripcion',
-      ...getColumnSearchProps('descripcion'),
+      title: "Descripcion",
+      dataIndex: "descripcion",
+      key: "descripcion",
+      ...getColumnSearchProps("descripcion"),
       sorter: (a, b) => a.descripcion.localeCompare(b.descripcion),
-      sortDirections: ['descend', 'ascend'],
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Tiempo Estimado Minutos',
-      dataIndex: 'tiempoEstimadoCocina',
-      key: 'tiempoEstimadoCocina',
-      ...getColumnSearchProps('tiempoEstimadoCocina'),
-      sorter: (a, b) => a.tiempoEstimadoCocina.localeCompare(b.tiempoEstimadoCocina),
-      sortDirections: ['descend', 'ascend'],
+      title: "Tiempo Estimado Minutos",
+      dataIndex: "tiempoEstimadoCocina",
+      key: "tiempoEstimadoCocina",
+      ...getColumnSearchProps("tiempoEstimadoCocina"),
+      sorter: (a, b) =>
+        a.tiempoEstimadoCocina.localeCompare(b.tiempoEstimadoCocina),
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: 'Acción',
-      key: 'action',
+      title: "Acción",
+      key: "action",
       render: (_text: string, record: DataType) => (
         <Space size="middle">
-          <a onClick={() => handleEdit(record)}><EditOutlined /></a>
+          <a onClick={() => handleEdit(record)}>
+            <EditOutlined />
+          </a>
           <Switch
             checked={!record.eliminado}
             onChange={(checked) => handleSwitchChange(checked, record)}
@@ -244,10 +263,13 @@ const App: React.FC<Props> = ({ sucursalId }) => {
 
   return (
     <>
-      <Table 
-        columns={columns} 
-        dataSource={data} 
-        pagination={{ pageSizeOptions: ['5', '10', '20', '30', '50', '100'], showSizeChanger: true }} 
+      <Table
+        columns={columns}
+        dataSource={data}
+        pagination={{
+          pageSizeOptions: ["5", "10", "20", "30", "50", "100"],
+          showSizeChanger: true,
+        }}
       />
       {showFormularioProducto && selectedProducto && (
         <FormularioActualizarProducto
@@ -255,7 +277,7 @@ const App: React.FC<Props> = ({ sucursalId }) => {
           onClose={() => setShowFormularioProducto(false)}
           onSubmit={(values) => {
             // Handle the submit action
-            console.log('Submitted values:', values);
+            console.log("Submitted values:", values);
             setShowFormularioProducto(false);
           }}
           initialValues={selectedProducto}

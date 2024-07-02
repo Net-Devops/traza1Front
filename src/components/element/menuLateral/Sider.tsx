@@ -48,10 +48,10 @@ const allItems: MenuItem[] = [
   getItem("/promociones", "PROMOCIONES", "6", <DollarCircleOutlined />),
   getItem("/empleados", "EMPLEADOS", "sub2", <ShoppingCartOutlined />, [
     getItem("/empleados", "LISTA DE EMPLEADOS", "7"),
-    getItem("/roles", "ROLES", "8"),
+    // getItem("/roles", "ROLES", "8"),
   ]),
   getItem("/insumos", "INSUMOS", "9", <FileOutlined />),
-  getItem("/compra/", "COMPRA", "10", <ShoppingCartOutlined />),
+  // getItem("/compra/", "COMPRA", "10", <ShoppingCartOutlined />),
   getItem(
     "/unidadMedida",
     "Unidad de Medida",

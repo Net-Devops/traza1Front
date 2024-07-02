@@ -1,4 +1,3 @@
-
 import { Button, Switch, Table, Modal, Form, Input } from "antd";
 import { useEffect, useState } from "react";
 import {
@@ -8,6 +7,7 @@ import {
   traerTodoUnidadMedida,
 } from "../../../service/UnidadMedidaService";
 import { toast } from "react-toastify";
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface UnidadMedida {
   id: number;
@@ -21,6 +21,7 @@ const UnidadMedida: React.FC = () => {
   const [unidadSeleccionada, setUnidadSeleccionada] =
     useState<UnidadMedida | null>(null);
   const [form] = Form.useForm();
+  const { getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
     traerTodoUnidadMedida().then(setUnidades);
@@ -31,13 +32,12 @@ const UnidadMedida: React.FC = () => {
   }, []);
 
   const fetchData = async () => {
-    
     try {
       const data = await traerTodoUnidadMedida();
-      console.log('Datos recibidos:', data);
+      console.log("Datos recibidos:", data);
       setUnidades(data);
     } catch (error) {
-      console.error('Error al obtener los insumos:', error);
+      console.error("Error al obtener los insumos:", error);
     }
   };
 
@@ -54,11 +54,12 @@ const UnidadMedida: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
+      const token = await getAccessTokenSilently();
       const values = await form.validateFields();
       if (unidadSeleccionada) {
         await actualizarUnidadMedida(unidadSeleccionada.id, values);
       } else {
-        await cargarUnidadMedida(values);
+        await cargarUnidadMedida(values, token);
       }
       cerrarModal();
       traerTodoUnidadMedida().then(setUnidades);
@@ -68,15 +69,14 @@ const UnidadMedida: React.FC = () => {
   };
 
   const handleToggleActive = async (id: number, checked: boolean) => {
-    await toggleActiveUnidadMedida(id);
-  
+    const token = await getAccessTokenSilently();
+    await toggleActiveUnidadMedida(id, token);
+
     // Actualizar unidades después de cambiar el estado
     const updatedUnidades = unidades.map((unidad) =>
       unidad.id === id ? { ...unidad, eliminado: !checked } : unidad
     );
     setUnidades(updatedUnidades);
-    
-    
   };
 
   const columns = [
@@ -138,8 +138,6 @@ const UnidadMedida: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-
-
     </div>
   );
 };

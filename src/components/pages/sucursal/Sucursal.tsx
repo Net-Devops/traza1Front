@@ -12,6 +12,7 @@ import imagenSucursal from "../../../util/sucursal.jpg";
 import { useSelector, useDispatch } from "react-redux";
 import { EmpresaSlice } from "../../../redux/slice/EmpresaRedux";
 import FormularioEditarSucursal from "../../element/formularios/FormularioEditarSucursal"; // Import your modal component
+import { useAuth0 } from "@auth0/auth0-react";
 
 const { Meta } = Card;
 const { info } = Modal;
@@ -20,7 +21,7 @@ const Sucursal = () => {
   const empresa = useSelector((state) => state);
   const dispatch = useDispatch();
   console.log(empresa);
-
+  const { getAccessTokenSilently } = useAuth0();
   const [sucursales, setSucursales] = useState<sucursalInterface[]>([]);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -32,8 +33,9 @@ const Sucursal = () => {
     checked: boolean,
     sucursalId: string | number | undefined
   ) => {
+    const token = await getAccessTokenSilently();
     if (checked) {
-      await eliminarSucursal(sucursalId as string);
+      await eliminarSucursal(sucursalId as string, token);
       info({
         title: "Sucursal habilitada",
         content: "La sucursal ha sido habilitada.",
@@ -41,7 +43,7 @@ const Sucursal = () => {
         onOk() {},
       });
     } else {
-      await eliminarSucursal(sucursalId as string);
+      await eliminarSucursal(sucursalId as string, token);
       info({
         title: "Sucursal deshabilitada",
         content: "La sucursal ha sido deshabilitada.",

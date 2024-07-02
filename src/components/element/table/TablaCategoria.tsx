@@ -1,4 +1,4 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button, Input, Modal, Tree, Switch } from "antd";
 import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 
@@ -21,10 +21,8 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editCategoryName, setEditCategoryName] = useState<string>("");
-  
-  const [, setEditingSubcategory] = useState<Category | null>(
-    null
-  );
+
+  const [, setEditingSubcategory] = useState<Category | null>(null);
   const [, setEditSubcategoryName] = useState<string>("");
   const [updateKey, setUpdateKey] = useState<number>(Date.now());
   const [addSubcategoryModalVisible, setAddSubcategoryModalVisible] =
@@ -33,7 +31,6 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
 
   const [selectedParentCategory, setSelectedParentCategory] =
     useState<Category | null>(null);
-   
 
   useEffect(() => {
     if (selectedEmpresa !== null) {
@@ -59,7 +56,7 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
   const handleEditCategory = (category: Category) => {
     setEditingCategory(category);
     setEditCategoryName(category.denominacion);
-    setUpdateKey(Date.now()); 
+    setUpdateKey(Date.now());
   };
 
   const handleCancelEdit = () => {
@@ -74,31 +71,31 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
       if (editingCategory === null) {
         throw new Error("No se puede editar la categoría seleccionada");
       }
-  
+
       const url = `http://localhost:8080/api/categorias/${editingCategory.id}/denominacion`;
-  
+
       const response = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: editCategoryName , // Enviar como JSON
+        body: editCategoryName, // Enviar como JSON
       });
-  
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
-  
+
       // Actualiza el estado local
-      setCategories(prevCategories =>
-        prevCategories.map(category =>
+      setCategories((prevCategories) =>
+        prevCategories.map((category) =>
           category.id === editingCategory.id
             ? { ...category, denominacion: editCategoryName }
             : category
         )
       );
-  
+
       setUpdateKey(Date.now()); // Fuerza un re-renderizado
       handleCancelEdit();
     } catch (error) {
@@ -109,16 +106,18 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
       });
     }
   };
-  
+
   const handleSwitchChange = async (item: Category) => {
     try {
       const url = `http://localhost:8080/api/categorias/${item.id}/eliminado`;
       const response = await fetch(url, { method: "PUT" });
       if (response.ok) {
         // Actualiza el estado local
-        setCategories(prevCategories =>
-          prevCategories.map(category =>
-            category.id === item.id ? { ...category, eliminado: !category.eliminado } : category
+        setCategories((prevCategories) =>
+          prevCategories.map((category) =>
+            category.id === item.id
+              ? { ...category, eliminado: !category.eliminado }
+              : category
           )
         );
         setUpdateKey(Date.now()); // Fuerza un re-renderizado
@@ -126,7 +125,8 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
       } else {
         Modal.error({
           title: "Error al realizar la operación",
-          content: "Hubo un problema al intentar realizar la operación. Por favor, inténtalo de nuevo más tarde.",
+          content:
+            "Hubo un problema al intentar realizar la operación. Por favor, inténtalo de nuevo más tarde.",
         });
       }
     } catch (error) {
@@ -143,7 +143,7 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
     try {
       if (selectedParentCategory === null)
         throw new Error("No se ha seleccionado una categoría padre");
-  
+
       const response = await fetch(
         `http://localhost:8080/api/categorias/subcategoriaConEmpresa`,
         {
@@ -152,11 +152,11 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
           body: JSON.stringify({
             denominacion: denominacion,
             idCategoriaPadre: selectedParentCategory.id,
-            idEmpresaCategoriaPadre: selectedEmpresa
+            idEmpresaCategoriaPadre: selectedEmpresa,
           }),
         }
       );
-  
+
       if (response.ok) {
         setUpdateKey(Date.now());
         setAddSubcategoryModalVisible(false);
@@ -181,14 +181,21 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
     data.map((item) => (
       <TreeNode
         title={
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ textDecoration: item.eliminado ? 'line-through' : 'none' }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span
+              style={{
+                textDecoration: item.eliminado ? "line-through" : "none",
+              }}
+            >
               {item.denominacion}
             </span>
             <Switch
               checked={!item.eliminado}
               onChange={() => handleSwitchChange(item)}
-              style={{ marginLeft: 10, backgroundColor: item.eliminado ? 'red' : 'green' }}
+              style={{
+                marginLeft: 10,
+                backgroundColor: item.eliminado ? "red" : "green",
+              }}
             />
             <Button
               onClick={() => handleEditCategory(item)}
@@ -207,7 +214,7 @@ const TablaCategoria: React.FC<CategoryInputProps> = ({ selectedEmpresa }) => {
           </div>
         }
         key={item.id}
-        style={{ color: item.eliminado ? 'gray' : 'inherit' }}
+        style={{ color: item.eliminado ? "gray" : "inherit" }}
       >
         {item.subCategoriaDtos &&
           item.subCategoriaDtos.length > 0 &&
