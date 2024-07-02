@@ -80,6 +80,21 @@ const Promociones = () => {
 
   const handleShowDetail = async (promocionId: number) => {
     const detalle = await PromocionDetalle(promocionId);
+    // Manipular la URL para obtener solo el nombre del archivo y agregar la ruta base
+    detalle.forEach((item: any) => {
+      if (
+        item.articuloManufacturadoDto.imagenes &&
+        item.articuloManufacturadoDto.imagenes.length > 0
+      ) {
+        const url = item.articuloManufacturadoDto.imagenes[0].url;
+        const parts = url.split("\\");
+        const fileName = parts[parts.length - 1];
+        item.articuloManufacturadoDto.imagenes[0].url = `http://localhost:8080/images/${fileName}`;
+        console.log(
+          "----------->" + item.articuloManufacturadoDto.imagenes[0].url
+        );
+      }
+    });
     setPromocionDetail(detalle);
     setIsModalVisible(true);
   };
@@ -171,7 +186,7 @@ const Promociones = () => {
         articuloManufacturadoDto.imagenes &&
         articuloManufacturadoDto.imagenes.length > 0 ? (
           <img
-            src={articuloManufacturadoDto.imagenes[0]}
+            src={articuloManufacturadoDto.imagenes[0].url}
             alt={articuloManufacturadoDto.denominacion}
             style={{ width: "50px" }}
           />

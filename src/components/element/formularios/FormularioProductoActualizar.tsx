@@ -21,6 +21,7 @@ import {
 } from "../../../service/ServiceInsumos";
 import TextArea from "antd/es/input/TextArea";
 import {
+  getCategoria,
   getProductoXIdBase,
   modificarProductoId,
 } from "../../../service/ServiceProducto";
@@ -58,6 +59,23 @@ const FormularioActualizarProducto: React.FC<Props> = ({
   const [images, setImages] = useState<ImageData[]>([]);
   const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
   const { getAccessTokenSilently } = useAuth0();
+  const [categoria, setCategoria] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchCategoriaSucursal = async () => {
+      try {
+        console.log("Fetching categorias for sucursalId:", sucursalId);
+        const data = await getCategoria(Number(sucursalId));
+        console.log("Categorias recibidas:", data);
+        setCategoria(data);
+      } catch (error) {
+        console.error("Error al obtener las categorias:", error);
+      }
+    };
+    if (sucursalId) {
+      fetchCategoriaSucursal();
+    }
+  }, [sucursalId]);
 
   useEffect(() => {
     const fetchUnidadesMedida = async () => {
@@ -88,17 +106,18 @@ const FormularioActualizarProducto: React.FC<Props> = ({
           tiempoEstimadoMinutos: data.tiempoEstimadoCocina,
           unidadMedida: data.unidadMedida.id,
           precioVenta: data.precioVenta,
+          categoria: data.categoria.id,
           imagen: data.imagen,
         });
         setSelectedInsumosData(
-          data.articuloManufacturadoDetalles.map((detalle: any) => ({
-            ...detalle.articuloInsumo,
+          data.articuloManufacturadoDetallesDto.map((detalle: any) => ({
+            ...detalle.articuloInsumoDto,
             cantidad: detalle.cantidad,
           }))
         );
         setSelectedInsumos(
-          data.articuloManufacturadoDetalles.map(
-            (detalle: any) => detalle.articuloInsumo.id
+          data.articuloManufacturadoDetallesDto.map(
+            (detalle: any) => detalle.articuloInsumoDto.id
           )
         );
         const imagesData = data.imagenes.map(
@@ -374,6 +393,25 @@ const FormularioActualizarProducto: React.FC<Props> = ({
               >
                 <Input style={{ width: "100%" }} />
               </Form.Item>
+              <Form.Item
+                label="Categoria"
+                name="categoria"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor, selecciona una categoria",
+                  },
+                ]}
+              >
+                <Select>
+                  {categoria.map((categoria) => (
+                    <Select.Option key={categoria.id} value={categoria.id}>
+                      {categoria.denominacion}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
               <Form.Item
                 label="Foto"
                 name="imagenes"
