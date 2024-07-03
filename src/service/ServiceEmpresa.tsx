@@ -6,6 +6,7 @@ export interface Empresas {
   razonSocial: string;
   cuil: number;
   eliminado?: boolean;
+  imagen?: string;
 }
 
 export const getEmpresas = async (): Promise<Empresas[]> => {

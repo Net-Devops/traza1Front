@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { PlusOutlined } from "@ant-design/icons";
 import {
   Button,
   Col,
@@ -8,7 +7,6 @@ import {
   Modal,
   Row,
   TimePicker,
-  Upload,
   notification,
   Select,
 } from "antd";
@@ -23,12 +21,6 @@ import {
 import { Pais, Provincia, Localidad } from "../../../service/ServiceUbicacion";
 import { useAuth0 } from "@auth0/auth0-react";
 const { Option } = Select;
-const normFile = (e: any) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
 
 interface FormularioAgregarEmpresaProps {
   onClose: () => void;
@@ -41,7 +33,9 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({
   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
   const { id } = useParams<{ id: string }>();
   const [form] = Form.useForm(); // Usar el hook useForm
-
+  const [imagenBase64, setImagenBase64] = useState<string | undefined>(
+    undefined
+  );
   const [paises, setPaises] = useState<Pais[]>([]);
   const [provincias, setProvincias] = useState<Provincia[]>([]);
   const [localidades, setLocalidades] = useState<Localidad[]>([]);
@@ -61,7 +55,22 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({
     setIsModalVisible(false);
     onClose();
   };
-
+  const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          const base64String = (reader.result as string).replace(
+            /^data:image\/\w+;base64,/,
+            ""
+          );
+          setImagenBase64(base64String);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleSubmit = async (values: any) => {
     console.log("Form submitted with values:", values); // Add log to check form values
     try {
@@ -72,7 +81,7 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({
         horaApertura: horaApertura.format("HH:mm"), // Formatear la hora de apertura
         horaCierre: horaCierre.format("HH:mm"), // Formatear la hora de cierre
         idEmpresa: id, // Ensure idEmpresa is set correctly
-        file: values.fileList?.[0]?.originFileObj || null, // Handle the file input
+        imagen: imagenBase64, // Set the image base64 string
       };
       console.log("Sucursal to create:", sucursal); // Log the sucursal object
       const token = await getAccessTokenSilently();
@@ -266,18 +275,23 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({
         </Row>
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item
-              label="Upload"
-              valuePropName="fileList"
-              getValueFromEvent={normFile}
-            >
-              <Upload listType="picture-card">
-                <button style={{ border: 0, background: "none" }} type="button">
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </button>
-              </Upload>
+            <Form.Item label="Imagen:" name="imagen">
+              <Input
+                type="file"
+                onChange={handleImagenChange}
+                accept="image/*"
+              />
             </Form.Item>
+
+            {imagenBase64 && (
+              <div style={{ marginTop: 20 }}>
+                <img
+                  src={imagenBase64}
+                  alt="Preview"
+                  style={{ maxWidth: 200 }}
+                />
+              </div>
+            )}
           </Col>
         </Row>
         <Form.Item style={{ textAlign: "right" }}>

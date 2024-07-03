@@ -88,6 +88,23 @@ const Empresa = () => {
       );
     }
   };
+  useEffect(() => {
+    getEmpresas().then((empresas) => {
+      const empresasTransformadas = empresas.map((empresa) => {
+        if (empresa.imagen) {
+          return {
+            ...empresa,
+            imagen: empresa.imagen.replace(
+              "src\\main\\resources\\images\\",
+              "http://localhost:8080/images/"
+            ),
+          };
+        }
+        return empresa;
+      });
+      setEmpresas(empresasTransformadas);
+    });
+  }, []);
 
   return (
     <div>
@@ -104,7 +121,8 @@ const Empresa = () => {
             cover={
               <img
                 alt={empresa.nombre}
-                src={imagenEmpresa}
+                // Aquí se realiza la verificación y se elige la imagen
+                src={empresa.imagen ? empresa.imagen : imagenEmpresa}
                 onClick={() =>
                   empresa.eliminado ? null : navigate(`/sucursal/${empresa.id}`)
                 }

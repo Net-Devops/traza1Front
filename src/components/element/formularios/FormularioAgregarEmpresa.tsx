@@ -1,15 +1,8 @@
 import { useState } from "react";
-import { PlusOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Modal, Upload } from "antd";
+
+import { Button, Form, Input, Modal } from "antd";
 import { crearEmpresa } from "../../../service/ServiceEmpresa";
 import { useAuth0 } from "@auth0/auth0-react";
-
-const normFile = (e: any) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
 
 interface FormularioAgregarEmpresaProps {
   onClose: () => void;
@@ -21,7 +14,9 @@ const FormularioAgregarEmpresa: React.FC<FormularioAgregarEmpresaProps> = ({
   const [componentDisabled] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
   const { getAccessTokenSilently } = useAuth0();
-
+  const [imagenBase64, setImagenBase64] = useState<string | undefined>(
+    undefined
+  );
   const handleOk = () => {
     setIsModalVisible(false);
     onClose();
@@ -30,6 +25,22 @@ const FormularioAgregarEmpresa: React.FC<FormularioAgregarEmpresaProps> = ({
   const handleCancel = () => {
     setIsModalVisible(false);
     onClose();
+  };
+  const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          const base64String = (reader.result as string).replace(
+            /^data:image\/\w+;base64,/,
+            ""
+          );
+          setImagenBase64(base64String);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (values: any) => {
@@ -67,18 +78,15 @@ const FormularioAgregarEmpresa: React.FC<FormularioAgregarEmpresaProps> = ({
         <Form.Item label="Cuit" name="cuil">
           <Input />
         </Form.Item>
-        <Form.Item
-          label="Upload"
-          valuePropName="fileList"
-          getValueFromEvent={normFile}
-        >
-          <Upload action="/upload.do" listType="picture-card">
-            <button style={{ border: 0, background: "none" }} type="button">
-              <PlusOutlined />
-              <div style={{ marginTop: 8 }}>Upload</div>
-            </button>
-          </Upload>
+        <Form.Item label="Imagen:" name="imagen">
+          <Input type="file" onChange={handleImagenChange} accept="image/*" />
         </Form.Item>
+
+        {imagenBase64 && (
+          <div style={{ marginTop: 20 }}>
+            <img src={imagenBase64} alt="Preview" style={{ maxWidth: 200 }} />
+          </div>
+        )}
         <Form.Item style={{ textAlign: "right" }}>
           <Button
             type="default"

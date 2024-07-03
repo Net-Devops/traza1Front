@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { PlusOutlined } from "@ant-design/icons";
 import {
   Button,
   Col,
@@ -8,7 +7,6 @@ import {
   Modal,
   Row,
   TimePicker,
-  Upload,
   notification,
   Select,
 } from "antd";
@@ -28,12 +26,6 @@ import { Pais, Provincia, Localidad } from "../../../service/ServiceUbicacion";
 import moment from "moment";
 import { useAuth0 } from "@auth0/auth0-react";
 const { Option } = Select;
-const normFile = (e: any) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
 
 interface FormularioEditarSucursalProps {
   visible: boolean;
@@ -53,7 +45,26 @@ const FormularioEditarSucursal: React.FC<FormularioEditarSucursalProps> = ({
   const [provincias, setProvincias] = useState<Provincia[]>([]);
   const [localidades, setLocalidades] = useState<Localidad[]>([]);
   const [, setSucursal] = useState<SucursalInterface | null>(null);
+  const [nuevaImagenBase64, setNuevaImagenBase64] = useState<string | null>(
+    null
+  );
 
+  const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          const base64String = (reader.result as string).replace(
+            /^data:image\/\w+;base64,/,
+            ""
+          );
+          setNuevaImagenBase64(base64String);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       const [paisData, provinciaData, localidadData, sucursalData] =
@@ -79,6 +90,7 @@ const FormularioEditarSucursal: React.FC<FormularioEditarSucursalProps> = ({
         numero: sucursalData.domicilio.numero,
         cp: sucursalData.domicilio.cp,
         empresaId: sucursalData.empresa.id,
+        imagen: sucursalData.imagen,
       });
     };
 
@@ -106,7 +118,7 @@ const FormularioEditarSucursal: React.FC<FormularioEditarSucursalProps> = ({
         horaApertura: horaApertura.format("HH:mm"),
         horaCierre: horaCierre.format("HH:mm"),
         idEmpresa: sucursalId,
-        file: values.fileList?.[0]?.originFileObj || null,
+        imagen: nuevaImagenBase64,
       };
       const token = await getAccessTokenSilently();
       await actualizarSucursal(sucursalId!, updatedSucursal, token);
@@ -301,18 +313,29 @@ const FormularioEditarSucursal: React.FC<FormularioEditarSucursalProps> = ({
         </Row>
 
         <Col span={12}>
-          <Form.Item
-            label="Imágen"
-            name="fileList"
-            valuePropName="fileList"
-            getValueFromEvent={normFile}
-          >
-            <Upload listType="picture-card">
-              <button style={{ border: 0, background: "none" }} type="button">
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Upload</div>
-              </button>
-            </Upload>
+          <Form.Item label="Imagen:">
+            {nuevaImagenBase64 && (
+              <img
+                src={nuevaImagenBase64}
+                alt="Nueva imagen de la promoción"
+                style={{ maxWidth: "100%", marginBottom: 10 }}
+              />
+            )}
+            {!nuevaImagenBase64 && form.getFieldValue("imagen") && (
+              <img
+                src={`data:image/jpeg;base64,${form.getFieldValue("imagen")}`}
+                alt="Imagen de la promoción"
+                style={{ maxWidth: "100%", marginBottom: 10 }}
+              />
+            )}
+          </Form.Item>
+          <Form.Item label="Cargar Nueva Imagen:">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImagenChange(e)}
+              style={{ marginBottom: 10 }}
+            />
           </Form.Item>
         </Col>
 
