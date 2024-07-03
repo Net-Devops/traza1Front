@@ -40,7 +40,12 @@ const EmpleadoProfileCard = () => {
       style={{ width: 300, margin: "20px auto" }}
       cover={
         empleado?.imagen ? (
-          <img alt="Empleado" src={empleado.imagen} />
+          <img
+            alt="Empleado"
+            src={`http://localhost:8080/images/${empleado.imagen
+              .split("\\")
+              .pop()}`}
+          />
         ) : (
           <Avatar size={300} src={<img src={avatarImage} alt="Avatar" />} />
         )

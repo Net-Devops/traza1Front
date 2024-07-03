@@ -7,6 +7,7 @@ import Highlighter from "react-highlight-words";
 import { Empleado, getEmpleados } from "../../../service/EmpleadoService";
 import FormularioEmpleadoModificar from "../formularios/FormularioEmpleadoModificar";
 import { useAuth0 } from "@auth0/auth0-react";
+import userImage from "../../../assets/user_imagen.jpg";
 
 type DataIndex = keyof Empleado;
 type TablaEmpleadosProps = {
@@ -175,13 +176,13 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
       title: "Imagen",
       dataIndex: "imagen",
       key: "imagen",
-      render: (text) => (
-        <img
-          src={`http://localhost:8080/images/${text}`}
-          style={{ width: "50px" }}
-          alt="Empleado"
-        />
-      ),
+      render: (text) => {
+        const defaultImage = "http://localhost:8080/images/default.jpg"; // URL de tu imagen por defecto
+        const imageUrl = text
+          ? `http://localhost:8080/images/${text.split("\\").pop()}`
+          : userImage || defaultImage;
+        return <img src={imageUrl} style={{ width: "50px" }} alt="Empleado" />;
+      },
     },
     {
       title: "Nombre",

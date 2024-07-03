@@ -1,14 +1,7 @@
-import {
-  Modal,
-  Form,
-  Input,
-  Button,
-  Upload,
-  UploadFile,
-  notification,
-} from "antd";
-import { PlusOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { Modal, Form, Input, Button, notification } from "antd";
+import { CheckCircleOutlined } from "@ant-design/icons";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useState } from "react";
 
 interface Props {
   visible: boolean;
@@ -28,38 +21,41 @@ const FormularioEmpleado: React.FC<Props> = ({
 }) => {
   const [form] = Form.useForm();
   const { getAccessTokenSilently } = useAuth0();
+  const [nuevaImagenBase64, setNuevaImagenBase64] = useState<string | null>(
+    null
+  );
+
+  const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          const base64String = (reader.result as string).replace(
+            /^data:image\/\w+;base64,/,
+            ""
+          );
+          setNuevaImagenBase64(base64String);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleButtonClick = async (values: any) => {
     console.log("Received values of form: ", values);
     const formattedValues = { ...values };
-    let promises: Promise<{ url: string }>[] = [];
 
     formattedValues.sucursal = {
       id: sucursalId,
       denominacion: "", // You might want to fill this with actual data if available
     };
     if (values.imagenes) {
-      const files: UploadFile[] = values.imagenes;
-
-      promises = files.map((file) => {
-        return new Promise<{ url: string }>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64String = (reader.result as string).replace(
-              /^data:image\/\w+;base64,/,
-              ""
-            );
-            resolve({ url: base64String });
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(file.originFileObj as File);
-        });
-      });
+      values.imagen = nuevaImagenBase64;
     }
 
     try {
       const token = await getAccessTokenSilently();
-      const imagenes = await Promise.all(promises);
-      formattedValues.imagenes = imagenes;
+      formattedValues.imagen = nuevaImagenBase64;
 
       let url = `http://localhost:8080/api/empleado/`;
       let method = "POST";
@@ -94,25 +90,6 @@ const FormularioEmpleado: React.FC<Props> = ({
     } catch (error) {
       console.error("Error: ", error);
     }
-  };
-
-  const normFile = (e: any) => {
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return (
-      e &&
-      e.fileList.map((file: any) => {
-        if (file.originFileObj) {
-          const reader = new FileReader();
-          reader.readAsDataURL(file.originFileObj);
-          reader.onloadend = () => {
-            file.url = reader.result as string;
-          };
-        }
-        return file;
-      })
-    );
   };
 
   return (
@@ -191,22 +168,29 @@ const FormularioEmpleado: React.FC<Props> = ({
           >
             <Input style={{ width: "100%" }} />
           </Form.Item>
-          <Form.Item
-            label="Foto"
-            name="imagenes"
-            valuePropName="fileList"
-            getValueFromEvent={normFile}
-          >
-            <Upload
-              action="/upload.do"
-              listType="picture-card"
-              beforeUpload={() => false}
-            >
-              <button style={{ border: 0, background: "none" }} type="button">
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Foto</div>
-              </button>
-            </Upload>
+          <Form.Item label="Imagen:">
+            {nuevaImagenBase64 && (
+              <img
+                src={nuevaImagenBase64}
+                alt="Nueva imagen de la promoción"
+                style={{ maxWidth: "100%", marginBottom: 10 }}
+              />
+            )}
+            {!nuevaImagenBase64 && form.getFieldValue("imagen") && (
+              <img
+                src={`data:image/jpeg;base64,${form.getFieldValue("imagen")}`}
+                alt="Imagen de la promoción"
+                style={{ maxWidth: "100%", marginBottom: 10 }}
+              />
+            )}
+          </Form.Item>
+          <Form.Item label="Cargar Nueva Imagen:">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImagenChange(e)}
+              style={{ marginBottom: 10 }}
+            />
           </Form.Item>
         </div>
 
