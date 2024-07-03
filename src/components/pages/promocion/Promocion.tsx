@@ -90,9 +90,6 @@ const Promociones = () => {
         const parts = url.split("\\");
         const fileName = parts[parts.length - 1];
         item.articuloManufacturadoDto.imagenes[0].url = `http://localhost:8080/images/${fileName}`;
-        console.log(
-          "----------->" + item.articuloManufacturadoDto.imagenes[0].url
-        );
       }
     });
     setPromocionDetail(detalle);
@@ -119,11 +116,10 @@ const Promociones = () => {
     try {
       const token = await getAccessTokenSilently();
       const response = await savePromocion(values, token);
-      if (response) {
-        console.log("Promoción guardada con éxito:", response);
-        setIsFormVisible(false); // Cierra el formulario si se guarda con éxito
-        handleSucursalChange(selectedSucursalId.toString()); // Recarga las promociones
-      }
+
+      console.log("Promoción guardada con éxito:", response);
+      setIsFormVisible(false); // Cierra el formulario si se guarda con éxito
+      await handleSucursalChange(selectedSucursalId.toString()); // Recarga las promociones
     } catch (error) {
       console.error("Error al guardar la promoción:", error);
     }
@@ -167,11 +163,10 @@ const Promociones = () => {
         },
         token
       );
-      if (response) {
-        console.log("Promoción actualizada con éxito:", response);
-        setIsUpdateFormVisible(false); // Cierra el formulario si se actualiza con éxito
-        handleSucursalChange(selectedSucursalId.toString()); // Recarga las promociones
-      }
+
+      console.log("Promoción actualizada con éxito:", response);
+      setIsUpdateFormVisible(false); // Cierra el formulario si se actualiza con éxito
+      handleSucursalChange(selectedSucursalId.toString()); // Recarga las promociones
     } catch (error) {
       console.error("Error al actualizar la promoción:", error);
     }
@@ -360,7 +355,7 @@ const Promociones = () => {
       <FormularioPromocion
         visible={isFormVisible}
         onCancel={() => setIsFormVisible(false)}
-        onSubmit={handleSubmitPromocion}
+        onSubmit={handleSubmitPromocion} // Aquí pasamos la función handleSubmitPromocion
         initialValues={undefined}
         tiposPromocion={[]}
         selectedSucursalId={selectedSucursalId}

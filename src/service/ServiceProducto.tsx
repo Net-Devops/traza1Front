@@ -71,7 +71,9 @@ export async function crearManufacturado(
       mode: "cors",
       body: JSON.stringify({
         codigo: "M-" + formData.codigo,
-        categoria: formData.categoria,
+        categoria: {
+          id: formData.categoria.id,
+        },
         denominacion: formData.denominacion,
         descripcion: formData.descripcion || "sin descripcion",
         precioVenta: formData.precioVenta,
@@ -149,7 +151,12 @@ export async function modificarProductoId(
     console.log("estoy en el fetc");
     console.log("data" + formData);
     console.log("id:" + id);
-
+    console.log(
+      "----------------->" +
+        formData.categoria.id +
+        "---------" +
+        formData.categoria
+    );
     const urlServer = `http://localhost:8080/api/articulos/manufacturados/${id}`;
     const response = await fetch(urlServer, {
       method: "PUT",
@@ -171,6 +178,7 @@ export async function modificarProductoId(
         preparacion: formData.preparacion || "sin preparacion",
         sucursal: formData.sucursal,
         articuloManufacturadoDetalles: formData.articuloManufacturadoDetalles,
+        categoria: formData.categoria,
       }),
     });
 

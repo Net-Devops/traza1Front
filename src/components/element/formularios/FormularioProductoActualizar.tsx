@@ -106,7 +106,7 @@ const FormularioActualizarProducto: React.FC<Props> = ({
           tiempoEstimadoMinutos: data.tiempoEstimadoCocina,
           unidadMedida: data.unidadMedida.id,
           precioVenta: data.precioVenta,
-          categoria: data.categoria.id,
+          categoria: data.categoria,
           imagen: data.imagen,
         });
         setSelectedInsumosData(

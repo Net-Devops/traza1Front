@@ -29,9 +29,10 @@ type DataIndex = keyof DataType;
 interface Props {
   empresaId: string;
   sucursalId: string;
+  onReload: () => void; // Agregar el callback onReload
 }
 
-const App: React.FC<Props> = ({ sucursalId }) => {
+const App: React.FC<Props> = ({ sucursalId, onReload }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
@@ -274,11 +275,15 @@ const App: React.FC<Props> = ({ sucursalId }) => {
       {showFormularioProducto && selectedProducto && (
         <FormularioActualizarProducto
           visible={showFormularioProducto}
-          onClose={() => setShowFormularioProducto(false)}
+          onClose={() => {
+            setShowFormularioProducto(false);
+            onReload(); // Llamar al callback para recargar los productos
+          }}
           onSubmit={(values) => {
             // Handle the submit action
             console.log("Submitted values:", values);
             setShowFormularioProducto(false);
+            onReload(); // Llamar al callback para recargar los productos
           }}
           initialValues={selectedProducto}
           sucursalId={sucursalId}

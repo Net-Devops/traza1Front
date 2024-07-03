@@ -97,6 +97,7 @@ const App: React.FC = () => {
       if (isCocinero) {
         if (
           item?.key === "2" ||
+          item?.key === "12" ||
           item?.key === "10" ||
           item?.key === "sub2" ||
           item?.key === "8"

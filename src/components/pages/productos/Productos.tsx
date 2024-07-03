@@ -14,6 +14,7 @@ export default function Productos() {
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
   const [selectedSucursal, setSelectedSucursal] = useState("");
   const [disableSelection, setDisableSelection] = useState(false);
+  const [reloadProductos, setReloadProductos] = useState(false);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -53,11 +54,17 @@ export default function Productos() {
     setShowFormularioProducto(false);
   };
 
-  const handleFormSubmit = (values: any) => {
-    // Implementa la lógica para manejar el envío del formulario
+  const handleFormSubmit = async (values: any) => {
     console.log(values);
+    setReloadProductos(true);
     closeFormularioProducto();
   };
+
+  useEffect(() => {
+    if (reloadProductos) {
+      setReloadProductos(false);
+    }
+  }, [reloadProductos]);
 
   return (
     <div>
@@ -125,8 +132,10 @@ export default function Productos() {
       <div>
         {selectedSucursal ? (
           <TablaProductos
+            key={reloadProductos ? "reload" : "normal"}
             empresaId={selectedEmpresa}
             sucursalId={selectedSucursal}
+            onReload={() => setReloadProductos(true)} // Pasar callback
           />
         ) : (
           <p>Por favor, seleccione la sucursal para ver los productos.</p>
