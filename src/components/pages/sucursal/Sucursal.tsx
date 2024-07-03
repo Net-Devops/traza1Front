@@ -29,6 +29,19 @@ const Sucursal = () => {
   const [currentSucursal, setCurrentSucursal] =
     useState<sucursalInterface | null>(null);
 
+  const cargarDatosSucursal = async () => {
+    try {
+      const response = await getSucursalId(Number(id));
+      setSucursales(response);
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+      setSucursales([]);
+    }
+  };
+  useEffect(() => {
+    cargarDatosSucursal();
+  }, [id]);
+
   const handleSwitchChange = async (
     checked: boolean,
     sucursalId: string | number | undefined
@@ -101,10 +114,25 @@ const Sucursal = () => {
     }
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = async () => {
     setIsModalVisible(false);
     setCurrentSucursal(null);
+    await cargarDatosSucursal(); // Recargar los datos después de cerrar el modal de edición
   };
+  useEffect(() => {
+    const cargarDatosSucursal = async () => {
+      try {
+        const response = await getSucursalId(Number(id));
+        console.log(response);
+        setSucursales(response);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+        setSucursales([]);
+      }
+    };
+
+    cargarDatosSucursal();
+  }, [id]);
 
   return (
     <div>
@@ -121,7 +149,16 @@ const Sucursal = () => {
                 cover={
                   <img
                     alt={sucursal.nombre}
-                    src={imagenSucursal}
+                    src={
+                      sucursal.imagen
+                        ? sucursal.imagen
+                            .replace(
+                              /src\\main\\resources\\images\\/g,
+                              "http://localhost:8080/images/"
+                            )
+                            .replace(/\\/g, "/")
+                        : imagenSucursal
+                    }
                     onClick={() => handleCardClick(sucursal)}
                   />
                 }

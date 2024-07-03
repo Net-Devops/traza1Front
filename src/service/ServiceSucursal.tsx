@@ -7,7 +7,7 @@ export interface Sucursal {
   calle: string;
   cp: string;
   numero: string;
-  localidad: string;
+  localidad?: string;
   provincia: string;
   pais: string;
   imagen?: string; // Añadido opcional

@@ -78,10 +78,17 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({
       const sucursal: Sucursal = {
         ...rest,
         empresa: { id },
-        horaApertura: horaApertura.format("HH:mm"), // Formatear la hora de apertura
-        horaCierre: horaCierre.format("HH:mm"), // Formatear la hora de cierre
-        idEmpresa: id, // Ensure idEmpresa is set correctly
-        imagen: imagenBase64, // Set the image base64 string
+        horaApertura: horaApertura.format("HH:mm"),
+        horaCierre: horaCierre.format("HH:mm"),
+        idEmpresa: id,
+        imagen: imagenBase64,
+        calle: values.calle,
+        cp: values.cp,
+        numero: values.numero,
+        localidad: values.localidad,
+        provincia: values.provincia,
+        pais: values.pais,
+        nombre: values.nombre,
       };
       console.log("Sucursal to create:", sucursal); // Log the sucursal object
       const token = await getAccessTokenSilently();
@@ -91,7 +98,8 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({
         description: "Sucursal agregada correctamente",
       });
       handleOk();
-      window.location.reload();
+      cargarDatos();
+      //window.location.reload();
     } catch (error) {
       console.error("Error creating sucursal:", error); // Log the error
       notification.error({
@@ -100,6 +108,17 @@ const FormularioAgregarSucursal: React.FC<FormularioAgregarEmpresaProps> = ({
       });
     }
   };
+  const cargarDatos = async () => {
+    const paisesData = await getPais();
+    setPaises(paisesData);
+    const provinciasData = await getProvincia();
+    setProvincias(provinciasData);
+    const localidadesData = await getLocalidad();
+    setLocalidades(localidadesData);
+  };
+  useEffect(() => {
+    cargarDatos();
+  }, []);
 
   return (
     <Modal

@@ -119,6 +119,13 @@ const FormularioEditarSucursal: React.FC<FormularioEditarSucursalProps> = ({
         horaCierre: horaCierre.format("HH:mm"),
         idEmpresa: sucursalId,
         imagen: nuevaImagenBase64,
+        pais: values.pais,
+        provincia: values.provincia,
+        localidad: values.localidad,
+        calle: values.calle,
+        numero: values.numero,
+        cp: values.cp,
+        nombre: values.nombre,
       };
       const token = await getAccessTokenSilently();
       await actualizarSucursal(sucursalId!, updatedSucursal, token);
@@ -127,7 +134,8 @@ const FormularioEditarSucursal: React.FC<FormularioEditarSucursalProps> = ({
         description: "Sucursal actualizada correctamente",
       });
       handleOk();
-      window.location.reload();
+      cargarDatos();
+      //window.location.reload();
     } catch (error) {
       console.error("Error updating sucursal:", error);
       notification.error({
@@ -136,7 +144,18 @@ const FormularioEditarSucursal: React.FC<FormularioEditarSucursalProps> = ({
       });
     }
   };
+  const cargarDatos = async () => {
+    const paisesData = await getPais();
+    setPaises(paisesData);
+    const provinciasData = await getProvincia();
+    setProvincias(provinciasData);
+    const localidadesData = await getLocalidad();
+    setLocalidades(localidadesData);
+  };
 
+  useEffect(() => {
+    cargarDatos();
+  }, []);
   return (
     <Modal
       title="Editar Sucursal"
