@@ -51,6 +51,9 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
     null
   );
   const { getAccessTokenSilently } = useAuth0();
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const forceReload = () => setReloadKey((prevKey) => prevKey + 1);
 
   const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
@@ -81,7 +84,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
 
   useEffect(() => {
     if (promocionId) {
-      setNuevaImagenBase64(null); // Reinicia la imagen nueva al cargar una nueva promoción
+      setNuevaImagenBase64(null);
       fetchPromocionById(promocionId).then((data) => {
         form.setFieldsValue({
           denominacion: data.denominacion,
@@ -91,8 +94,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
           horaHasta: dayjs(data.horaHasta, "HH:mm"),
           descripcionDescuento: data.descripcionDescuento,
           precioPromocional: data.precioPromocional,
-          tipoPromocion: data.tipoPromocion,
-          imagen: data.imagen, // Asegura que el campo imagen se actualice con la imagen actual
+          imagen: data.imagen,
         });
         setSelectedArticulosData(
           data.promocionDetallesDto.map((detalle: any) => ({
@@ -106,8 +108,10 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
           )
         );
       });
+    } else {
+      form.resetFields();
     }
-  }, [promocionId]);
+  }, [promocionId, reloadKey]); // Paso 3: Agregar reloadKey a las dependencias
 
   const handleCantidadChange = (id: string, cantidad: number) => {
     setSelectedArticulosData((prevState) =>
@@ -150,6 +154,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
       await eliminarDetallesPromocion(promocionId!, token);
       await actualizarPromocion(promocionId!, promocionData, token);
       form.resetFields(); // Limpia los campos del formulario
+      forceReload();
       onCancel();
       onSubmit(promocionData); // Asegúrate de llamar a onSubmit aquí
     } catch (error) {
@@ -203,6 +208,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
 
   const handleCancel = () => {
     form.resetFields(); // Limpia los campos del formulario
+    forceReload();
     onCancel();
   };
 
