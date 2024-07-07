@@ -19,11 +19,13 @@ type TablaInsumoProps = {
   empresaId: string;
   sucursalId: string;
   updateTabla: boolean;
+  reload: boolean;
 };
 
 const TablaInsumo: React.FC<TablaInsumoProps> = ({
   sucursalId,
   updateTabla,
+  reload,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -40,7 +42,7 @@ const TablaInsumo: React.FC<TablaInsumoProps> = ({
   const { getAccessTokenSilently } = useAuth0();
   useEffect(() => {
     fetchData();
-  }, [sucursalId, updateTabla]);
+  }, [sucursalId, updateTabla, reload]);
 
   const fetchData = async () => {
     console.log("Obteniendo insumos de la sucursal:", sucursalId);

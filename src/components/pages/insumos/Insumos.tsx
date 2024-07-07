@@ -16,7 +16,8 @@ const Insumos = () => {
   const [selectedEmpresa, setSelectedEmpresa] = useState<string>("");
   const [selectedSucursal, setSelectedSucursal] = useState<string>("");
   const [isDisabled, setIsDisabled] = useState(false);
-  const [updateTabla, setUpdateTabla] = useState(false); // Estado para controlar la actualización
+  const [updateTabla, setUpdateTabla] = useState(false);
+  const [reloadTable, setReloadTable] = useState(false);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -55,6 +56,9 @@ const Insumos = () => {
   const closeFormularioInsumo = () => {
     setShowFormularioInsumo(false);
     setUpdateTabla(true); // Actualizar la tabla al cerrar el formulario
+  };
+  const handleFormSubmit = () => {
+    setReloadTable(!reloadTable); // Cambiar el estado para recargar la tabla
   };
 
   return (
@@ -119,6 +123,7 @@ const Insumos = () => {
           onClose={closeFormularioInsumo}
           empresaId={selectedEmpresa}
           sucursalId={selectedSucursal}
+          onSubmit={handleFormSubmit}
         />
       )}
       <div>
@@ -127,6 +132,7 @@ const Insumos = () => {
             empresaId={selectedEmpresa}
             sucursalId={selectedSucursal}
             updateTabla={updateTabla}
+            reload={reloadTable}
           />
         ) : (
           <p>Por favor, seleccione la sucursal para ver los insumos.</p>

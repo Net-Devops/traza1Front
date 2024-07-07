@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { PlusOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -13,7 +13,6 @@ import {
   Upload,
   notification,
 } from "antd";
-
 import { UploadFile } from "antd/es/upload/interface";
 import {
   crearInsumo,
@@ -23,8 +22,10 @@ import {
 import { getSucursal, Sucursal } from "../../../service/ServiceSucursal";
 import { crearManufacturado } from "../../../service/ServiceProducto";
 import { useAuth0 } from "@auth0/auth0-react";
+
 interface FormularioInsumoProps {
   onClose: () => void;
+  onSubmit: (values: any) => void;
   empresaId: string;
   sucursalId: string;
 }
@@ -33,10 +34,11 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
   onClose,
   empresaId,
   sucursalId,
+  onSubmit,
 }) => {
   const [form] = Form.useForm();
   const [isModalVisible] = useState(true);
-  const [, setIsSwitchOn] = useState(false);
+  const [isParaElaborar, setIsParaElaborar] = useState(false); // Estado para controlar si es para elaborar
   const [unidadesMedida, setUnidadesMedida] = useState<unidadMedida[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const { getAccessTokenSilently } = useAuth0();
@@ -103,8 +105,11 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
       const token = await getAccessTokenSilently();
       const imagenes = await Promise.all(promises);
       formattedValues.imagenes = imagenes;
+      if (isParaElaborar) {
+        formattedValues.precioVenta = 0;
+      }
 
-      let response; // Declaración de la variable fuera del bloque condicional
+      let response;
       if (values.esParaElaborar) {
         response = await crearInsumo(formattedValues, token);
       } else {
@@ -120,9 +125,9 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
         response = await crearManufacturado(formattedValues, token);
       }
       console.log("Response: ", response);
+      onSubmit(values);
       form.resetFields();
       onClose();
-      // window.location.reload(); // Considera recargar los datos de manera más eficiente si es necesario
 
       notification.open({
         message: (
@@ -136,8 +141,9 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
       console.error("Error: ", error);
     }
   };
+
   const handleSwitchChange = (checked: boolean) => {
-    setIsSwitchOn(checked);
+    setIsParaElaborar(checked);
   };
 
   const normFile = (e: any) => {
@@ -158,10 +164,6 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
       })
     );
   };
-
-  // function getFieldValue(arg0: string) {
-  //     throw new Error('Function not implemented.');
-  // }
 
   return (
     <Modal
@@ -184,7 +186,7 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
           stockMaximo: 0,
           stockMinimo: 0,
           precioCompra: 0,
-          precioVenta: 0,
+          precioVenta: isParaElaborar ? 0 : undefined,
           unidadMedida: "",
           sucursal: sucursalId,
           esParaElaborar: false,
@@ -280,8 +282,6 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
                 </Form.Item>
               </Col>
               <Col span={12}>
-                {" "}
-                {/* Ajusta el ancho de la columna con `span` */}
                 <Form.Item
                   label="Stock máximo"
                   name="stockMaximo"
@@ -334,11 +334,7 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
               <InputNumber style={{ width: "100%" }} min={0} />
             </Form.Item>
             <Row gutter={16}>
-              {" "}
-              {/* Ajusta el espacio entre columnas con `gutter` */}
               <Col span={12}>
-                {" "}
-                {/* Ajusta el ancho de la columna con `span` */}
                 <Form.Item
                   label="Precio de compra"
                   name="precioCompra"
@@ -355,34 +351,37 @@ const FormularioInsumo: React.FC<FormularioInsumoProps> = ({
                 </Form.Item>
               </Col>
               <Col span={12}>
-                {" "}
-                {/* Ajusta el ancho de la columna con `span` */}
                 <Form.Item
                   label="Precio de venta"
                   name="precioVenta"
                   rules={[
-                    {
-                      required: true,
-                      message:
-                        "El precio de venta debe ser mayor al precio de compra",
-                      type: "number",
-                      min: 0,
-                    },
                     ({ getFieldValue }) => ({
                       validator(_, value) {
-                        if (value > getFieldValue("precioCompra")) {
+                        if (getFieldValue("esParaElaborar")) {
                           return Promise.resolve();
                         }
-                        return Promise.reject(
-                          new Error(
-                            "El precio de venta debe ser mayor al precio de compra"
-                          )
-                        );
+                        if (!value) {
+                          return Promise.reject(
+                            new Error("Por favor ingresa el precio de venta")
+                          );
+                        }
+                        if (value <= getFieldValue("precioCompra")) {
+                          return Promise.reject(
+                            new Error(
+                              "El precio de venta debe ser mayor al precio de compra"
+                            )
+                          );
+                        }
+                        return Promise.resolve();
                       },
                     }),
                   ]}
                 >
-                  <InputNumber style={{ width: "100%" }} min={0} />
+                  <InputNumber
+                    style={{ width: "100%" }}
+                    min={0}
+                    disabled={isParaElaborar}
+                  />
                 </Form.Item>
               </Col>
             </Row>
