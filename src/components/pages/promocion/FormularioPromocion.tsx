@@ -122,6 +122,7 @@ const FormularioPromocion: React.FC<Props> = ({
       form.resetFields(); // Limpia los campos del formulario
       setImagenBase64(undefined);
       onCancel();
+      onSubmit(promocionData);
     } catch (error) {
       console.error("Error al guardar la promoción:", error);
     }

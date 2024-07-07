@@ -19,7 +19,7 @@ import {
   fetchPromocionById,
   actualizarPromocion,
   Promocion,
-  eliminarDetallesPromocion,
+  //eliminarDetallesPromocion,
 } from "../../../service/PromocionService";
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -151,7 +151,7 @@ const FormularioActualizacionPromocion: React.FC<Props> = ({
         })),
       };
       const token = await getAccessTokenSilently();
-      await eliminarDetallesPromocion(promocionId!, token);
+      //await eliminarDetallesPromocion(promocionId!, token);
       await actualizarPromocion(promocionId!, promocionData, token);
       form.resetFields(); // Limpia los campos del formulario
       forceReload();

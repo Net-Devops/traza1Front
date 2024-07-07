@@ -180,7 +180,7 @@ export const fetchPromocionById = async (promocionId: number) => {
 
 export const actualizarPromocion = async (
   id: number,
-  promocion: any,
+  promocion: Promocion,
   token: string
 ) => {
   const response = await fetch(`http://localhost:8080/api/promociones/${id}`, {

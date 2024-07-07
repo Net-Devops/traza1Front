@@ -13,10 +13,11 @@ import {
 import FormularioPromocion from "./FormularioPromocion";
 import FormularioActualizacionPromocion from "./FormularioActualizacion"; // Importar el formulario de actualización
 import {
-  savePromocion,
+  //savePromocion,
   eliminacionLogica,
 } from "../../../service/PromocionService";
 import { useAuth0 } from "@auth0/auth0-react";
+import sinImagen from "../../../assets/sin-imagen.jpg";
 
 const { Option } = Select;
 
@@ -112,12 +113,11 @@ const Promociones = () => {
     }
   };
 
-  const handleSubmitPromocion = async (values: any) => {
+  const handleSubmitPromocion = async () => {
     try {
-      const token = await getAccessTokenSilently();
-      const response = await savePromocion(values, token);
-
-      console.log("Promoción guardada con éxito:", response);
+      //const token = await getAccessTokenSilently();
+      //const response = await savePromocion(values, token);
+      //console.log("Promoción guardada con éxito:", response);
       setIsFormVisible(false); // Cierra el formulario si se guarda con éxito
       await handleSucursalChange(selectedSucursalId.toString()); // Recarga las promociones
     } catch (error) {
@@ -153,18 +153,8 @@ const Promociones = () => {
     setIsUpdateFormVisible(true); // Muestra el formulario de actualización
   };
 
-  const handleUpdatePromotion = async (values: any) => {
+  const handleUpdatePromotion = async () => {
     try {
-      const token = await getAccessTokenSilently();
-      const response = await savePromocion(
-        {
-          ...values,
-          id: selectedPromocionId,
-        },
-        token
-      );
-
-      console.log("Promoción actualizada con éxito:", response);
       setIsUpdateFormVisible(false); // Cierra el formulario si se actualiza con éxito
       handleSucursalChange(selectedSucursalId.toString()); // Recarga las promociones
     } catch (error) {
@@ -186,7 +176,7 @@ const Promociones = () => {
             style={{ width: "50px" }}
           />
         ) : (
-          "No image"
+          <img src={sinImagen} alt="Sin imagen" style={{ width: "50px" }} />
         ),
     },
     {
