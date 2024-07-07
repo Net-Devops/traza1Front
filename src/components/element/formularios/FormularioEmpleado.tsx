@@ -11,8 +11,6 @@ import {
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { RolEmpleado } from "../../../types/usuario/Usuario";
-import CryptoJS from "crypto-js";
-import { useAuth0 } from "@auth0/auth0-react";
 
 interface Props {
   visible: boolean;
@@ -27,11 +25,11 @@ const FormularioEmpleado: React.FC<Props> = ({
   onClose,
   initialValues,
   sucursalId,
+  onSubmit,
 }) => {
   const [imagenBase64, setImagenBase64] = useState<string | undefined>(
     undefined
   );
-  const { getAccessTokenSilently } = useAuth0();
   const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
@@ -51,44 +49,24 @@ const FormularioEmpleado: React.FC<Props> = ({
 
   const handleButtonClick = async (values: any) => {
     console.log("Received values of form: ", values);
+    const formattedValues = { ...values };
 
-    // Encriptar la contraseña
-    const encryptedPassword = CryptoJS.SHA256(values.apellido).toString();
-
-    // Preparar los valores formateados para la solicitud
-    const formattedValues = {
-      username: values.email,
-      password: encryptedPassword,
-      empleado: {
-        nombre: values.nombre,
-        apellido: values.apellido,
-        telefono: values.telefono,
-        email: values.email,
-        rol: values.rol,
-        imagen: imagenBase64,
-        fechaNacimiento: values.fechaNacimiento.format("YYYY-MM-DD"),
-        sucursal: {
-          id: sucursalId,
-        },
-        // imagen: imagenBase64, // Descomenta y ajusta según sea necesario
-        // Añade otros campos específicos de empleado si es necesario
-      },
+    formattedValues.sucursal = {
+      id: sucursalId,
+      denominacion: "", // You might want to fill this with actual data if available
     };
 
     try {
+      formattedValues.imagen = imagenBase64;
+
       // Realizar la petición POST a la API
-      const token = await getAccessTokenSilently();
-      const response = await fetch(
-        "http://localhost:8080/api/usuario/registro/usuario-empleado",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formattedValues),
-        }
-      );
+      const response = await fetch("http://localhost:8080/api/empleado/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formattedValues),
+      });
 
       if (response.ok) {
         notification.open({
@@ -99,9 +77,9 @@ const FormularioEmpleado: React.FC<Props> = ({
             </span>
           ),
         });
+        onSubmit(values);
         form.resetFields();
-        setImagenBase64(undefined);
-        onClose(); // Asegúrate de que esta función esté definida y haga lo que esperas (por ejemplo, cerrar un modal)
+        onClose();
       } else {
         throw new Error("Error en la solicitud");
       }
@@ -174,6 +152,14 @@ const FormularioEmpleado: React.FC<Props> = ({
           >
             <Input style={{ width: "100%" }} />
           </Form.Item>
+          <Form.Item
+            name="fechaNacimiento"
+            label="Fecha de Nacimiento"
+            rules={[{ required: true }]}
+          >
+            <DatePicker />
+          </Form.Item>
+
           <Form.Item name="rol" label="Rol" rules={[{ required: true }]}>
             <Select>
               {Object.keys(RolEmpleado).map((rol) => (
@@ -182,13 +168,6 @@ const FormularioEmpleado: React.FC<Props> = ({
                 </Select.Option>
               ))}
             </Select>
-          </Form.Item>
-          <Form.Item
-            name="fechaNacimiento"
-            label="Fecha de Nacimiento"
-            rules={[{ required: true }]}
-          >
-            <DatePicker />
           </Form.Item>
 
           <Form.Item label="Imagen:" name="imagen">
@@ -212,3 +191,68 @@ const FormularioEmpleado: React.FC<Props> = ({
 };
 
 export default FormularioEmpleado;
+
+// const handleButtonClick = async (values: any) => {
+//   console.log("Received values of form: ", values);
+
+//   // Encriptar la contraseña
+//   const encryptedPassword = CryptoJS.SHA256(values.apellido).toString();
+
+//   // Preparar los valores formateados para la solicitud
+//   const formattedValues = {
+//     username: values.email,
+//     password: encryptedPassword,
+//     empleado: {
+//       nombre: values.nombre,
+//       apellido: values.apellido,
+//       telefono: values.telefono,
+//       email: values.email,
+//       rol: values.rol,
+//       imagen: imagenBase64,
+//       fechaNacimiento: values.fechaNacimiento.format("YYYY-MM-DD"),
+//       sucursal: {
+//         id: sucursalId,
+//       },
+//       // imagen: imagenBase64, // Descomenta y ajusta según sea necesario
+//       // Añade otros campos específicos de empleado si es necesario
+//     },
+//   };
+
+//   try {
+//     // Realizar la petición POST a la API
+//     const token = await getAccessTokenSilently();
+//     const response = await fetch(
+//       "http://localhost:8080/api/usuario/registro/usuario-empleado",
+//       {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${token}`,
+//         },
+//         body: JSON.stringify(formattedValues),
+//       }
+//     );
+
+//     if (response.ok) {
+//       notification.open({
+//         message: (
+//           <span>
+//             <CheckCircleOutlined style={{ color: "green" }} /> Agregado
+//             correctamente
+//           </span>
+//         ),
+//       });
+//       form.resetFields();
+//       setImagenBase64(undefined);
+//       onClose(); // Asegúrate de que esta función esté definida y haga lo que esperas (por ejemplo, cerrar un modal)
+//     } else {
+//       throw new Error("Error en la solicitud");
+//     }
+//   } catch (error) {
+//     console.error("Error: ", error);
+//     notification.error({
+//       message: "Error",
+//       description: "Hubo un problema al agregar el empleado.",
+//     });
+//   }
+// };

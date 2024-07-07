@@ -1,7 +1,8 @@
-import { Modal, Form, Input, Button, notification } from "antd";
+import { Modal, Form, Input, Button, notification, Select } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState } from "react";
+import { RolEmpleado } from "../../../types/usuario/Usuario";
 
 interface Props {
   visible: boolean;
@@ -156,17 +157,14 @@ const FormularioEmpleado: React.FC<Props> = ({
           >
             <Input style={{ width: "100%" }} />
           </Form.Item>
-          <Form.Item
-            label="Rol:"
-            name="rol"
-            rules={[
-              {
-                required: true,
-                message: "Por favor ingresa un rol",
-              },
-            ]}
-          >
-            <Input style={{ width: "100%" }} />
+          <Form.Item name="rol" label="Rol" rules={[{ required: true }]}>
+            <Select>
+              {Object.keys(RolEmpleado).map((rol) => (
+                <Select.Option key={rol} value={rol}>
+                  {rol}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item label="Imagen:">
             {nuevaImagenBase64 && (
