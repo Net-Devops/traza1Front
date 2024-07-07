@@ -12,9 +12,13 @@ import userImage from "../../../assets/user_imagen.jpg";
 type DataIndex = keyof Empleado;
 type TablaEmpleadosProps = {
   sucursalId: string;
+  reload: boolean;
 };
 
-const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
+const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({
+  sucursalId,
+  reload,
+}) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
@@ -26,7 +30,7 @@ const TablaEmpleados: React.FC<TablaEmpleadosProps> = ({ sucursalId }) => {
   const { getAccessTokenSilently } = useAuth0();
   useEffect(() => {
     fetchData();
-  }, [sucursalId]);
+  }, [sucursalId, reload]);
 
   const fetchData = async () => {
     try {

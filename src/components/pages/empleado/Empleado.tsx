@@ -15,6 +15,7 @@ const Empleados = () => {
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
   const [selectedSucursal, setSelectedSucursal] = useState("");
+  const [reloadTable, setReloadTable] = useState(false); // Estado para controlar la recarga de la tabla
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -43,11 +44,9 @@ const Empleados = () => {
   };
 
   const handleFormSubmit = (values: any) => {
-    // Implementa la lógica para manejar el envío del formulario
     console.log(values);
     closeFormularioEmpleado();
-    // Aquí puedes agregar lógica para actualizar la lista de empleados automáticamente
-    // Por ejemplo, si `TablaEmpleado` es capaz de manejar cambios en `sucursalId`, debería actualizar automáticamente
+    setReloadTable(!reloadTable); // Cambiar el estado para recargar la tabla
   };
 
   return (
@@ -94,7 +93,6 @@ const Empleados = () => {
             ))}
           </Select>
         </div>
-        {/* Botón para agregar empleado solo se muestra cuando ambos empresa y sucursal están seleccionados */}
         {selectedEmpresa && selectedSucursal && (
           <Button
             type="primary"
@@ -114,7 +112,7 @@ const Empleados = () => {
       />
       <div>
         {selectedSucursal ? (
-          <TablaEmpleado sucursalId={selectedSucursal} />
+          <TablaEmpleado sucursalId={selectedSucursal} reload={reloadTable} />
         ) : (
           <p>Por favor, seleccione la sucursal para ver los empleados.</p>
         )}
