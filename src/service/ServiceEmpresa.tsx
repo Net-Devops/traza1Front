@@ -22,6 +22,19 @@ export const getEmpresas = async (): Promise<Empresas[]> => {
   console.log(response);
   return await response.json();
 };
+export const getTodasEmpresas = async (): Promise<Empresas[]> => {
+  const endpoint = "http://localhost:8080/api/empresa/traer-todo/eliminado/";
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    mode: "cors",
+  });
+  console.log(response);
+  return await response.json();
+};
 
 export async function crearEmpresa(formData: Empresas, token: string) {
   console.log("estoy en el crearEmpresa");

@@ -8,7 +8,7 @@ import imagenEmpresa from "../../../util/empresa.jpeg";
 import TarjetaAgregar from "../../element/tarjeta/TarjetaAgregar";
 import FormularioModificarEmpresa from "../../element/formularios/FormularioEditarEmpresa";
 import {
-  getEmpresas,
+  getTodasEmpresas,
   Empresas as EmpresasInterface,
   eliminarEmpresa,
 } from "../../../service/ServiceEmpresa";
@@ -23,7 +23,7 @@ const Empresa = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getEmpresas().then(setEmpresas);
+    getTodasEmpresas().then(setEmpresas);
   }, []);
 
   const openEditModal = (empresa: any) => {
@@ -89,7 +89,7 @@ const Empresa = () => {
     }
   };
   useEffect(() => {
-    getEmpresas().then((empresas) => {
+    getTodasEmpresas().then((empresas) => {
       const empresasTransformadas = empresas.map((empresa) => {
         if (empresa.imagen) {
           return {

@@ -57,7 +57,7 @@ const UnidadMedida: React.FC = () => {
       const token = await getAccessTokenSilently();
       const values = await form.validateFields();
       if (unidadSeleccionada) {
-        await actualizarUnidadMedida(unidadSeleccionada.id, values);
+        await actualizarUnidadMedida(unidadSeleccionada.id, values, token);
       } else {
         await cargarUnidadMedida(values, token);
       }
